@@ -37,9 +37,9 @@ def load_data(path: str = "data/", Cutpats_threshold=60, norm="freq", print_info
             Average cut pixel percentages.
         - LesionAssessment : np.ndarray of str
             Labels related to lesion assessment.
-        - label_2class : np.ndarray of str
-        - labels_4class : np.ndarray of str
-        - labels_WHOclass : np.ndarray of str
+        - labels_healthy_vs_cancer : np.ndarray of str
+        - labels_cancer_vs_hbd : np.ndarray of str
+        - labels_WHO : np.ndarray of str
 
     Notes
     -----
@@ -59,9 +59,9 @@ def load_data(path: str = "data/", Cutpats_threshold=60, norm="freq", print_info
     Zdata = []
     Avg_Cutpats = []
     LesionAssessment = []
-    label_2class = []
-    labels_4class = []
-    labels_WHOclass = []
+    labels_healthy_vs_cancer = []
+    labels_cancer_vs_hbd = []
+    labels_WHO = []
 
     files = glob(join(path, "*.npz"))
     for file in files:
@@ -72,9 +72,9 @@ def load_data(path: str = "data/", Cutpats_threshold=60, norm="freq", print_info
         Zdata.append(tmp["Zdata"])
         Avg_Cutpats.append(tmp["Avg_Cutpats"])
         LesionAssessment.append(tmp["LesionAssessment"])
-        label_2class.append(tmp["label_2class"])
-        labels_4class.append(tmp["labels_4class"])
-        labels_WHOclass.append(tmp["labels_WHOclass"])
+        labels_healthy_vs_cancer.append(tmp["labels_healthy_vs_cancer"])
+        labels_cancer_vs_hbd.append(tmp["labels_cancer_vs_hbd"])
+        labels_WHO.append(tmp["labels_WHO"])
 
     py_idx = np.array(py_idx, dtype=int)
     patient_no = np.array(patient_no, dtype=int)
@@ -82,9 +82,9 @@ def load_data(path: str = "data/", Cutpats_threshold=60, norm="freq", print_info
     Zdata = np.array(Zdata, dtype=complex)
     Avg_Cutpats = np.array(Avg_Cutpats, dtype=float)
     LesionAssessment = np.array(LesionAssessment, dtype=str)
-    label_2class = np.array(label_2class, dtype=str)
-    labels_4class = np.array(labels_4class, dtype=str)
-    labels_WHOclass = np.array(labels_WHOclass, dtype=str)
+    labels_healthy_vs_cancer = np.array(labels_healthy_vs_cancer, dtype=str)
+    labels_cancer_vs_hbd = np.array(labels_cancer_vs_hbd, dtype=str)
+    labels_WHO = np.array(labels_WHO, dtype=str)
 
     # Zdata to absolute values
     print("\n\tInfo:\tnp.abs(Zdata)")
@@ -103,9 +103,9 @@ def load_data(path: str = "data/", Cutpats_threshold=60, norm="freq", print_info
     Zdata = Zdata[dropout]
     Avg_Cutpats = Avg_Cutpats[dropout]
     LesionAssessment = LesionAssessment[dropout]
-    label_2class = label_2class[dropout]
-    labels_4class = labels_4class[dropout]
-    labels_WHOclass = labels_WHOclass[dropout]
+    labels_healthy_vs_cancer = labels_healthy_vs_cancer[dropout]
+    labels_cancer_vs_hbd = labels_cancer_vs_hbd[dropout]
+    labels_WHO = labels_WHO[dropout]
 
     if print_info:
         remaining_sample_count(Zdata)
@@ -128,7 +128,7 @@ def load_data(path: str = "data/", Cutpats_threshold=60, norm="freq", print_info
         Zdata,
         Avg_Cutpats,
         LesionAssessment,
-        label_2class,
-        labels_4class,
-        labels_WHOclass,
+        labels_healthy_vs_cancer,
+        labels_cancer_vs_hbd,
+        labels_WHO,
     )
