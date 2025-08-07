@@ -8,7 +8,7 @@ color_palette_full = {
     "Benign": "#58508D",
     "Dysplasia": "#7A5195",
     "Mild dysplasia": "#BC5090",
-    "Moderate dysplasia": "#DD5182",
+    "Non-cancer": "#DD5182",
     "Severe dysplasia": "#FF6361",
     "Cancer": "#FFA600",
 }
@@ -36,7 +36,7 @@ def visualize_Category_hist(Category):
         for cat in categories
     ]
     # Plot
-    plt.figure(figsize=(10, 4))
+    plt.figure(figsize=(6, 4))
     plt.bar(categories, values, color=colors)
     plt.xlabel("Category")
     plt.ylabel("Number of Samples")
