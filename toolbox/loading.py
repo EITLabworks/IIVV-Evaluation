@@ -39,7 +39,7 @@ def load_data(path: str = "data/", Cutpats_threshold=60, norm="freq", print_info
             Labels related to lesion assessment.
         - labels_healthy_vs_cancer : np.ndarray of str
         - labels_cancer_vs_hbd : np.ndarray of str
-        - labels_WHO : np.ndarray of str
+        - labels_MC : np.ndarray of str
 
     Notes
     -----
@@ -61,7 +61,7 @@ def load_data(path: str = "data/", Cutpats_threshold=60, norm="freq", print_info
     LesionAssessment = []
     labels_healthy_vs_cancer = []
     labels_cancer_vs_hbd = []
-    labels_WHO = []
+    labels_MC = []
 
     files = glob(join(path, "*.npz"))
     for file in files:
@@ -74,7 +74,7 @@ def load_data(path: str = "data/", Cutpats_threshold=60, norm="freq", print_info
         LesionAssessment.append(tmp["LesionAssessment"])
         labels_healthy_vs_cancer.append(tmp["labels_healthy_vs_cancer"])
         labels_cancer_vs_hbd.append(tmp["labels_cancer_vs_hbd"])
-        labels_WHO.append(tmp["labels_WHO"])
+        labels_MC.append(tmp["labels_MC"])
 
     py_idx = np.array(py_idx, dtype=int)
     patient_no = np.array(patient_no, dtype=int)
@@ -84,7 +84,7 @@ def load_data(path: str = "data/", Cutpats_threshold=60, norm="freq", print_info
     LesionAssessment = np.array(LesionAssessment, dtype=str)
     labels_healthy_vs_cancer = np.array(labels_healthy_vs_cancer, dtype=str)
     labels_cancer_vs_hbd = np.array(labels_cancer_vs_hbd, dtype=str)
-    labels_WHO = np.array(labels_WHO, dtype=str)
+    labels_MC = np.array(labels_MC, dtype=str)
 
     # Zdata to absolute values
     print("\n\tInfo:\tnp.abs(Zdata)")
@@ -105,7 +105,7 @@ def load_data(path: str = "data/", Cutpats_threshold=60, norm="freq", print_info
     LesionAssessment = LesionAssessment[dropout]
     labels_healthy_vs_cancer = labels_healthy_vs_cancer[dropout]
     labels_cancer_vs_hbd = labels_cancer_vs_hbd[dropout]
-    labels_WHO = labels_WHO[dropout]
+    labels_MC = labels_MC[dropout]
 
     if print_info:
         remaining_sample_count(Zdata)
@@ -130,5 +130,5 @@ def load_data(path: str = "data/", Cutpats_threshold=60, norm="freq", print_info
         LesionAssessment,
         labels_healthy_vs_cancer,
         labels_cancer_vs_hbd,
-        labels_WHO,
+        labels_MC,
     )

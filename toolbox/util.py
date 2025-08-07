@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 def get_freqs(freq_start_hz=100, freq_stop_hz=100_000, num_steps=31, plot=True):
