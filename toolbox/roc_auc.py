@@ -350,6 +350,8 @@ def combined_frequency_roc_analysis(
         # Get patient IDs for training and testing
         train_patients = unique_patients[train_patients_idx]
         test_patients = unique_patients[test_patients_idx]
+        print("Train patients:", train_patients)
+        print("Test patients:", test_patients)
 
         # Create masks for training and testing samples
         train_mask = np.isin(LesionCase, train_patients)
