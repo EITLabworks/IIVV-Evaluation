@@ -7,12 +7,14 @@ from sklearn.model_selection import train_test_split
 from sklearn.decomposition import PCA
 from sklearn.multiclass import OneVsRestClassifier
 import pandas as pd
+from .visualization import color_palette_full
 
 
 # To maintain compatibility with the original function name
 def compute_ROC(
     data, labels, patient_ids=None, test_size=0.3, plot=True, random_state=42
 ):
+    print("Outdated, please use: compute_ROC_patient_split")
     """
     Computes ROC curves and AUC with either patient-based or random train/test splitting.
 
@@ -110,22 +112,29 @@ def compute_ROC(
 
 
 def compute_ROC_patient_split(
-    data, labels, patient_ids, test_size=0.3, plot=True, random_state=42
+    data,
+    labels,
+    patient_ids,
+    test_size=0.3,
+    plot=True,
+    random_state=42,
+    inverse_mapping=None,
 ):
     """
     Computes ROC curves and AUC with patient-based train/test splitting.
 
     Parameters:
-        data        : Feature data array
-        labels      : One-hot encoded class labels (samples, n_classes)
-        patient_ids : Array of patient IDs corresponding to each sample
-        test_size   : Proportion of patients to use for testing (default 0.3)
-        plot        : Whether to plot ROC curves (default True)
-        random_state: Random seed for reproducibility
+        data            : Feature data array
+        labels          : One-hot encoded class labels (samples, n_classes)
+        patient_ids     : Array of patient IDs corresponding to each sample
+        test_size       : Proportion of patients to use for testing (default 0.3)
+        plot            : Whether to plot ROC curves (default True)
+        random_state    : Random seed for reproducibility
+        inverse_mapping : Dict mapping one-hot tuple -> class name (optional)
 
     Returns:
         avg_roc_auc : Average AUC across all classes
-        roc_auc_dict: Dictionary of AUC values for each class
+        roc_auc_dict: Dictionary of AUC values for each class label
     """
     # Reshape data if needed
     if len(data.shape) > 2:
@@ -151,6 +160,8 @@ def compute_ROC_patient_split(
 
     train_patients = unique_patients[train_patient_indices]
     test_patients = unique_patients[test_patient_indices]
+    print("Train patients:", train_patients)
+    print("Test patients:", test_patients)
 
     # Create masks for samples based on patient assignment
     train_mask = np.isin(patient_ids, train_patients)
@@ -162,9 +173,6 @@ def compute_ROC_patient_split(
     y_train = labels[train_mask]
     y_test = labels[test_mask]
 
-    # Count samples and patients in each set
-    train_samples = np.sum(train_mask)
-    test_samples = np.sum(test_mask)
     train_patient_count = len(train_patients)
     test_patient_count = len(test_patients)
 
@@ -188,13 +196,10 @@ def compute_ROC_patient_split(
         y_score = classifier.fit(X_train, y_train).predict_proba(X_test)
     except Exception as e:
         print(f"Error during classifier fitting: {e}")
-        return 0.5, {}  # Return default values for failed classification
+        return 0.5, {}
 
     # Compute ROC curve and ROC area for each class
-    fpr = dict()
-    tpr = dict()
-    roc_auc = dict()
-
+    fpr, tpr, roc_auc = {}, {}, {}
     for i in range(n_classes):
         try:
             fpr[i], tpr[i], _ = roc_curve(y_test[:, i], y_score[:, i])
@@ -217,16 +222,27 @@ def compute_ROC_patient_split(
 
     # Calculate per-class AUC scores
     roc_auc_scores = []
-    roc_auc_dict = dict()
-
+    roc_auc_dict = {}
     for i in range(n_classes):
         try:
             score = roc_auc_score(y_test[:, i], y_score[:, i])
+            # Key-Namen aus inverse_mapping statt class index
+            if inverse_mapping:
+                class_name = inverse_mapping.get(
+                    tuple(labels[np.argmax(labels[:, i])]), f"Class_{i}"
+                )
+            else:
+                class_name = f"Class_{i}"
+            roc_auc_dict[f"roc_auc_{class_name}"] = score
             roc_auc_scores.append(score)
-            roc_auc_dict[f"roc_auc_{i}"] = score
         except Exception as e:
-            print(f"Error calculating AUC score for class {i}: {e}")
-            roc_auc_dict[f"roc_auc_{i}"] = 0.5
+            if inverse_mapping:
+                class_name = inverse_mapping.get(
+                    tuple(labels[np.argmax(labels[:, i])]), f"Class_{i}"
+                )
+            else:
+                class_name = f"Class_{i}"
+            roc_auc_dict[f"roc_auc_{class_name}"] = 0.5
             roc_auc_scores.append(0.5)
 
     # Calculate average AUC
@@ -234,30 +250,38 @@ def compute_ROC_patient_split(
 
     # Plot ROC curves
     if plot:
-        plt.figure(figsize=(8, 6))
-        plt.title("Receiver Operating Characteristic (ROC) Curve")
+        plt.figure(figsize=(6, 4))
 
-        # Plot micro-average ROC curve
+        # Micro-average curve
         plt.plot(
             fpr["micro"],
             tpr["micro"],
             "--",
-            label="Micro-average ROC curve (area = {0:.3f})".format(roc_auc["micro"]),
-            linewidth=2,
+            label=f"Micro-average ROC curve (area = {roc_auc['micro']:.3f})",
+            linewidth=1.5,
+            color="C0",  # oder eigene Farbe für Micro-average
         )
 
-        # Plot ROC curve for each class
+        # Per-class curves
         for i in range(n_classes):
+            if inverse_mapping:
+                class_name = inverse_mapping.get(
+                    tuple(labels[np.argmax(labels[:, i])]), f"Class_{i}"
+                )
+            else:
+                class_name = f"Class {i}"
+
+            # take from color_palette_full
+            color = color_palette_full.get(class_name, None)
+
             plt.plot(
                 fpr[i],
                 tpr[i],
-                label="ROC curve of class {0} (area = {1:.3f})".format(i, roc_auc[i]),
+                label=f"ROC {class_name} (area = {roc_auc[i]:.3f})",
+                color=color,
             )
 
-        # Plot diagonal reference line
         plt.plot([0, 1], [0, 1], "k--", linewidth=1)
-
-        # Set plot limits and labels
         plt.xlim([0.0, 1.0])
         plt.ylim([0.0, 1.05])
         plt.xlabel("False Positive Rate")
@@ -276,7 +300,13 @@ def compute_ROC_patient_split(
 
 
 def combined_frequency_roc_analysis(
-    X, Y, LesionCase, max_freqs=31, n_folds=5, random_state=42
+    X,
+    Y,
+    LesionCase,
+    max_freqs=31,
+    n_folds=5,
+    random_state=42,
+    s_name=None,
 ):
     """
     Combines PCA-based frequency selection with ROC analysis using the same patient-based train/test splits.
@@ -288,6 +318,7 @@ def combined_frequency_roc_analysis(
         max_freqs   : Max number of frequencies to test (default 31)
         n_folds     : Number of folds for cross-validation (default 5)
         random_state: Random seed for reproducibility
+        s_name      : Save name of the pictures (default None)
 
     Returns:
         final_aucs  : Average AUCs across folds for each number of frequencies
@@ -530,12 +561,19 @@ def combined_frequency_roc_analysis(
                 )
 
     plt.tight_layout()
+    if s_name != None:
+        plt.savefig(s_name + "HeatMaps.pdf", bbox_inches="tight")
     plt.show()
 
     # Plot AUC vs number of frequencies
-    plt.figure(figsize=(10, 6))
+    plt.figure(figsize=(6, 4))
     plt.plot(
-        range(1, max_freqs + 1), final_aucs, marker="o", color="steelblue", linewidth=2
+        range(1, max_freqs + 1),
+        final_aucs,
+        marker="x",
+        color="steelblue",
+        linewidth=2,
+        label="Average AUCs",
     )
 
     # Add individual fold lines
@@ -544,7 +582,7 @@ def combined_frequency_roc_analysis(
             range(1, max_freqs + 1),
             fold_aucs[fold_idx],
             "o-",
-            alpha=0.3,
+            alpha=0.5,
             label=f"Fold {fold_idx+1}",
         )
 
@@ -554,6 +592,8 @@ def combined_frequency_roc_analysis(
     plt.grid(True)
     plt.legend()
     plt.tight_layout()
+    if s_name != None:
+        plt.savefig(s_name + "aucs.pdf", bbox_inches="tight")
     plt.show()
 
     return final_aucs, composite_freq_indices, all_fold_rankings, fold_aucs

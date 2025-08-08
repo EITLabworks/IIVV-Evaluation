@@ -2,7 +2,9 @@ from .util import z_score, get_freqs, squeeze1shape
 from .visualization import visualize_Category_hist
 from .masking import euclidean_distance, Masking
 from .processing import assessment_wrapping, find_all_indices
-from .roc_auc import compute_ROC, combined_frequency_roc_analysis
+
+# please do not use compute_ROC anymore, because it is not bulletproof
+from .roc_auc import combined_frequency_roc_analysis, compute_ROC_patient_split
 from .decoding_encoding import Encoder, hot_coding
 
 __all__ = [
@@ -20,6 +22,7 @@ __all__ = [
     # roc_auc.py
     "compute_ROC",
     "combined_frequency_roc_analysis",
+    "compute_ROC_patient_split",
     # decoding_encoding.py
     "Encoder",
     "hot_coding",

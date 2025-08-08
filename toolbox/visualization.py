@@ -14,7 +14,7 @@ color_palette_full = {
 }
 
 
-def visualize_Category_hist(Category):
+def visualize_Category_hist(Category, s_name=None):
     """
     Visualizes a histogram of class/category distribution with category-specific color mapping.
 
@@ -22,6 +22,8 @@ def visualize_Category_hist(Category):
     ----------
     Category : list of str
         List of class labels to visualize.
+    s_name : str
+        Name of the saved filed, default None
 
     Returns
     -------
@@ -43,4 +45,6 @@ def visualize_Category_hist(Category):
     plt.grid(True, axis="y")
     plt.xticks(rotation=45)
     plt.tight_layout()
+    if s_name != None:
+        plt.savefig(s_name, bbox_inches="tight")
     plt.show()

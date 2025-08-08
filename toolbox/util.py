@@ -51,6 +51,7 @@ def get_freqs(freq_start_hz=100, freq_stop_hz=100_000, num_steps=31, plot=True):
         plt.xlabel("frequency index")
 
     freq_list = [np.round(freq, 2) for freq in freq_list]
+    freq_list = np.array(freq_list, dtype=float)
     return freq_idx, freq_list
 
 

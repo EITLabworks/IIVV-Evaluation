@@ -71,7 +71,9 @@ def hot_coding(categories, info=True):
             coding.append(mapping[case])
         coding = np.array(coding)
 
-        return coding
+        inverse_mapping = {tuple(v): str(k) for k, v in mapping.items()}
+
+        return coding, inverse_mapping
 
     elif len(categories.shape) == 2:
         cases = np.unique(categories, axis=0)
@@ -91,6 +93,8 @@ def hot_coding(categories, info=True):
             coding.append(mapping[str(case)])
         coding = np.array(coding)
 
-        return coding
+        inverse_mapping = {tuple(v): str(k) for k, v in mapping.items()}
+
+        return coding, inverse_mapping
     else:
         raise ValueError(f"Invalid input option: {categories}")
