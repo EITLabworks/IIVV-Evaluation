@@ -5,7 +5,6 @@ from sklearn.multiclass import OneVsRestClassifier
 from sklearn.metrics import roc_curve, roc_auc_score, auc
 from sklearn.model_selection import train_test_split
 from sklearn.decomposition import PCA
-from sklearn.multiclass import OneVsRestClassifier
 import pandas as pd
 from .visualization import color_palette_full
 

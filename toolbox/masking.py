@@ -460,7 +460,12 @@ class Masking:
 
         if skip == None:
             # ----- NEW ---
-            if vv_distance == "vv_long_across":
+            if vv_distance == "all":
+                self.mask = np.ones(7728, dtype=bool)
+                if self.prints:
+                    print("All set to True.")
+                    self.count_true_false()
+            elif vv_distance == "vv_long_across":
                 self.ii_pattern = np.unique(vv_long_across[:, :2])
                 if self.prints:
                     print(f"config: {vv_long_across=}")

@@ -1,5 +1,5 @@
 from collections import Counter
-
+import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
 import pandas as pd
 
@@ -12,6 +12,19 @@ color_palette_full = {
     "Severe dysplasia": "#FF6361",
     "Cancer": "#FFA600",
 }
+
+
+custom_colors = list(color_palette_full.values())
+custom_cmap = mcolors.ListedColormap(custom_colors, name="custom_disease_cmap")
+
+cmap_gradient = mcolors.LinearSegmentedColormap.from_list(
+    "custom_gradient",
+    [
+        color_palette_full["Healthy"],
+        color_palette_full["Mild dysplasia"],
+        color_palette_full["Cancer"],
+    ],
+)
 
 
 def visualize_Category_hist(Category, s_name=None):
