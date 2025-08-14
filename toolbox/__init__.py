@@ -6,6 +6,7 @@ from .processing import assessment_wrapping, find_all_indices
 # please do not use compute_ROC anymore, because it is not bulletproof
 from .roc_auc import combined_frequency_roc_analysis, compute_ROC_patient_split
 from .decoding_encoding import Encoder, hot_coding
+from .evaluation import evaluate_combinations
 
 __all__ = [
     # util.py
@@ -26,4 +27,6 @@ __all__ = [
     # decoding_encoding.py
     "Encoder",
     "hot_coding",
+    # evaluation.py
+    "evaluate_combinations",
 ]
