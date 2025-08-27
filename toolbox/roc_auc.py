@@ -54,7 +54,7 @@ def compute_ROC(
         print("Note: Using random sample splitting (not patient-based)")
 
     classifier = OneVsRestClassifier(
-        svm.SVC(kernel="linear", probability=True, random_state=random_state)
+        svm.SVC(kernel="rbf", probability=True, random_state=random_state)
     )
 
     y_score = classifier.fit(X_train, y_train).predict_proba(X_test)
@@ -187,7 +187,7 @@ def compute_ROC_patient_split(
 
     # Train the classifier
     classifier = OneVsRestClassifier(
-        svm.SVC(kernel="linear", probability=True, random_state=random_state)
+        svm.SVC(kernel="rbf", probability=True, random_state=random_state)
     )
 
     # Fit and predict
@@ -456,7 +456,7 @@ def combined_frequency_roc_analysis(
 
             # Train classifier
             classifier = OneVsRestClassifier(
-                svm.SVC(kernel="linear", probability=True, random_state=random_state)
+                svm.SVC(kernel="rbf", probability=True, random_state=random_state)
             )
 
             # Fit and predict
