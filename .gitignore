@@ -2,7 +2,7 @@
 __pycache__
 results/
 data/
-engineering.ipynb
+eng*.ipynb
 figures.ipynb
 toolbox/toolbox_old/
 source/
