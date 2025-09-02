@@ -9,3 +9,5 @@ source/
 full_evaluation*.py
 CNN-model.ipynb
 IIVV-and-freq-analysis.ipynb
+*-task2.ipynb
+*-task3.ipynb
