@@ -61,7 +61,6 @@ def Model(
         * ``"SVMscaler"`` - SVM with RBF kernel + ``StandardScaler``.
         * ``"SVM"`` - SVM with RBF kernel (no scaling).
         * ``"DecisionTreeClassifier"`` - Decision‑Tree wrapped in ``OneVsRest``.
-        * ``"RandomForestClassifier"`` - Random Forest (100 trees) wrapped in ``OneVsRest``.
         * ``"GradientBoostingClassifier"`` - Gradient Boosting wrapped in ``OneVsRest``.
         * ``"RF"`` - Random Forest (max depth = 5) wrapped in ``OneVsRest``.
         * ``"RFscaler"`` - Same as ``"RF"`` but with ``StandardScaler``.
@@ -176,12 +175,6 @@ def Model(
     elif architecture == "DecisionTreeClassifier":
         print("\nDecisionTreeClassifier\n")
         m = OneVsRestClassifier(DecisionTreeClassifier(random_state=random_state))
-
-    elif architecture == "RandomForestClassifier":
-        print("\nRandomForestClassifier\n")
-        m = OneVsRestClassifier(
-            RandomForestClassifier(n_estimators=100, random_state=random_state)
-        )
 
     elif architecture == "GradientBoostingClassifier":
         print("\nGradientBoostingClassifier (GBC)\n")
