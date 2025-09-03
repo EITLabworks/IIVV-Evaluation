@@ -491,7 +491,7 @@ def combined_frequency_roc_analysis(
     ]  # descending order
 
     # Calculate average AUC across folds
-    final_aucs = np.nanmean(final_aucs)# / n_folds
+    final_aucs = final_aucs / n_folds
 
     print(
         "\nComposite frequency ranking from all folds (top 10):",
