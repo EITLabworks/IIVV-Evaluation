@@ -4,13 +4,13 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 color_palette_full = {
-    "Healthy": "#003F5C",
+    "Healthy": "#FFA600",
     "Benign": "#58508D",
     "Dysplasia": "#7A5195",
-    "Mild dysplasia": "#BC5090",
-    "Non-cancer": "#DD5182",
+    #"Mild dysplasia": "#BC5090",
+    "Non-cancer": "#003F5C",
     "Severe dysplasia": "#FF6361",
-    "Cancer": "#FFA600",
+    "Cancer": "#DD5182",
 }
 
 
@@ -21,7 +21,7 @@ cmap_gradient = mcolors.LinearSegmentedColormap.from_list(
     "custom_gradient",
     [
         color_palette_full["Healthy"],
-        color_palette_full["Mild dysplasia"],
+        color_palette_full["Severe dysplasia"],
         color_palette_full["Cancer"],
     ],
 )
