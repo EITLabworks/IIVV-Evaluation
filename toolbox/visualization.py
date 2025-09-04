@@ -7,7 +7,7 @@ color_palette_full = {
     "Healthy": "#FFA600",
     "Benign": "#58508D",
     "Dysplasia": "#7A5195",
-    #"Mild dysplasia": "#BC5090",
+    # "Mild dysplasia": "#BC5090",
     "Non-cancer": "#003F5C",
     "Severe dysplasia": "#FF6361",
     "Cancer": "#DD5182",
