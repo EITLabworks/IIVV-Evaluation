@@ -20,9 +20,9 @@ custom_cmap = mcolors.ListedColormap(custom_colors, name="custom_disease_cmap")
 cmap_gradient = mcolors.LinearSegmentedColormap.from_list(
     "custom_gradient",
     [
-        color_palette_full["Healthy"],
-        color_palette_full["Severe dysplasia"],
+        color_palette_full["Non-cancer"],
         color_palette_full["Cancer"],
+        color_palette_full["Healthy"],
     ],
 )
 
