@@ -1,5 +1,6 @@
 import pandas as pd
 from typing import List, Sequence, Mapping, Tuple, Union, Optional
+import numpy as np
 
 
 def evaluate_combinations(
@@ -135,3 +136,38 @@ def evaluate_combinations(
     result = result.sort_values(by=sort_col, ascending=ascending).reset_index(drop=True)
 
     return result
+
+
+def load_top_Fsel_Msel(class_task):
+    """
+    return Freq_sel, Mask_sel
+    """
+    tmp = np.load(f"results/freq_fold_results_{class_task}.npz", allow_pickle=True)
+    top_freqs_baseline = tmp["top_freqs_baseline"]
+    Freq_sel = {
+        "Top 2": top_freqs_baseline[:2],
+        "Top 3": top_freqs_baseline[:3],
+        "Top 5": top_freqs_baseline[:5],
+        "Top 12": top_freqs_baseline[:12],
+        # "All": top_freqs_baseline,  # np.arange(31), # it doesn't matter
+    }
+    # load masking selection
+    tmp = np.load(f"results/Top_IIVV_masks_{class_task}.npz", allow_pickle=True)
+    Mask_ranks = tmp["Mask_ranks"][:4]
+    Mask_sel = {
+        "All": "all",
+        "Long a+": "vv_long_across",
+        "Long a+ ext.": "vv_long_across_extended",
+        "Med. a+ ext.": "vv_medium_across_extended",
+        "Skip1 close": "vv_distance_close_skip_1",
+        "Adj. close": "adjacent_close",
+        "Med. adj.": "vv_distance_medium_adj",
+        "Adj. far": "adjacent_far",
+        "Skip1 medium": "skip1_medium",
+        "Skip1 far": "skip1_far",
+        "Opp. close": "opposite_close",
+        "Opp. medium": "opposite_medium",
+        "Opp. far": "opposite_far",
+    }
+    Mask_sel = {k: v for k, v in Mask_sel.items() if k in Mask_ranks}
+    return Freq_sel, Mask_sel
