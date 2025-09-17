@@ -14,7 +14,9 @@ Repository for the paper: _In Vivo Oral Lesion Classification Using Optimized El
 
 - [Frequency reduction](Frequency-reduction.ipynb)
 - [IIVV pattern reduction](IIVV-pattern-reduction.ipynb)
-- [III-D Model and parameter tuning](Model-and-parameter-tuning.ipynb)
+- [Model and parameter tuning](Model-and-parameter-tuning.ipynb)
+- [Baseline performance](Results-Baseline.ipynb) vs. [final performance](Results.ipynb)
+- [Statistics and figures](Statistics-and-figures.ipynb)
 
 ___
 For referencing this work, please cite:
