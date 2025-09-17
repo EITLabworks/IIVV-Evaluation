@@ -2,6 +2,8 @@
 
 Repository for the paper: _In Vivo Oral Lesion Classification Using Optimized Electrical Impedance Spectroscopy_
 
+**Optimization schedule line out**
+
 <p align="center", width="300px">
   <img src="results/Optschedule_v2_sketch.png" alt="Schedule" width="550px">
 </p>
@@ -9,7 +11,6 @@ Repository for the paper: _In Vivo Oral Lesion Classification Using Optimized El
   <em>Fig. 1: Optimization and tuning schedule.</em>
 </p>
 
-**Optimization schedule line out**
 
 - [Frequency reduction](Frequency-reduction.ipynb)
 - [IIVV pattern reduction](IIVV-pattern-reduction.ipynb)
