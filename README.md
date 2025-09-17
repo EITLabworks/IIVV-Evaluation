@@ -2,7 +2,7 @@
 
 Repository for the paper: _In Vivo Oral Lesion Classification Using Optimized Electrical Impedance Spectroscopy_
 
-**Optimization schedule line out**
+**Optimization schedule**
 
 <p align="center", width="300px">
   <img src="results/Optschedule_v2_sketch.png" alt="Schedule" width="550px">
@@ -22,5 +22,19 @@ ___
 For referencing this work, please cite:
 
 ```
-TBD:Citation key
+TBD:Citation paper
+```
+
+and the repository:
+
+```
+@software{Thones_IIVV_Evaluation_2025,
+    author = {Thönes, Jacob P., Sophie A. Lloyd},
+    license = {MIT},
+    month = sep,
+    title = {{IIVV Evaluation}},
+    url = {https://github.com/EITLabworks/IIVV-Evaluation},
+    version = {0.1.0},
+    year = {2025}
+}
 ```
