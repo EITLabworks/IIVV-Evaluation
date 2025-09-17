@@ -2,8 +2,8 @@
 
 Repository for the paper: _Title paper_
 
-<p align="center", width="350px">
-  <img src="results/Optschedule_v2.png" alt="Schedule" width="1650px">
+<p align="center", width="300px">
+  <img src="results/Optschedule_v2_sketch.png" alt="Schedule" width="1250px">
 </p>
 <p align="center" style="font-size: smaller;">
   <em>Fig. 1: Optimization and tuning schedule.</em>

@@ -1,7 +1,7 @@
 .ipynb_checkpoints/
 __pycache__
 results/*
-!results/Optschedule_v2.png
+!results/Optschedule_v2_sketch.png
 data/
 eng*.ipynb
 figures.ipynb
