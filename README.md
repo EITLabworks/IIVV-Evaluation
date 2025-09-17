@@ -1,9 +1,9 @@
 # IIVV Evaluation
 
-Repository for the paper: _Title paper_
+Repository for the paper: _In Vivo Oral Lesion Classification Using Optimized Electrical Impedance Spectroscopy_
 
 <p align="center", width="300px">
-  <img src="results/Optschedule_v2_sketch.png" alt="Schedule" width="650px">
+  <img src="results/Optschedule_v2_sketch.png" alt="Schedule" width="550px">
 </p>
 <p align="center" style="font-size: smaller;">
   <em>Fig. 1: Optimization and tuning schedule.</em>
