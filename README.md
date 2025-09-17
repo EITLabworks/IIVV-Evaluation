@@ -3,7 +3,7 @@
 Repository for the paper: _Title paper_
 
 <p align="center", width="300px">
-  <img src="results/Optschedule_v2_sketch.png" alt="Schedule" width="1250px">
+  <img src="results/Optschedule_v2_sketch.png" alt="Schedule" width="650px">
 </p>
 <p align="center" style="font-size: smaller;">
   <em>Fig. 1: Optimization and tuning schedule.</em>
