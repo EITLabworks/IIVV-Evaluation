@@ -64,7 +64,7 @@ def find_all_indices(array, target_values, split=False, prints=True):
 
 
 def augment_patient_and_cat_specific(
-    X, Y_labels, labels, Case, aug_dict: dict, snr_db=20, random_state=42
+    X, Y_labels, labels, Case, aug_dict: dict, snr_db=20, random_state=42, prints=True,
 ):
     # create augmented data arrays
     X_aug = [x for x in X]
@@ -74,9 +74,11 @@ def augment_patient_and_cat_specific(
 
     rng = np.random.default_rng(random_state)
     for aug_cat, n_aug in aug_dict.items():
-        print(aug_cat, "to be created:", n_aug)
+        if prints:
+            print(aug_cat, "to be created:", n_aug)
         select_idx = find_all_indices(labels, [aug_cat], split=False, prints=False)
-        print("")
+        if prints:
+            print("")
         cat_num = len(select_idx)
         # select all X,Y,... for specific category
         X_in_selcat = X[select_idx]
@@ -86,12 +88,14 @@ def augment_patient_and_cat_specific(
         # Create a vector with unique patients
         unique_patients = np.unique(Case_in_selcat)
 
-        print("---")
+        if prints:
+            print("---")
         pat_count_dict = {
             int(num): int(np.sum(Case_in_selcat == num)) for num in unique_patients
         }
-        print(f"{aug_cat} {pat_count_dict=}")
-        print("---")
+        if prints:
+            print(f"{aug_cat} {pat_count_dict=}")
+            print("---")
         # now: draw as often as needed from the patient list:
         while cat_num <= n_aug:
             # New Case IDs after last in Case_aug
