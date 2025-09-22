@@ -64,7 +64,14 @@ def find_all_indices(array, target_values, split=False, prints=True):
 
 
 def augment_patient_and_cat_specific(
-    X, Y_labels, labels, Case, aug_dict: dict, snr_db=20, random_state=42, prints=True,
+    X,
+    Y_labels,
+    labels,
+    Case,
+    aug_dict: dict,
+    snr_db=20,
+    random_state=42,
+    prints=True,
 ):
     # create augmented data arrays
     X_aug = [x for x in X]
