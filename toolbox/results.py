@@ -161,30 +161,30 @@ def ResultsROCAUC(class_task, y_true, y_score, Y_labels, s_name=None):
             label=f"{label_roc_plot[class_task]} (AUC = {roc_auc:.3f})",
         )
     else:
-       # Multi-class case: binarize labels
+        # Multi-class case: binarize labels
         y_bin = label_binarize(y_true, classes=classes)
-        
+
         # One-vs-rest ROC for each class
         for i in classes:
             fpr, tpr, _ = roc_curve(y_bin[:, i], y_score[:, i])
             roc_auc = auc(fpr, tpr)
-        
+
             # Flip AUC if < 0.5
             if roc_auc < 0.5:
                 fpr, tpr = 1 - fpr, 1 - tpr
                 roc_auc = 1 - roc_auc
-        
+
             plt.plot(fpr, tpr, color=cp[i], label=f"{cp_l[i]} (AUC = {roc_auc:.3f})")
-        
+
         # Micro-average ROC
         fpr, tpr, _ = roc_curve(y_bin.ravel(), y_score.ravel())
         roc_auc = auc(fpr, tpr)
-        
+
         # Flip AUC if < 0.5
         if roc_auc < 0.5:
             fpr, tpr = 1 - fpr, 1 - tpr
             roc_auc = 1 - roc_auc
-        
+
         plt.plot(
             fpr,
             tpr,
