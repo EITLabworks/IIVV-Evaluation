@@ -5,7 +5,7 @@ Repository for the paper: _In Vivo Oral Lesion Classification Using Optimized El
 **Optimization schedule**
 
 <p align="center", width="300px">
-  <img src="results/Optschedule_v2_sketch.png" alt="Schedule" width="550px">
+  <img src="results/Optschedule_v3_sketch.png" alt="Schedule" width="550px">
 </p>
 <p align="center" style="font-size: smaller;">
   <em>Fig. 1: Optimization and tuning schedule.</em>
