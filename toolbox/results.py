@@ -158,12 +158,21 @@ def ResultsROCAUC(class_task, y_true, y_score, Y_labels, s_name=None):
             fpr,
             tpr,
             color=cp[1],
-            label=f"{label_roc_plot[class_task]} (AUC = {roc_auc:.3f})",
+            label=f"{label_roc_plot[class_task]} (AUC = {roc_auc:.2f})",
+        )
+        np.savez(
+            s_name.split(".pdf")[0] + ".npz",
+            fpr=fpr,
+            tpr=tpr,
+            color=cp[1],
+            roc_auc=roc_auc,
+            label=f"{label_roc_plot[class_task]} (AUC = {roc_auc:.2f})",
+            class_task=class_task,
         )
     else:
         # Multi-class case: binarize labels
         y_bin = label_binarize(y_true, classes=classes)
-
+        MC_save_npz = {}
         # One-vs-rest ROC for each class
         for i in classes:
             fpr, tpr, _ = roc_curve(y_bin[:, i], y_score[:, i])
@@ -174,8 +183,9 @@ def ResultsROCAUC(class_task, y_true, y_score, Y_labels, s_name=None):
                 fpr, tpr = 1 - fpr, 1 - tpr
                 roc_auc = 1 - roc_auc
 
-            plt.plot(fpr, tpr, color=cp[i], label=f"{cp_l[i]} (AUC = {roc_auc:.3f})")
-
+            plt.plot(fpr, tpr, color=cp[i], label=f"{cp_l[i]} (AUC = {roc_auc:.2f})")
+            # prepare saving
+            MC_save_npz[cp_l[i]] = (fpr, tpr, cp[i], f"{cp_l[i]} (AUC = {roc_auc:.2f})")
         # Micro-average ROC
         fpr, tpr, _ = roc_curve(y_bin.ravel(), y_score.ravel())
         roc_auc = auc(fpr, tpr)
@@ -184,13 +194,24 @@ def ResultsROCAUC(class_task, y_true, y_score, Y_labels, s_name=None):
         if roc_auc < 0.5:
             fpr, tpr = 1 - fpr, 1 - tpr
             roc_auc = 1 - roc_auc
-
         plt.plot(
             fpr,
             tpr,
             color="black",
             linestyle="--",
-            label=f"Micro-average (AUC = {roc_auc:.3f})",
+            label=f"Micro-average (AUC = {roc_auc:.2f})",
+        )
+        MC_save_npz["Micro-average"] = (
+            fpr,
+            tpr,
+            "black",
+            "Micro-average (AUC = {roc_auc:.2f})",
+        )
+        np.savez(
+            s_name.split(".pdf")[0] + ".npz",
+            info="(fpr, tpr, color, label)",
+            MC_save_npz=MC_save_npz,
+            class_task=class_task,
         )
 
     plt.plot([0, 1], [0, 1], "k--", linewidth=1)
