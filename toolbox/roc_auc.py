@@ -422,6 +422,9 @@ def combined_frequency_roc_analysis(
         )
         pca.fit(X_train_clean)
         loading_matrix = pca.components_  # (components, freqs)
+        print("\nExplained variance in first 10 PCA components:")
+        explained_variance = pca.explained_variance_ratio_
+        print(np.sum(explained_variance[:10]))
         frequency_scores = np.sum(loading_matrix[:10] ** 2, axis=0)
         fold_top_freq_indices = np.argsort(frequency_scores)[::-1]  # descending order
 
