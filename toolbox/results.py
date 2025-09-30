@@ -66,27 +66,27 @@ def Results_data_loading(class_task, data_augmentation=True):
         print("\nMC\n")
         select_idx = find_all_indices(
             labels_MC,
-            ["Healthy", "Cancer", "Severe dysplasia", "Benign"],
+            ["Healthy", "Cancer", "High-grade dysplasia", "Non-malignant"],
             split=False,
         )
         labels = labels_MC[select_idx]
         Y, inverse_mapping = hot_coding(labels)
         Y_labels = np.argmax(Y, axis=1)
         cp = {
-            0: "#58508D",  # Benign
+            0: "#58508D",  # Non-malignant
             1: "#FFA600",  # Cancer
             2: "#003F5C",  # Healthy
-            3: "#FF6361",  # Severe dysplasia
+            3: "#FF6361",  # High-grade dysplasia
         }
         cp_l = {
-            0: "Benign",
+            0: "Non-malignant",
             1: "Cancer",
             2: "Healthy",
-            3: "Severe dysplasia",
+            3: "High-grade dysplasia",
         }
         aug_dict = {
-            "Severe dysplasia": 70,
-            "Benign": 70,
+            "High-grade dysplasia": 70,
+            "Non-malignant": 70,
         }
 
     Case = patient_no[select_idx]
@@ -132,16 +132,16 @@ def ResultsROCAUC(class_task, y_true, y_score, Y_labels, s_name=None):
         }
     elif class_task == "MC":
         cp = {
-            0: "#58508D",  # Benign
+            0: "#58508D",  # Non-malignant
             1: "#FFA600",  # Cancer
             2: "#003F5C",  # Healthy
-            3: "#FF6361",  # Severe dysplasia
+            3: "#FF6361",  # High-grade dysplasia
         }
         cp_l = {
-            0: "Benign",
+            0: "Non-malignant",
             1: "Cancer",
             2: "Healthy",
-            3: "Severe dysplasia",
+            3: "High-grade dysplasia",
         }
 
     # ----- ROC Curve plotting -----
