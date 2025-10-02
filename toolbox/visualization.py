@@ -89,8 +89,8 @@ def plot_cv_heatmap(X_tmp, Y_labels, Case, n_trials, n_folds):
 
     im = ax.imshow(split_matrix, cmap=cmap, aspect="auto", vmin=0, vmax=1)
     # Set labels
-    ax.set_xlabel("Random State and Trial")
-    ax.set_ylabel("Patient Index")
+    ax.set_xlabel("Random state and trial")
+    ax.set_ylabel("Sample index")
     # Set ticks
     ax.set_xticks(range(len(trial_fold_labels)))
     ax.set_xticklabels(trial_fold_labels, rotation=90, ha="right")
