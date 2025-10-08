@@ -180,16 +180,69 @@ vv_distance_far_opp = {
     "33_29": [3, 4, 5, 8, 9, 10, 16, 17, 18, 21, 22, 23],
 }
 
+def euclidean_distance(el1, el2):
+    """
+    Calculate Euclidean distance for single or arrays of electrodes.
 
-def euclidean_distance(el1, el2, n_el_vv: int = 5):
+    Parameters
+    ----------
+    el1 : int or array-like of ints
+        Electrode indices (can be scalar or numpy array)
+    el2 : int or array-like of ints
+        Electrode indices (same shape as el1)
+
+    Returns
+    -------
+    np.ndarray or float
+        Distances between electrode pairs. If inputs are arrays, returns array
+        of distances; else returns single float distance.
+    """
     def index_to_coordinates(index):
-        return ((index - 1) % n_el_vv, (index - 1) // n_el_vv)
+        spacing = 1.0  # 1 mm spacing
+        if np.isscalar(index):
+            # Single electrode index
+            if 1 <= index <= 25:
+                row = (index - 1) // 5 + 1
+                col = (index - 1) % 5 + 1
+                x = (col - 3) * spacing
+                y = (3 - row) * spacing
+                return np.array([x, y])
+            elif 26 <= index <= 33:
+                current_coords = {
+                    26: np.array([-3,  1]),
+                    27: np.array([-3, -1]),
+                    28: np.array([-1,  3]),
+                    29: np.array([ 1,  3]),
+                    30: np.array([ 3,  1]),
+                    31: np.array([ 3, -1]),
+                    32: np.array([ 1, -3]),
+                    33: np.array([-1, -3]),
+                }
+                return current_coords.get(index, np.array([np.nan, np.nan]))
+            else:
+                return np.array([np.nan, np.nan])
+        else:
+            # Vectorized coordinates
+            coords = np.empty((len(index), 2), dtype=float)
+            for i, idx in enumerate(index):
+                coords[i] = index_to_coordinates(idx)
+            return coords
 
-    x1, y1 = index_to_coordinates(el1)
-    x2, y2 = index_to_coordinates(el2)
+    # Convert to numpy arrays
+    el1 = np.atleast_1d(el1)
+    el2 = np.atleast_1d(el2)
 
-    return np.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
+    coords1 = index_to_coordinates(el1)
+    coords2 = index_to_coordinates(el2)
 
+    # Compute Euclidean distances element-wise
+    diffs = coords1 - coords2
+    dists = np.linalg.norm(diffs, axis=1)
+
+    # If input is scalar, return scalar
+    if dists.size == 1:
+        return dists.item()
+    return dists
 
 class Masking:
     def __init__(self, IIVV, plot: bool = True, prints: bool = True):
@@ -444,7 +497,6 @@ class Masking:
                     & np.isin(self.IIVV[:, 3], dd_cond)
                 )
                 mask_u = np.ma.mask_or(mask_f, mask_i)
-
             elif mode == "fromarray":
                 i0, i1, v0, v1 = dd_cond
                 mask_f = ((self.IIVV[:, 0] == i0) & (self.IIVV[:, 1] == i1)) & (
@@ -457,9 +509,11 @@ class Masking:
             return mask_u
 
         mask_IIVV_selection = list()
+        ii_distances = [] 
+        vv_distances = []
+     
 
-        if skip == None:
-            # ----- NEW ---
+        if skip is None:
             if vv_distance == "all":
                 self.mask = np.ones(7728, dtype=bool)
                 if self.prints:
@@ -470,8 +524,14 @@ class Masking:
                 if self.prints:
                     print(f"config: {vv_long_across=}")
                 for dd in vv_long_across:
+                    print(f" dd: {dd}")
                     tmp_mask = create_mask(dd, mode="fromarray")
                     mask_IIVV_selection.append(tmp_mask)
+                    i0, i1, v0, v1 = dd 
+                    ii_d = euclidean_distance(i0,i1)
+                    vv_d = euclidean_distance(v0,v1)
+                    ii_distances.append(ii_d)
+                    vv_distances.append(vv_d)
 
             elif vv_distance == "vv_long_across_extended":
                 self.ii_pattern = [
@@ -484,6 +544,16 @@ class Masking:
                     dd = vv_long_across_extended[f"{self.i0}_{self.i1}"]
                     tmp_mask = create_mask(dd)
                     mask_IIVV_selection.append(tmp_mask)
+                    ii_d = euclidean_distance(self.i0,self.i1)
+                    v0s = self.IIVV[tmp_mask,2]
+                    v1s = self.IIVV[tmp_mask,3]
+                    if len(v0s) > 0:
+                        vv_d_array = euclidean_distance(v0s,v1s)
+                        vv_d = np.mean(vv_d_array)
+                    else:       
+                        vv_d = np.nan
+                    ii_distances.append(ii_d)
+                    vv_distances.append(vv_d)
 
             elif vv_distance == "vv_medium_across_extended":
                 self.ii_pattern = [
@@ -497,6 +567,16 @@ class Masking:
                     dd = vv_medium_across_extended[f"{self.i0}_{self.i1}"]
                     tmp_mask = create_mask(dd)
                     mask_IIVV_selection.append(tmp_mask)
+                    ii_d = euclidean_distance(self.i0,self.i1)
+                    v0s = self.IIVV[tmp_mask,2]
+                    v1s = self.IIVV[tmp_mask,3]
+                    if len(v0s) > 0:
+                        vv_d_array = euclidean_distance(v0s,v1s)
+                        vv_d = np.mean(vv_d_array)
+                    else:       
+                        vv_d = np.nan
+                    ii_distances.append(ii_d)
+                    vv_distances.append(vv_d)
 
             elif vv_distance == "vv_distance_close_skip_1":
                 self.ii_pattern = [
@@ -510,6 +590,16 @@ class Masking:
                     dd = vv_distance_close_skip_1[f"{self.i0}_{self.i1}"]
                     tmp_mask = create_mask(dd)
                     mask_IIVV_selection.append(tmp_mask)
+                    ii_d = euclidean_distance(self.i0,self.i1)
+                    v0s = self.IIVV[tmp_mask,2]
+                    v1s = self.IIVV[tmp_mask,3]
+                    if len(v0s) > 0:
+                        vv_d_array = euclidean_distance(v0s,v1s)
+                        vv_d = np.mean(vv_d_array)
+                    else:       
+                        vv_d = np.nan
+                    ii_distances.append(ii_d)
+                    vv_distances.append(vv_d)
             # --- NEW ---
 
             elif vv_distance == "adjacent_close":
@@ -523,6 +613,17 @@ class Masking:
                     print("type(dd)", type(dd))
                     tmp_mask = create_mask(dd)
                     mask_IIVV_selection.append(tmp_mask)
+                    ii_d = euclidean_distance(self.i0,self.i1)
+                    v0s = self.IIVV[tmp_mask,2]
+                    v1s = self.IIVV[tmp_mask,3]
+                    if len(v0s) > 0:
+                        vv_d_array = euclidean_distance(v0s,v1s)
+                        vv_d = np.mean(vv_d_array)
+                    else:       
+                        vv_d = np.nan
+                    ii_distances.append(ii_d)
+                    vv_distances.append(vv_d)
+                    
             elif vv_distance == "vv_distance_medium_adj":
                 self.ii_skip_pattern(skip=0)
                 if self.prints:
@@ -531,6 +632,17 @@ class Masking:
                     dd = vv_distance_medium_adj[f"{self.i0}_{self.i1}"]
                     tmp_mask = create_mask(dd)
                     mask_IIVV_selection.append(tmp_mask)
+                    ii_d = euclidean_distance(self.i0,self.i1)
+                    v0s = self.IIVV[tmp_mask,2]
+                    v1s = self.IIVV[tmp_mask,3]
+                    if len(v0s) > 0:
+                        vv_d_array = euclidean_distance(v0s,v1s)
+                        vv_d = np.mean(vv_d_array)
+                    else:       
+                        vv_d = np.nan
+                    ii_distances.append(ii_d)
+                    vv_distances.append(vv_d)
+                    
             elif vv_distance == "adjacent_far":
                 self.ii_skip_pattern(skip=0)
                 if self.prints:
@@ -539,6 +651,17 @@ class Masking:
                     dd = vv_distance_far_adj[f"{self.i0}_{self.i1}"]
                     tmp_mask = create_mask(dd)
                     mask_IIVV_selection.append(tmp_mask)
+                    ii_d = euclidean_distance(self.i0,self.i1)
+                    v0s = self.IIVV[tmp_mask,2]
+                    v1s = self.IIVV[tmp_mask,3]
+                    if len(v0s) > 0:
+                        vv_d_array = euclidean_distance(v0s,v1s)
+                        vv_d = np.mean(vv_d_array)
+                    else:       
+                        vv_d = np.nan
+                    ii_distances.append(ii_d)
+                    vv_distances.append(vv_d)
+                    
             elif vv_distance == "skip1_close":
                 self.ii_skip_pattern(skip=1)
                 if self.prints:
@@ -547,6 +670,17 @@ class Masking:
                     dd = vv_distance_close_skip_1[f"{self.i0}_{self.i1}"]
                     tmp_mask = create_mask(dd)
                     mask_IIVV_selection.append(tmp_mask)
+                    ii_d = euclidean_distance(self.i0,self.i1)
+                    v0s = self.IIVV[tmp_mask,2]
+                    v1s = self.IIVV[tmp_mask,3]
+                    if len(v0s) > 0:
+                        vv_d_array = euclidean_distance(v0s,v1s)
+                        vv_d = np.mean(vv_d_array)
+                    else:       
+                        vv_d = np.nan
+                    ii_distances.append(ii_d)
+                    vv_distances.append(vv_d)
+                    
             elif vv_distance == "skip1_medium":
                 self.ii_skip_pattern(skip=1)
                 if self.prints:
@@ -555,6 +689,17 @@ class Masking:
                     dd = vv_distance_medium_skip_1[f"{self.i0}_{self.i1}"]
                     tmp_mask = create_mask(dd)
                     mask_IIVV_selection.append(tmp_mask)
+                    ii_d = euclidean_distance(self.i0,self.i1)
+                    v0s = self.IIVV[tmp_mask,2]
+                    v1s = self.IIVV[tmp_mask,3]
+                    if len(v0s) > 0:
+                        vv_d_array = euclidean_distance(v0s,v1s)
+                        vv_d = np.mean(vv_d_array)
+                    else:       
+                        vv_d = np.nan
+                    ii_distances.append(ii_d)
+                    vv_distances.append(vv_d)
+                    
             elif vv_distance == "skip1_far":
                 self.ii_skip_pattern(skip=1)
                 if self.prints:
@@ -563,6 +708,17 @@ class Masking:
                     dd = vv_distance_far_skip_1[f"{self.i0}_{self.i1}"]
                     tmp_mask = create_mask(dd)
                     mask_IIVV_selection.append(tmp_mask)
+                    ii_d = euclidean_distance(self.i0,self.i1)
+                    v0s = self.IIVV[tmp_mask,2]
+                    v1s = self.IIVV[tmp_mask,3]
+                    if len(v0s) > 0:
+                        vv_d_array = euclidean_distance(v0s,v1s)
+                        vv_d = np.mean(vv_d_array)
+                    else:       
+                        vv_d = np.nan
+                    ii_distances.append(ii_d)
+                    vv_distances.append(vv_d)
+                    
             elif vv_distance == "opposite_close":
                 self.ii_skip_pattern(skip=3)
                 if self.prints:
@@ -571,6 +727,17 @@ class Masking:
                     dd = vv_distance_close_opp[f"{self.i0}_{self.i1}"]
                     tmp_mask = create_mask(dd)
                     mask_IIVV_selection.append(tmp_mask)
+                    ii_d = euclidean_distance(self.i0,self.i1)
+                    v0s = self.IIVV[tmp_mask,2]
+                    v1s = self.IIVV[tmp_mask,3]
+                    if len(v0s) > 0:
+                        vv_d_array = euclidean_distance(v0s,v1s)
+                        vv_d = np.mean(vv_d_array)
+                    else:       
+                        vv_d = np.nan
+                    ii_distances.append(ii_d)
+                    vv_distances.append(vv_d)
+                    
             elif vv_distance == "opposite_medium":
                 self.ii_skip_pattern(skip=3)
                 if self.prints:
@@ -579,6 +746,17 @@ class Masking:
                     dd = vv_distance_medium_opp[f"{self.i0}_{self.i1}"]
                     tmp_mask = create_mask(dd)
                     mask_IIVV_selection.append(tmp_mask)
+                    ii_d = euclidean_distance(self.i0,self.i1)
+                    v0s = self.IIVV[tmp_mask,2]
+                    v1s = self.IIVV[tmp_mask,3]
+                    if len(v0s) > 0:
+                        vv_d_array = euclidean_distance(v0s,v1s)
+                        vv_d = np.mean(vv_d_array)
+                    else:       
+                        vv_d = np.nan
+                    ii_distances.append(ii_d)
+                    vv_distances.append(vv_d)
+                    
             elif vv_distance == "opposite_far":
                 self.ii_skip_pattern(skip=3)
                 if self.prints:
@@ -588,6 +766,16 @@ class Masking:
                     dd = vv_distance_far_opp[f"{self.i0}_{self.i1}"]
                     tmp_mask = create_mask(dd)
                     mask_IIVV_selection.append(tmp_mask)
+                    ii_d = euclidean_distance(self.i0,self.i1)
+                    v0s = self.IIVV[tmp_mask,2]
+                    v1s = self.IIVV[tmp_mask,3]
+                    if len(v0s) > 0:
+                        vv_d_array = euclidean_distance(v0s,v1s)
+                        vv_d = np.mean(vv_d_array)
+                    else:       
+                        vv_d = np.nan
+                    ii_distances.append(ii_d)
+                    vv_distances.append(vv_d)
 
         if skip != None:
             self.ii_skip_pattern(skip)
@@ -604,6 +792,16 @@ class Masking:
                     )
                     tmp_mask = create_mask(dd)
                     mask_IIVV_selection.append(tmp_mask)
+                    ii_d = euclidean_distance(self.i0,self.i1)
+                    v0s = self.IIVV[tmp_mask,2]
+                    v1s = self.IIVV[tmp_mask,3]
+                    if len(v0s) > 0:
+                        vv_d_array = euclidean_distance(v0s,v1s)
+                        vv_d = np.mean(vv_d_array)
+                    else:       
+                        vv_d = np.nan
+                    ii_distances.append(ii_d)
+                    vv_distances.append(vv_d)
 
             elif vv_distance == "medium":
                 if self.prints:
@@ -617,6 +815,16 @@ class Masking:
                     )
                     tmp_mask = create_mask(dd)
                     mask_IIVV_selection.append(tmp_mask)
+                    ii_d = euclidean_distance(self.i0,self.i1)
+                    v0s = self.IIVV[tmp_mask,2]
+                    v1s = self.IIVV[tmp_mask,3]
+                    if len(v0s) > 0:
+                        vv_d_array = euclidean_distance(v0s,v1s)
+                        vv_d = np.mean(vv_d_array)
+                    else:       
+                        vv_d = np.nan
+                    ii_distances.append(ii_d)
+                    vv_distances.append(vv_d)
 
             elif vv_distance == "far":
                 if self.prints:
@@ -630,6 +838,16 @@ class Masking:
                     )
                     tmp_mask = create_mask(dd)
                     mask_IIVV_selection.append(tmp_mask)
+                    ii_d = euclidean_distance(self.i0,self.i1)
+                    v0s = self.IIVV[tmp_mask,2]
+                    v1s = self.IIVV[tmp_mask,3]
+                    if len(v0s) > 0:
+                        vv_d_array = euclidean_distance(v0s,v1s)
+                        vv_d = np.mean(vv_d_array)
+                    else:       
+                        vv_d = np.nan
+                    ii_distances.append(ii_d)
+                    vv_distances.append(vv_d)
 
         # if non of the created cases were selected
         if len(mask_IIVV_selection) == 0:
@@ -651,4 +869,15 @@ class Masking:
                 print(
                     "Plotting currently not available. Please use the config:\n\t'plot=True, update_mask = True'"
                 )
-            return mask_IIVV_selection
+                
+        ii_distances_clean = [d for d in ii_distances if not np.isnan(d)]
+        vv_distances_clean = [d for d in vv_distances if not np.isnan(d)]
+        avg_ii_distance = np.mean(ii_distances_clean) if ii_distances_clean else 0
+        avg_vv_distance = np.mean(vv_distances_clean) if vv_distances_clean else 0
+
+        if self.prints:
+                print(f"Average II (current injection) distance across pattern sets: {avg_ii_distance:.3f} mm")
+                print(f"Average VV (voltage electrode) distance across pattern sets: {avg_vv_distance:.3f} mm")
+
+
+        return mask_IIVV_selection, avg_ii_distance, avg_vv_distance
