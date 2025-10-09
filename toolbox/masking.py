@@ -515,16 +515,39 @@ class Masking:
 
         if skip is None:
             if vv_distance == "all":
-                self.mask = np.ones(7728, dtype=bool)
+                self.mask = np.ones(len(self.IIVV), dtype=bool)
+                
+                mask_all = np.ones(len(self.IIVV), dtype=bool)
+                mask_IIVV_selection.append(mask_all)   # add full mask to the list
                 if self.prints:
                     print("All set to True.")
+
+                # extract ii and vv index pairs from self.IIVV
+                i0s = self.IIVV[:, 0]
+                i1s = self.IIVV[:, 1]
+                v0s = self.IIVV[:, 2]
+                v1s = self.IIVV[:, 3]
+
+                # compute II distances
+                # Assuming euclidean_distance can take arrays of indices and return array of distances 
+                # (otherwise you need to vectorize it or loop)
+                ii_distances = euclidean_distance(i0s, i1s)
+                vv_distances = euclidean_distance(v0s, v1s)
+
+                avg_ii_distance = np.mean(ii_distances)
+                avg_vv_distance = np.mean(vv_distances)
+
+                if self.prints:
+                    print(f"Average II (current injection) distance: {avg_ii_distance:.3f} mm")
+                    print(f"Average VV (voltage electrode) distance: {avg_vv_distance:.3f} mm")
+
+                if self.prints:
                     self.count_true_false()
             elif vv_distance == "vv_long_across":
                 self.ii_pattern = np.unique(vv_long_across[:, :2])
                 if self.prints:
                     print(f"config: {vv_long_across=}")
                 for dd in vv_long_across:
-                    print(f" dd: {dd}")
                     tmp_mask = create_mask(dd, mode="fromarray")
                     mask_IIVV_selection.append(tmp_mask)
                     i0, i1, v0, v1 = dd 
@@ -609,8 +632,6 @@ class Masking:
 
                 for self.i0, self.i1 in self.ii_pattern:
                     dd = vv_distance_close_adj[f"{self.i0}_{self.i1}"]
-                    print(dd)
-                    print("type(dd)", type(dd))
                     tmp_mask = create_mask(dd)
                     mask_IIVV_selection.append(tmp_mask)
                     ii_d = euclidean_distance(self.i0,self.i1)
