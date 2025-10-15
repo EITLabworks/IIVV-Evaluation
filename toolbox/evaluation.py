@@ -168,6 +168,7 @@ def load_top_Fsel_Msel(class_task):
         "Opp. close": "opposite_close",
         "Opp. medium": "opposite_medium",
         "Opp. far": "opposite_far",
+        "z_threshold" : None,
     }
     Mask_sel = {k: v for k, v in Mask_sel.items() if k in Mask_ranks}
     return Freq_sel, Mask_sel
