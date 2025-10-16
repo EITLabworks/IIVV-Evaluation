@@ -66,7 +66,7 @@ def Results_data_loading(class_task, data_augmentation=True):
         print("\nMC\n")
         select_idx = find_all_indices(
             labels_MC,
-            ["Healthy", "Cancer", "Severe dysplasia", "Benign"],
+            ["Healthy", "Cancer", "High-grade Dysplasia", "Non-malignant"],
             split=False,
         )
         labels = labels_MC[select_idx]
@@ -138,10 +138,10 @@ def ResultsROCAUC(class_task, y_true, y_score, Y_labels, s_name=None):
             3: "#FF6361",  # Severe dysplasia
         }
         cp_l = {
-            0: "Benign",
+            0: "Non-malignant",
             1: "Cancer",
             2: "Healthy",
-            3: "Severe dysplasia",
+            3: "High-grade Dysplasia",
         }
 
     # ----- ROC Curve plotting -----

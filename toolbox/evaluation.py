@@ -144,16 +144,14 @@ def load_top_Fsel_Msel(class_task):
     """
     tmp = np.load(f"results/freq_fold_results_{class_task}.npz", allow_pickle=True)
     top_freqs_baseline = tmp["top_freqs_baseline"]
-    Freq_sel = {
-        "Top 2": top_freqs_baseline[:2],
-        "Top 3": top_freqs_baseline[:3],
-        "Top 5": top_freqs_baseline[:5],
-        "Top 12": top_freqs_baseline[:12],
-        # "All": top_freqs_baseline,  # np.arange(31), # it doesn't matter
-    }
+
+    Freq_sel = dict()
+    for ft in range(1, len(top_freqs_baseline) + 1):
+        Freq_sel[f"Top {ft}"] = top_freqs_baseline[:ft].tolist()
+
     # load masking selection
     tmp = np.load(f"results/Top_IIVV_masks_{class_task}.npz", allow_pickle=True)
-    Mask_ranks = tmp["Mask_ranks"][:4]
+    Mask_ranks = tmp["Mask_ranks"][:14]
     Mask_sel = {
         "All": "all",
         "Long a+": "vv_long_across",
@@ -168,7 +166,7 @@ def load_top_Fsel_Msel(class_task):
         "Opp. close": "opposite_close",
         "Opp. medium": "opposite_medium",
         "Opp. far": "opposite_far",
-        "z_threshold" : None,
+        "Z_threshold": None
     }
     Mask_sel = {k: v for k, v in Mask_sel.items() if k in Mask_ranks}
     return Freq_sel, Mask_sel
