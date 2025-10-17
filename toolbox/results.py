@@ -88,7 +88,7 @@ def Results_data_loading(class_task, data_augmentation=True):
             "High-grade dysplasia": 70,
             "Non-malignant": 70,
         }
-
+        visualize_Category_hist(labels)
     Case = patient_no[select_idx]
     X = Zdata[select_idx, ...]
     print("\nInverse mapping:", inverse_mapping)
@@ -132,16 +132,16 @@ def ResultsROCAUC(class_task, y_true, y_score, Y_labels, s_name=None):
         }
     elif class_task == "MC":
         cp = {
-            0: "#58508D",  # Non-malignant
-            1: "#FFA600",  # Cancer
-            2: "#003F5C",  # Healthy
-            3: "#FF6361",  # High-grade dysplasia
+            3: "#58508D",  # Non-malignant
+            0: "#FFA600",  # Cancer
+            1: "#003F5C",  # Healthy
+            2: "#FF6361",  # High-grade dysplasia
         }
         cp_l = {
-            0: "Non-malignant",
-            1: "Cancer",
-            2: "Healthy",
-            3: "High-grade dysplasia",
+            0: "Cancer",
+            1: "Healthy",
+            2: "High-grade dysplasia",
+            3: "Non-malignant",
         }
 
     # ----- ROC Curve plotting -----
