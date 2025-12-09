@@ -161,6 +161,7 @@ def ResultsROCAUC(class_task, y_true, y_score, Y_labels, s_name=None):
             color=cp[1],
             label=f"{label_roc_plot[class_task]} (AUC = {roc_auc:.2f})",
         )
+        print("AUC = ", roc_auc)
         np.savez(
             s_name.split(".pdf")[0] + ".npz",
             fpr=fpr,
@@ -202,6 +203,7 @@ def ResultsROCAUC(class_task, y_true, y_score, Y_labels, s_name=None):
             linestyle="--",
             label=f"Micro-average (AUC = {roc_auc:.2f})",
         )
+        print("Micro-average AUC = ", roc_auc)
         MC_save_npz["Micro-average"] = (
             fpr,
             tpr,
