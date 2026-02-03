@@ -12,6 +12,9 @@ CNN-model.ipynb
 IIVV-and-freq-analysis.ipynb
 *-task2.ipynb
 *-task3.ipynb
-Freq-GPU*.py
+Freq-GPU1.py
+Freq-GPU2.py
+Freq-GPU3.py
 IIVV-GPU*.py
+zthresh-stats-task*.py
 zthresh-task*.py
