@@ -233,6 +233,7 @@ def load_data_no_norm(path: str = "data/", Cutpats_threshold=60, print_info=True
     LesionAssessment = LesionAssessment[dropout]
     labels_healthy_vs_cancer = labels_healthy_vs_cancer[dropout]
     labels_cancer_vs_hbd = labels_cancer_vs_hbd[dropout]
+    labels_cancer_vs_lr_hr = labels_cancer_vs_lr_hr[dropout]
     labels_MC = labels_MC[dropout]
 
     if print_info:
