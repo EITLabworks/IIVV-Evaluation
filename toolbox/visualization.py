@@ -3,7 +3,7 @@ import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
-from sklearn.model_selection import GroupKFold
+from sklearn.model_selection import GroupShuffleSplit
 
 color_palette_full = {
     "Healthy": "#FFA600",
@@ -71,7 +71,7 @@ def plot_cv_heatmap(X_tmp, Y_labels, Case, n_trials, n_folds):
     split_data = []
     trial_fold_labels = []
     for rs in range(n_trials):
-        cv = GroupKFold(n_splits=n_folds, shuffle=True, random_state=rs)
+        cv = GroupShuffleSplit(n_splits=n_folds, random_state=rs)
         fold = 1
         for train_idx, test_idx in cv.split(X_tmp, Y_labels, Case):
             patient_split = np.zeros(n_patients)  # 0 = train, 1 = test

@@ -44,7 +44,7 @@ def Results_data_loading(class_task, data_augmentation=True):
         }
         visualize_Category_hist(labels)
 
-    elif class_task == "labels_cancer_vs_lr_hr":
+    elif class_task == "cancer_vs_lr_hr":
         print("\nHealthy vs. LR vs. HR\n")
         select_idx = find_all_indices(
             labels_cancer_vs_lr_hr, ["Cancer", "High risk", "Low risk"], split=False
@@ -131,7 +131,7 @@ def ResultsROCAUC(class_task, y_true, y_score, Y_labels, s_name=None):
             2: "#58508D",  # "Low risk
         }
         cp_l = {
-            0: "cancer",  # cancer
+            0: "Cancer",  # cancer
             1: "High risk",  # High risk
             2: "Low risk",  # Low risk
         }
