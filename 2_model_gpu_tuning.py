@@ -3,10 +3,16 @@
 
 """
 GPU Hyperparameter Tuning for SVM / RF / LR with Fsel & Msel loops (project-compatible).
-- Uses RAPIDS cuML on GPU if available, otherwise falls back to scikit-learn CPU.
-- Shows live status in the shell.
-- Lets you choose class_task and (optionally) a positive class label to tune (one-vs-rest binarization).
-- Reports best combination: (Fsel, Msel, model, hyperparams) by chosen metric.
+
+UPDATED per your requirements:
+- Loads TOP-4 Mask selections from: results/MaskSel_ranking_<task>_<metric>.json
+- Loads TOP-4 Frequency selections (Top-N) from: results/FreqSel_ranking_<task>_<metric>.json
+- Builds Fsel as "Top <N>" using your existing top_freqs_baseline (from freq_fold_results_<task>.npz),
+  but the N values come from the JSON ranking.
+- Prints a summary header: model, task, metric, top4 masks, top4 freqs (Top-N).
+- Supports "Z-threshold" mask inside the Top-4:
+    uses Avg_Zs.npy + task-specific thresholds to select patterns where avg_Z_fp[0,:] <= z_thresh.
+- Avoids probability=True unless metric requires it (AUC); for other metrics uses predict().
 """
 
 import argparse
@@ -15,8 +21,9 @@ import json
 import os
 import sys
 import time
+from pathlib import Path
 from dataclasses import dataclass
-from typing import Any, Dict, Iterable, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
@@ -53,7 +60,6 @@ from sklearn.linear_model import LogisticRegression as skLR
 # -----------------------------
 # Your project imports (expected)
 # -----------------------------
-# If your project structure differs, adjust these imports.
 try:
     from toolbox import Masking, find_all_indices, hot_coding  # type: ignore
     from toolbox.loading import load_data  # type: ignore
@@ -82,13 +88,29 @@ def ensure_dir(path: str) -> None:
     os.makedirs(path, exist_ok=True)
 
 
+def metric_to_rank_metric(metric: str) -> str:
+    """
+    Your tuning CLI uses: auc, f1, acc
+    Your ranking files use: auc, f1, acc
+    """
+    metric = metric.lower()
+    return metric
+
+
+def z_threshold_for_task(class_task: str) -> Optional[int]:
+    if class_task == "healthy_vs_cancer":
+        return 424
+    if class_task == "cancer_vs_lr_hr":
+        return 314
+    if class_task == "MC":
+        return 212
+    return None
+
+
 def shuffle_groups_groupkfold(
     groups: np.ndarray, n_splits: int, seed: int
 ) -> List[Tuple[np.ndarray, np.ndarray]]:
-    """
-    GroupKFold-like splitting with shuffling of groups (since sklearn GroupKFold has no shuffle).
-    Returns list of (train_idx, val_idx).
-    """
+    """GroupKFold-like splitting with shuffling of groups."""
     rng = np.random.default_rng(seed)
     uniq = np.unique(groups)
     rng.shuffle(uniq)
@@ -106,14 +128,12 @@ def shuffle_groups_groupkfold(
 
 
 def to_gpu(x: np.ndarray):
-    # cupy conversion only if available
     import cupy as cp  # type: ignore
 
     return cp.asarray(x)
 
 
 def to_cpu(x):
-    # handles cupy arrays
     try:
         import cupy as cp  # type: ignore
 
@@ -139,8 +159,6 @@ def filter_params_for_model(model_cls, params: Dict[str, Any]) -> Dict[str, Any]
     return {k: v for k, v in params.items() if k in keys}
 
 
-# def sample_log_uniform(rng: np.random.Generator, low: float, high: float) -> float:
-#    return float(np.exp(rng.uniform(np.log(low), np.log(high))))
 def sample_log_C(rng):
     return float(rng.choice([1000, 100, 10, 1, 0.1, 0.01, 0.001]))
 
@@ -152,7 +170,6 @@ def sample_log_gamma(rng):
 def maybe_standardize_cpu(
     X_train: np.ndarray, X_val: np.ndarray
 ) -> Tuple[np.ndarray, np.ndarray]:
-    # Standardize for SVM/LR; RF typically doesn’t need it, but harmless.
     scaler = StandardScaler(with_mean=True, with_std=True)
     X_train_s = scaler.fit_transform(X_train)
     X_val_s = scaler.transform(X_val)
@@ -185,9 +202,9 @@ def get_outputs_for_metric(model, X, metric: str, n_classes: int):
 
     # multiclass AUC needs (N,K) probabilities/scores
     if hasattr(model, "predict_proba"):
-        return to_cpu(model.predict_proba(X))  # (N,K)
+        return to_cpu(model.predict_proba(X))
     if hasattr(model, "decision_function"):
-        return to_cpu(model.decision_function(X))  # (N,K)
+        return to_cpu(model.decision_function(X))
     raise ValueError(
         "Multiclass AUC requires predict_proba or decision_function matrix."
     )
@@ -200,41 +217,17 @@ def metric_fn(y_true: np.ndarray, y_out, metric: str, n_classes: int) -> float:
         return float(accuracy_score(y_true, y_out))
 
     if metric == "f1":
-        if n_classes <= 2:
-            # binary f1: ensure labels are 0/1 preds
-            y_pred = y_out.astype(int)
-            return float(f1_score(y_true, y_pred))
-        # multiclass f1:
         y_pred = y_out.astype(int)
+        if n_classes <= 2:
+            return float(f1_score(y_true, y_pred))
         return float(f1_score(y_true, y_pred, average="macro"))
 
     if metric == "auc":
         if n_classes <= 2:
             return float(roc_auc_score(y_true, y_out))
-        # multiclass auc:
-        # y_true must be int labels, y_out must be (N,K)
         return float(roc_auc_score(y_true, y_out, multi_class="ovr", average="macro"))
 
     raise ValueError(f"Unknown metric: {metric}")
-
-
-def get_scores(model, X, backend: str) -> np.ndarray:
-    """
-    Return continuous scores for AUC.
-    Prefer decision_function, fallback to predict_proba[:,1], else predict.
-    """
-    # cuML and sklearn both usually have decision_function for SVM
-    if hasattr(model, "decision_function"):
-        s = model.decision_function(X)
-        return to_cpu(s).ravel()
-    if hasattr(model, "predict_proba"):
-        p = model.predict_proba(X)
-        p = to_cpu(p)
-        if p.ndim == 2 and p.shape[1] >= 2:
-            return p[:, 1].ravel()
-    # fallback: hard predictions
-    yhat = model.predict(X)
-    return to_cpu(yhat).ravel()
 
 
 # -----------------------------
@@ -259,11 +252,10 @@ def load_project_data(class_task: str, data_path: str = "data", norm: str = "fre
         Avg_Cutpats,
         LesionAssessment,
         labels_healthy_vs_cancer,
-        labels_hr_vs_lr,
+        labels_cancer_vs_lr_hr,
         labels_MC,
     ) = load_data(path=data_path, Cutpats_threshold=60, norm=norm)
 
-    # Pick labels by class_task like in your notebook.
     if class_task == "healthy_vs_cancer":
         select_idx = find_all_indices(
             labels_healthy_vs_cancer, ["Healthy", "Cancer"], split=False
@@ -280,11 +272,11 @@ def load_project_data(class_task: str, data_path: str = "data", norm: str = "fre
         )
         return X, Y_labels, labels, groups, mask, label_names
 
-    if class_task == "hr_vs_lr":
+    if class_task == "cancer_vs_lr_hr":
         select_idx = find_all_indices(
-            labels_hr_vs_lr, ["High risk", "Low risk"], split=False
+            labels_cancer_vs_lr_hr, ["Cancer", "High risk", "Low risk"], split=False
         )
-        labels = labels_hr_vs_lr[select_idx]
+        labels = labels_cancer_vs_lr_hr[select_idx]
         X = Zdata[select_idx]
         Y, inverse_mapping = hot_coding(labels)
         Y_labels = np.argmax(Y, axis=1)
@@ -297,7 +289,6 @@ def load_project_data(class_task: str, data_path: str = "data", norm: str = "fre
         return X, Y_labels, labels, groups, mask, label_names
 
     if class_task == "MC":
-        # Multiclass available; you can still binarize via --positive-class
         select_idx = find_all_indices(
             labels_MC,
             ["Healthy", "Cancer", "High-grade dysplasia", "Non-malignant"],
@@ -315,82 +306,198 @@ def load_project_data(class_task: str, data_path: str = "data", norm: str = "fre
         )
         return X, Y_labels, labels, groups, mask, label_names
 
-    # If you have more tasks, extend here:
     raise ValueError(f"Unknown class_task: {class_task}")
 
 
-def build_fsel_msel(
-    class_task: str, results_path: str = "results"
-) -> Tuple[Dict[str, np.ndarray], Dict[str, str]]:
-    # Frequency selection
-    freq_file = os.path.join(results_path, f"freq_fold_results_{class_task}.npz")
-    tmp = np.load(freq_file, allow_pickle=True)
-    top_freqs_baseline = tmp["top_freqs_baseline"]
+# -----------------------------
+# Load TOP-4 Fsel/Msel from JSON rankings
+# -----------------------------
+MASK_SEL_ALL = {
+    "All": "all",
+    "Z-threshold": "z_threshold",  # special-case
+    "Long a+": "vv_long_across",
+    "Long a+ ext.": "vv_long_across_extended",
+    "Med. a+ ext.": "vv_medium_across_extended",
+    "Skip1 close": "vv_distance_close_skip_1",
+    "Adj. close": "adjacent_close",
+    "Med. adj.": "vv_distance_medium_adj",
+    "Adj. far": "adjacent_far",
+    "Skip1 medium": "skip1_medium",
+    "Skip1 far": "skip1_far",
+    "Opp. close": "opposite_close",
+    "Opp. medium": "opposite_medium",
+    "Opp. far": "opposite_far",
+}
 
-    if class_task == "healthy_vs_cancer":
-        Freq_sel = {
-            "Top 6": top_freqs_baseline[:6],
-            "Top 14": top_freqs_baseline[:14],
-            "Top 5": top_freqs_baseline[:5],
-            "Top 7": top_freqs_baseline[:7],
-        }
-    elif class_task == "hr_vs_lr":
-        Freq_sel = {
-            "Top 3": top_freqs_baseline[:3],
-            "Top 4": top_freqs_baseline[:4],
-            "Top 2": top_freqs_baseline[:2],
-            "Top 5": top_freqs_baseline[:5],
-        }
-    elif class_task == "cancer_vs_lr_hr":
-        Freq_sel = {
-            "Top 4": top_freqs_baseline[:4],
-            "Top 2": top_freqs_baseline[:2],
-            "Top 29": top_freqs_baseline[:29],
-            "Top 17": top_freqs_baseline[:17],
-        }
-    elif class_task == "hr_vs_lr":
-        Freq_sel = {
-            "Top 30": top_freqs_baseline[:30],
-            "Top 3": top_freqs_baseline[:3],
-            "Top 27": top_freqs_baseline[:27],
-            "Top 28": top_freqs_baseline[:28],
-        }
-    elif class_task == "MC":
-        Freq_sel = {
-            "Top 13": top_freqs_baseline[:13],
-            "Top 19": top_freqs_baseline[:19],
-            "Top 20": top_freqs_baseline[:20],
-            "Top 18": top_freqs_baseline[:18],
-        }
-    else:
-        # generic fallback
-        Freq_sel = {
-            "Top 10": top_freqs_baseline[:10],
-            "Top 20": top_freqs_baseline[:20],
-        }
 
-    # Masking selection
-    mask_file = os.path.join(results_path, f"Top_IIVV_masks_{class_task}.npz")
-    tmp2 = np.load(mask_file, allow_pickle=True)
-    Mask_ranks = tmp2["Mask_ranks"][:4]
+def load_top4_mask_names(
+    results_path: str,
+    class_task: str,
+    rank_metric: str,
+    N_top: int = 4,
+) -> List[str]:
+    p = os.path.join(results_path, f"MaskSel_ranking_{class_task}_{rank_metric}.json")
+    if not os.path.exists(p):
+        raise FileNotFoundError(f"Missing mask ranking JSON: {p}")
 
-    Mask_sel_all = {
-        # "All": "all",
-        "Long a+": "vv_long_across",
-        "Long a+ ext.": "vv_long_across_extended",
-        "Med. a+ ext.": "vv_medium_across_extended",
-        "Skip1 close": "vv_distance_close_skip_1",
-        "Adj. close": "adjacent_close",
-        "Med. adj.": "vv_distance_medium_adj",
-        "Adj. far": "adjacent_far",
-        "Skip1 medium": "skip1_medium",
-        "Skip1 far": "skip1_far",
-        "Opp. close": "opposite_close",
-        "Opp. medium": "opposite_medium",
-        "Opp. far": "opposite_far",
+    j = json.loads(Path(p).read_text(encoding="utf-8"))
+
+    table = j.get("ranking_table")
+    if not isinstance(table, list) or len(table) == 0:
+        raise ValueError(f"Mask ranking JSON has no valid 'ranking_table': {p}")
+
+    top = table[:N_top]
+
+    names = []
+    for row in top:
+        if not isinstance(row, dict) or "IIVV" not in row:
+            raise ValueError(f"Invalid row in ranking_table (missing 'IIVV'): {row}")
+        names.append(str(row["IIVV"]))
+    return names
+
+
+def load_top4_freq_N(
+    results_path: str,
+    class_task: str,
+    rank_metric: str,
+    N_top: int = 4,
+) -> Tuple[List[int], List[int]]:
+    """
+    Loads frequency ranking JSON and within it extracts:
+
+    baseline_order  = order_good_to_bad list
+    ranking_N_list  = list of N_freqs from ranking_table
+
+    JSON schema expected:
+        order_good_to_bad: [...]
+        ranking_table: [
+            { "N_freqs": 5, ... },
+            ...
+        ]
+    """
+
+    p = os.path.join(
+        results_path,
+        f"FreqSel_ranking_{class_task}_{rank_metric}.json",
+    )
+    if not os.path.exists(p):
+        raise FileNotFoundError(f"Missing freq ranking JSON: {p}")
+
+    j = json.loads(Path(p).read_text(encoding="utf-8"))
+
+    # ---------- order_good_to_bad ----------
+    order = j.get("order_good_to_bad", [])
+    if not isinstance(order, list) or len(order) == 0:
+        raise ValueError(f"No order_good_to_bad in {p}")
+
+    baseline_order: List[int] = []
+    for x in order:
+        if isinstance(x, (int, float)):
+            baseline_order.append(int(x))
+        else:
+            s = str(x).strip()
+            if s.upper().startswith("N"):
+                s = s[1:]
+            baseline_order.append(int(float(s)))
+
+    # ---------- ranking_table -> N_freqs ----------
+    table = j.get("ranking_table", [])
+    if not isinstance(table, list) or len(table) == 0:
+        raise ValueError(f"No ranking_table in {p}")
+
+    ranking_N_freqs: List[int] = []
+    for row in table:
+        if "N_freqs" not in row:
+            continue
+        ranking_N_freqs.append(int(row["N_freqs"]))
+    if not ranking_N_freqs:
+        raise ValueError(f"No N_freqs entries found in ranking_table of {p}")
+
+    top4_freqs = [baseline_order[:n] for n in ranking_N_freqs[:N_top]]
+
+    return [
+        np.array(freqs) - 1 for freqs in top4_freqs
+    ]  # correct for 1-based indexing in JSON -> 0-based indexing in code
+
+
+def build_top4_fsel_msel(
+    class_task: str,
+    metric: str,
+    results_path: str = "results",
+) -> Tuple[Dict[str, np.ndarray], Dict[str, str], Dict[str, Any]]:
+    """
+    Returns:
+      Freq_sel: {"Top 06": indices, ...} based on Top-N from JSON + baseline freq ordering (npz)
+      Mask_sel: {"<mask_name>": "<mask_key or z_threshold>", ...} based on JSON
+      meta: dict with pretty info (top4 lists + z-threshold)
+    """
+    rank_metric = metric_to_rank_metric(metric)
+
+    # Load Top-Ns from freq ranking JSON
+    top4_freqs = load_top4_freq_N(results_path, class_task, rank_metric)
+    Freq_sel: Dict[str, np.ndarray] = {}
+
+    for freqs in top4_freqs:
+        key = f"Top {int(len(freqs))}"
+        Freq_sel[key] = np.array(freqs)
+
+    # Load Top-4 masks from mask ranking JSON
+    top4_masks = load_top4_mask_names(results_path, class_task, rank_metric)
+
+    # Convert mask names -> keys (and keep only known)
+    Mask_sel: Dict[str, str] = {}
+    for name in top4_masks:
+        if name not in MASK_SEL_ALL:
+            # keep it visible for debugging, but skip since we can't apply it
+            log(f"Warning: mask '{name}' not in MASK_SEL_ALL, skipping.")
+            continue
+        Mask_sel[name] = MASK_SEL_ALL[name]
+
+    zt = z_threshold_for_task(class_task)
+    meta = {
+        "rank_metric": rank_metric,
+        "top4_freqs": top4_freqs,
+        "top4_masks": top4_masks,
+        "z_threshold": zt,
     }
-    Mask_sel = {k: v for k, v in Mask_sel_all.items() if k in Mask_ranks}
-    return Freq_sel, Mask_sel
+
+    return Freq_sel, Mask_sel, meta
+
+
+def print_top4_overview(
+    model_name: str, class_task: str, metric: str, meta: Dict[str, Any]
+) -> None:
+    width = 92
+    print("\n" + "=" * width)
+    print("TUNING OVERVIEW (Top-4 from ranking JSON)")
+    print(f"Model:   {model_name}")
+    print(f"Task:    {class_task}")
+    print(f"Metric:  {metric}  (ranking files use: {meta.get('rank_metric')})")
+    print("-" * width)
+
+    # Masks
+    masks = meta.get("top4_masks", [])
+    zt = meta.get("z_threshold", None)
+    print("Top4 Masks (good → bad):")
+    if not masks:
+        print("  (none)")
+    else:
+        for i, m in enumerate(masks[:4], start=1):
+            if m == "Z-threshold" and zt is not None:
+                print(f"  {i}. Z-threshold (avg_Z <= {zt})")
+            else:
+                print(f"  {i}. {m}")
+
+    # Freqs
+    freqs = meta.get("top4_freqs", [])
+    print("\nTop4 Freq selections (Top-N counts, good → bad):")
+    if not freqs:
+        print("  (none)")
+    else:
+        for i, freqs in enumerate(freqs[:4], start=1):
+            print(f"  {i}. {freqs}")
+
+    print("=" * width + "\n")
 
 
 # -----------------------------
@@ -404,7 +511,6 @@ def sample_params(model_name: str, rng: np.random.Generator) -> Dict[str, Any]:
         C = sample_log_C(rng)
         params = {"kernel": kernel, "C": C}
 
-        # Optional knobs for non-linear kernels
         if kernel in {"rbf", "poly", "sigmoid"}:
             gamma = sample_log_gamma(rng)
             params["gamma"] = gamma
@@ -413,7 +519,6 @@ def sample_params(model_name: str, rng: np.random.Generator) -> Dict[str, Any]:
         return params
 
     if model_name == "rf":
-        # cuML RF supports fewer knobs than sklearn; we sample a safe subset.
         n_estimators = int(rng.choice([100, 200, 300, 500, 800]))
         max_depth = int(rng.choice([8, 12, 16, 20, 24, 32]))
         max_features = float(rng.choice([0.3, 0.5, 0.7, 1.0]))
@@ -431,15 +536,23 @@ def sample_params(model_name: str, rng: np.random.Generator) -> Dict[str, Any]:
     raise ValueError(f"Unknown model_name: {model_name}")
 
 
-def make_model(model_name: str, params: Dict[str, Any], backend: str):
+def make_model(model_name: str, params: Dict[str, Any], backend: str, metric: str):
+    """
+    IMPORTANT: probability=True only when needed.
+    - For AUC:
+        * CPU SVM/LR/RF can use decision_function / predict_proba.
+        * cuML SVC: if we need predict_proba for multiclass AUC, enable probability.
+      We keep it minimal: only set probability=True for cuML SVC when metric == "auc"
+      AND predict_proba is needed (we still prefer decision_function when available).
+    """
     model_name_l = model_name.lower()
+    need_proba = metric.lower() == "auc"
 
     if backend == "cuml":
         if model_name_l == "svm":
             p = filter_params_for_model(cuSVC, params)
-            # cuML SVC: enable probability if available (not always needed for AUC)
             if "probability" in accepted_kwargs(cuSVC):
-                p.setdefault("probability", False)
+                p.setdefault("probability", bool(need_proba))
             return cuSVC(**p)
 
         if model_name_l == "rf":
@@ -448,7 +561,6 @@ def make_model(model_name: str, params: Dict[str, Any], backend: str):
 
         if model_name_l == "lr":
             p = filter_params_for_model(cuLR, params)
-            # safer defaults
             if "penalty" in accepted_kwargs(cuLR):
                 p.setdefault("penalty", "l2")
             return cuLR(**p)
@@ -456,12 +568,11 @@ def make_model(model_name: str, params: Dict[str, Any], backend: str):
     # CPU fallback
     if model_name_l == "svm":
         p = filter_params_for_model(skSVC, params)
-        # For AUC: decision_function exists; probability not required (keeps it faster).
+        # decision_function is enough for AUC on CPU; keep probability False for speed.
         p.setdefault("probability", False)
         return skSVC(**p)
 
     if model_name_l == "rf":
-        # richer knobs on CPU; still accept our sampled subset
         p = dict(params)
         p.setdefault("n_jobs", -1)
         p.setdefault("random_state", 0)
@@ -489,12 +600,46 @@ class TrialResult:
     fsel: str
     msel: str
     n_params: int
-    seed: int
     trial: int
     metric: str
     score_mean: float
     score_std: float
     params_json: str
+
+
+def apply_mask_and_freq(
+    *,
+    X: np.ndarray,
+    freq_idx: np.ndarray,
+    mask: Any,
+    msel_key: str,
+    class_task: str,
+    avg_Z_fp: Optional[np.ndarray],
+) -> np.ndarray:
+    """
+    Returns flattened X_tmp after applying frequency selection and masking selection.
+    Supports:
+      - standard IIVV masks via mask.IIVV_mask(msel_key)
+      - z-threshold special: avg_Z_fp[0,:] <= z_thresh
+    """
+    # freq selection first
+    X_tmp = X[:, freq_idx, :]  # (N, freqs_sel, patterns)
+
+    if msel_key == "z_threshold":
+        if avg_Z_fp is None:
+            raise RuntimeError("avg_Z_fp is required for z-threshold, but is None.")
+        zt = z_threshold_for_task(class_task)
+        if zt is None:
+            raise ValueError(f"No z-threshold configured for task: {class_task}")
+
+        above_threshold = avg_Z_fp[0, :] <= zt  # patterns mask
+        X_tmp = X_tmp[:, :, above_threshold]
+        return X_tmp.reshape(X_tmp.shape[0], -1)
+
+    # Normal IIVV masking
+    mask.IIVV_mask(msel_key, plot=False)
+    X_tmp = X_tmp[:, :, mask.mask]
+    return X_tmp.reshape(X_tmp.shape[0], -1)
 
 
 def run_tuning(
@@ -519,7 +664,6 @@ def run_tuning(
 
     # Optional binarization by positive class label
     y = np.asarray(Y_labels).astype(int)
-
     if positive_class is not None:
         labels_raw = np.asarray(labels_raw).astype(str)
         y = (labels_raw == positive_class).astype(int)
@@ -529,36 +673,50 @@ def run_tuning(
                 f"Available labels example: {np.unique(labels_raw)[:10]}"
             )
 
-    Freq_sel, Mask_sel = build_fsel_msel(
-        class_task=class_task, results_path=results_path
+    # Load top-4 selections from JSON rankings
+    Freq_sel, Mask_sel, meta = build_top4_fsel_msel(
+        class_task=class_task, metric=metric, results_path=results_path
     )
+
+    # Print overview (per your request)
+    print_top4_overview(
+        model_name=model_name, class_task=class_task, metric=metric, meta=meta
+    )
+
     ensure_dir(results_path)
 
+    # For z-threshold support
+    avg_Z_fp = None
+    if "Z-threshold" in meta.get("top4_masks", []):
+        avg_Z_fp = np.load("source/Avg_Zs.npy")
+
     rng_master = np.random.default_rng(12345)
+    group_seeds = list(range(n_group_seeds))
 
     all_rows: List[TrialResult] = []
     best_global = -np.inf
     best_desc = ""
 
-    # Pre-calc group splits seeds
-    group_seeds = list(range(n_group_seeds))
+    # Precompute class count once (based on current y, including optional binarization)
+    n_classes = int(np.unique(y).size)
 
     for fsel_name, freq_idx in Freq_sel.items():
         for msel_name, msel_key in Mask_sel.items():
-            # Apply mask selection (project code)
-            mask.IIVV_mask(msel_key, plot=False)
-
-            # Select freq + mask + flatten
-            X_tmp = X[:, freq_idx, :]
-            X_tmp = X_tmp[:, :, mask.mask]
-            X_tmp = X_tmp.reshape(X_tmp.shape[0], -1)
+            X_tmp = apply_mask_and_freq(
+                X=X,
+                freq_idx=freq_idx,
+                mask=mask,
+                msel_key=msel_key,
+                class_task=class_task,
+                avg_Z_fp=avg_Z_fp,
+            )
             n_params = X_tmp.shape[1]
 
             log(
-                f"=== {class_task=} | {model_name=} | {fsel_name=} | {msel_name=} | n_params={n_params} ==="
+                f"=== task={class_task} | model={model_name} | {fsel_name} | {msel_name} | n_params={n_params} ==="
             )
 
-            # Convert once to GPU if needed (fold slicing still cheap)
+            # Convert once to GPU if needed
             if backend == "cuml":
                 X_mat = to_gpu(X_tmp.astype(np.float32, copy=False))
                 y_vec = to_gpu(y.astype(np.int32, copy=False))
@@ -567,11 +725,10 @@ def run_tuning(
                 y_vec = y.astype(int, copy=False)
 
             for trial in range(1, n_trials + 1):
-                # Sample hyperparams
                 rng = np.random.default_rng(int(rng_master.integers(0, 1_000_000_000)))
                 params = sample_params(model_name, rng)
 
-                # Evaluate across multiple group-shuffled splits (stabilizes your 10 random_states idea)
+                # Evaluate across group-shuffled splits
                 scores: List[float] = []
                 for seed in group_seeds:
                     splits = shuffle_groups_groupkfold(
@@ -580,39 +737,30 @@ def run_tuning(
 
                     fold_scores: List[float] = []
                     for tr_idx, va_idx in splits:
-                        if backend == "cuml":
-                            X_tr = X_mat[tr_idx]
-                            X_va = X_mat[va_idx]
-                            y_tr = y_vec[tr_idx]
-                            y_va = y_vec[va_idx]
-                        else:
-                            X_tr = X_mat[tr_idx]
-                            X_va = X_mat[va_idx]
-                            y_tr = y_vec[tr_idx]
-                            y_va = y_vec[va_idx]
+                        X_tr = X_mat[tr_idx]
+                        X_va = X_mat[va_idx]
+                        y_tr = y_vec[tr_idx]
+                        y_va = y_vec[va_idx]
 
-                        # Standardize (helps SVM/LR). For RF it’s okay.
-                        if backend == "cpu" and model_name.lower() in {"svm", "lr"}:
-                            X_tr, X_va = maybe_standardize_cpu(X_tr, X_va)
-                        elif backend == "cuml" and model_name.lower() in {"svm", "lr"}:
-                            # quick GPU standardization
-                            import cupy as cp  # type: ignore
+                        # Standardize (SVM/LR)
+                        if model_name.lower() in {"svm", "lr"}:
+                            if backend == "cpu":
+                                X_tr, X_va = maybe_standardize_cpu(X_tr, X_va)
+                            else:
+                                import cupy as cp  # type: ignore
 
-                            mu = X_tr.mean(axis=0)
-                            sig = X_tr.std(axis=0) + 1e-8
-                            X_tr = (X_tr - mu) / sig
-                            X_va = (X_va - mu) / sig
+                                mu = X_tr.mean(axis=0)
+                                sig = X_tr.std(axis=0) + 1e-8
+                                X_tr = (X_tr - mu) / sig
+                                X_va = (X_va - mu) / sig
 
                         model = make_model(
-                            model_name=model_name, params=params, backend=backend
+                            model_name=model_name,
+                            params=params,
+                            backend=backend,
+                            metric=metric,
                         )
                         model.fit(X_tr, y_tr)
-
-                        # y_score = get_scores(model, X_va, backend=backend)
-                        # y_true = to_cpu(y_va).astype(int)
-
-                        # fold_scores.append(metric_fn(y_true, y_score, metric))
-                        n_classes = int(np.unique(to_cpu(y_vec)).size)
 
                         y_out = get_outputs_for_metric(
                             model, X_va, metric=metric, n_classes=n_classes
@@ -630,7 +778,10 @@ def run_tuning(
 
                 if score_mean > best_global:
                     best_global = score_mean
-                    best_desc = f"{class_task} | {model_name} | {fsel_name} | {msel_name} | {params} | {metric}={best_global:.5f}"
+                    best_desc = (
+                        f"{class_task} | {model_name} | {fsel_name} | {msel_name} | "
+                        f"{params} | {metric}={best_global:.5f}"
+                    )
                     log(f"NEW BEST ✅  {best_desc}")
 
                 log(
@@ -647,7 +798,6 @@ def run_tuning(
                         fsel=fsel_name,
                         msel=msel_name,
                         n_params=n_params,
-                        seed=-1,
                         trial=trial,
                         metric=metric,
                         score_mean=score_mean,
@@ -657,11 +807,12 @@ def run_tuning(
                 )
 
     df = pd.DataFrame([r.__dict__ for r in all_rows])
-    out_csv = os.path.join(results_path, f"GPU_tuning_{model_name}_{class_task}.csv")
+    out_csv = os.path.join(
+        results_path, f"GPU_tuning_{model_name}_{class_task}_{metric}.csv"
+    )
     df.to_csv(out_csv, index=False)
     log(f"Saved results: {out_csv}")
 
-    # Aggregate (mean over identical hyperparam json) like you did
     agg = (
         df.groupby(["model", "fsel", "msel", "params_json"], as_index=False)
         .agg(
@@ -673,7 +824,7 @@ def run_tuning(
     )
 
     out_agg = os.path.join(
-        results_path, f"GPU_tuning_{model_name}_{class_task}_AGG.csv"
+        results_path, f"GPU_tuning_{model_name}_{class_task}_{metric}_AGG.csv"
     )
     agg.to_csv(out_agg, index=False)
     log(f"Saved aggregated results: {out_agg}")
@@ -690,16 +841,11 @@ def run_tuning(
 # -----------------------------
 def parse_args():
     p = argparse.ArgumentParser(
-        description="GPU tuning for SVM/RF/LR over Fsel+Msel (project-compatible)."
+        description="GPU tuning for SVM/RF/LR over Top4 Fsel+Msel from ranking JSON."
     )
+    p.add_argument("--model", choices=["svm", "rf", "lr", "all"], default="all")
     p.add_argument(
-        "--model",
-        choices=["svm", "rf", "lr", "all"],
-        default="svm",
-        help="Which model to tune.",
-    )
-    p.add_argument(
-        "--class-task", required=True, help="e.g. healthy_vs_cancer, hr_vs_lr, MC"
+        "--task", required=True, help="healthy_vs_cancer, cancer_vs_lr_hr, MC"
     )
     p.add_argument(
         "--positive-class",
@@ -712,47 +858,27 @@ def parse_args():
         default="auc",
         help="Optimization metric.",
     )
-    p.add_argument("--n-splits", type=int, default=5, help="Group K-fold splits.")
-    p.add_argument(
-        "--n-group-seeds",
-        type=int,
-        default=10,
-        help="How many group shuffles to average over.",
-    )
-    p.add_argument(
-        "--n-trials", type=int, default=40, help="Random search trials per (Fsel,Msel)."
-    )
-    p.add_argument(
-        "--results-path", default="results", help="Where to read/write .npz/.csv files."
-    )
-    p.add_argument(
-        "--data-path",
-        default="data",
-        help="Data folder used by toolbox.loading.load_data",
-    )
-    p.add_argument("--norm", default="freq", help="Passed to load_data(norm=...)")
-    p.add_argument(
-        "--no-gpu", action="store_true", help="Force CPU even if GPU is available."
-    )
+    p.add_argument("--n-splits", type=int, default=5)
+    p.add_argument("--n-group-seeds", type=int, default=10)
+    p.add_argument("--n-trials", type=int, default=40)
+    p.add_argument("--results-path", default="results")
+    p.add_argument("--data-path", default="data")
+    p.add_argument("--norm", default="freq")
+    p.add_argument("--no-gpu", action="store_true")
     return p.parse_args()
 
 
 def main():
     args = parse_args()
-
     use_gpu = not args.no_gpu
 
-    if args.model == "all":
-        models = ["svm", "rf", "lr"]
-    else:
-        models = [args.model]
-
+    models = ["svm", "rf", "lr"] if args.model == "all" else [args.model]
     all_best_rows = []
 
     for m in models:
         agg = run_tuning(
             model_name=m,
-            class_task=args.class_task,
+            class_task=args.task,
             positive_class=args.positive_class,
             metric=args.metric,
             n_splits=args.n_splits,
@@ -770,7 +896,8 @@ def main():
     if len(all_best_rows) > 1:
         final = pd.DataFrame(all_best_rows).sort_values("score_mean", ascending=False)
         out_final = os.path.join(
-            args.results_path, f"GPU_tuning_BEST_OVERALL_{args.class_task}.csv"
+            args.results_path,
+            f"GPU_tuning_BEST_OVERALL_{args.task}_{args.metric}.csv",
         )
         final.to_csv(out_final, index=False)
         log("=== BEST OVERALL (across models) ===")
