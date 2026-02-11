@@ -37,7 +37,7 @@ def load_data(path: str = "data/", Cutpats_threshold=60, norm="freq", print_info
         - LesionAssessment : np.ndarray of str
             Labels related to lesion assessment.
         - labels_healthy_vs_cancer : np.ndarray of str
-        - labels_cancer_vs_lr_hr : np.ndarray of str
+        - labels_hr_vs_lr : np.ndarray of str
         - labels_MC : np.ndarray of str
 
     Notes
@@ -59,7 +59,7 @@ def load_data(path: str = "data/", Cutpats_threshold=60, norm="freq", print_info
     Avg_Cutpats = []
     LesionAssessment = []
     labels_healthy_vs_cancer = []
-    labels_cancer_vs_lr_hr = []
+    labels_hr_vs_lr = []
     labels_MC = []
 
     files = glob(join(path, "*.npz"))
@@ -72,7 +72,7 @@ def load_data(path: str = "data/", Cutpats_threshold=60, norm="freq", print_info
         Avg_Cutpats.append(tmp["Avg_Cutpats"])
         LesionAssessment.append(tmp["LesionAssessment"])
         labels_healthy_vs_cancer.append(tmp["labels_healthy_vs_cancer"])
-        labels_cancer_vs_lr_hr.append(tmp["labels_cancer_vs_lr_hr"])
+        labels_hr_vs_lr.append(tmp["labels_hr_vs_lr"])
         labels_MC.append(tmp["labels_MC"])
 
     py_idx = np.array(py_idx, dtype=int)
@@ -82,7 +82,7 @@ def load_data(path: str = "data/", Cutpats_threshold=60, norm="freq", print_info
     Avg_Cutpats = np.array(Avg_Cutpats, dtype=float)
     LesionAssessment = np.array(LesionAssessment, dtype=str)
     labels_healthy_vs_cancer = np.array(labels_healthy_vs_cancer, dtype=str)
-    labels_cancer_vs_lr_hr = np.array(labels_cancer_vs_lr_hr, dtype=str)
+    labels_hr_vs_lr = np.array(labels_hr_vs_lr, dtype=str)
     labels_MC = np.array(labels_MC, dtype=str)
 
     # Zdata to absolute values
@@ -103,7 +103,7 @@ def load_data(path: str = "data/", Cutpats_threshold=60, norm="freq", print_info
     Avg_Cutpats = Avg_Cutpats[dropout]
     LesionAssessment = LesionAssessment[dropout]
     labels_healthy_vs_cancer = labels_healthy_vs_cancer[dropout]
-    labels_cancer_vs_lr_hr = labels_cancer_vs_lr_hr[dropout]
+    labels_hr_vs_lr = labels_hr_vs_lr[dropout]
     labels_MC = labels_MC[dropout]
 
     if print_info:
@@ -128,7 +128,7 @@ def load_data(path: str = "data/", Cutpats_threshold=60, norm="freq", print_info
         Avg_Cutpats,
         LesionAssessment,
         labels_healthy_vs_cancer,
-        labels_cancer_vs_lr_hr,
+        labels_hr_vs_lr,
         labels_MC,
     )
 
@@ -166,7 +166,7 @@ def load_data_no_norm(path: str = "data/", Cutpats_threshold=60, print_info=True
         - LesionAssessment : np.ndarray of str
             Labels related to lesion assessment.
         - labels_healthy_vs_cancer : np.ndarray of str
-        - labels_cancer_vs_lr_hr : np.ndarray of str
+        - labels_hr_vs_lr : np.ndarray of str
         - labels_MC : np.ndarray of str
 
     Notes
@@ -188,7 +188,7 @@ def load_data_no_norm(path: str = "data/", Cutpats_threshold=60, print_info=True
     Avg_Cutpats = []
     LesionAssessment = []
     labels_healthy_vs_cancer = []
-    labels_cancer_vs_lr_hr = []
+    labels_hr_vs_lr = []
     labels_MC = []
 
     files = glob(join(path, "*.npz"))
@@ -201,7 +201,7 @@ def load_data_no_norm(path: str = "data/", Cutpats_threshold=60, print_info=True
         Avg_Cutpats.append(tmp["Avg_Cutpats"])
         LesionAssessment.append(tmp["LesionAssessment"])
         labels_healthy_vs_cancer.append(tmp["labels_healthy_vs_cancer"])
-        labels_cancer_vs_lr_hr.append(tmp["labels_cancer_vs_lr_hr"])
+        labels_hr_vs_lr.append(tmp["labels_hr_vs_lr"])
         labels_MC.append(tmp["labels_MC"])
 
     py_idx = np.array(py_idx, dtype=int)
@@ -211,7 +211,7 @@ def load_data_no_norm(path: str = "data/", Cutpats_threshold=60, print_info=True
     Avg_Cutpats = np.array(Avg_Cutpats, dtype=float)
     LesionAssessment = np.array(LesionAssessment, dtype=str)
     labels_healthy_vs_cancer = np.array(labels_healthy_vs_cancer, dtype=str)
-    labels_cancer_vs_lr_hr = np.array(labels_cancer_vs_lr_hr, dtype=str)
+    labels_hr_vs_lr = np.array(labels_hr_vs_lr, dtype=str)
     labels_MC = np.array(labels_MC, dtype=str)
 
     # Zdata to absolute values
@@ -232,7 +232,7 @@ def load_data_no_norm(path: str = "data/", Cutpats_threshold=60, print_info=True
     Avg_Cutpats = Avg_Cutpats[dropout]
     LesionAssessment = LesionAssessment[dropout]
     labels_healthy_vs_cancer = labels_healthy_vs_cancer[dropout]
-    labels_cancer_vs_lr_hr = labels_cancer_vs_lr_hr[dropout]
+    labels_hr_vs_lr = labels_hr_vs_lr[dropout]
     labels_MC = labels_MC[dropout]
 
     if print_info:

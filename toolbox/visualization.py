@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import GroupShuffleSplit
+from sklearn.metrics import confusion_matrix
 
 color_palette_full = {
     "Healthy": "#FFA600",
@@ -99,4 +100,66 @@ def plot_cv_heatmap(X_tmp, Y_labels, Case, n_trials, n_folds):
         range(0, n_patients, max(1, n_patients // 20))
     )  # Show every nth patient
     plt.tight_layout()
+    plt.show()
+
+
+def plot_confusion_matrix_custom(
+    y_true,
+    y_pred,
+    class_names=None,
+    normalize=False,
+    weighted=False,
+    sample_weights=None,
+    path=None,
+    cmap="Blues",
+):
+
+    if weighted and sample_weights is not None:
+        cm = confusion_matrix(y_true, y_pred, sample_weight=sample_weights)
+    else:
+        cm = confusion_matrix(y_true, y_pred)
+
+    if normalize:
+        cm = cm.astype(float) / cm.sum(axis=1, keepdims=True)
+        cm_display = cm * 100
+    else:
+        cm_display = cm
+
+    fig, ax = plt.subplots(figsize=(7, 6))
+    im = ax.imshow(cm_display, cmap=cmap)
+
+    plt.colorbar(im)
+
+    if class_names is None:
+        class_names = np.unique(y_true)
+
+    ax.set_xticks(np.arange(len(class_names)))
+    ax.set_yticks(np.arange(len(class_names)))
+    ax.set_xticklabels(class_names)
+    ax.set_yticklabels(class_names)
+
+    plt.xlabel("Predicted")
+    plt.ylabel("True")
+
+    thresh = cm_display.max() / 2
+
+    for i in range(cm.shape[0]):
+        for j in range(cm.shape[1]):
+            if normalize:
+                text = f"{cm_display[i,j]:.1f}%"
+            else:
+                text = f"{int(cm_display[i,j])}"
+
+            ax.text(
+                j,
+                i,
+                text,
+                ha="center",
+                va="center",
+                color="white" if cm_display[i, j] > thresh else "black",
+            )
+
+    plt.tight_layout()
+    if path != None:
+        plt.savefig(path)
     plt.show()
