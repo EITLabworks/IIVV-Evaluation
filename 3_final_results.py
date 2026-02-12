@@ -13,7 +13,9 @@ import pandas as pd
 
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import GroupKFold
+
+# from sklearn.model_selection import GroupKFold
+from sklearn.model_selection import StratifiedGroupKFold as GroupKFold
 from sklearn.svm import SVC
 
 from toolbox import Masking
@@ -204,7 +206,7 @@ def main():
         "--task", required=True, choices=["healthy_vs_cancer", "cancer_vs_lr_hr", "MC"]
     )
     ap.add_argument("--metric", required=True)
-    ap.add_argument("--model", required=True, choices=["all", "rf", "lr", "svm"])
+    ap.add_argument("--model", default="all", choices=["all", "rf", "lr", "svm"])
     ap.add_argument("--results-path", default="results")
     ap.add_argument("--outdir", default=None)
 

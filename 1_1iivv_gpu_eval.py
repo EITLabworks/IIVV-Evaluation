@@ -3,10 +3,38 @@ import argparse
 import json
 from pathlib import Path
 
-import cupy as cp
 import numpy as np
 import pandas as pd
-from cuml.svm import SVC  # GPU
+
+# -----------------------
+# GPU (cuML + CuPy) with CPU fallback (scikit-learn + NumPy)
+# -----------------------
+try:
+    import cupy as cp
+    from cuml.svm import SVC  # GPU
+
+    try:
+        _gpu_ok = cp.cuda.runtime.getDeviceCount() > 0
+    except Exception:
+        _gpu_ok = False
+
+    if not _gpu_ok:
+        raise RuntimeError("No CUDA device found")
+except Exception:
+    from sklearn.svm import SVC  # CPU fallback
+
+    class _CPShim:
+        @staticmethod
+        def asarray(x):
+            return np.asarray(x)
+
+        @staticmethod
+        def asnumpy(x):
+            return np.asarray(x)
+
+    cp = _CPShim()
+    print("CuPy/cuML GPU not available -> falling back to CPU (scikit-learn).")
+
 from sklearn.metrics import (
     accuracy_score,
     auc,
@@ -125,12 +153,15 @@ def run_single_fold(
     m = SVC(probability=need_proba, max_iter=max_iter)
     m.fit(X_train, y_train)
 
+    def _get(a):
+        return a.get() if hasattr(a, "get") else a
+
     if metric == "auc":
-        probs = m.predict_proba(X_test).get()
+        probs = _get(m.predict_proba(X_test))
         y_test_cpu = cp.asnumpy(y_test)
         score = compute_auc(y_test_cpu, probs, classes)
     else:
-        y_pred_cpu = m.predict(X_test).get().astype(np.int64)
+        y_pred_cpu = _get(m.predict(X_test)).astype(np.int64)
         y_test_cpu = cp.asnumpy(y_test).astype(np.int64)
 
         if metric == "acc":
