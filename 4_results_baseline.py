@@ -6,15 +6,20 @@ Results-baseline.py
 
 Baseline evaluation (NO masking, NO frequency selection) for default SVM / RF / LR.
 - Tries GPU (RAPIDS cuML) first; if it fails for a model/fold, falls back to CPU (scikit-learn).
-- Computes fold-wise metrics: AUC, F1, Accuracy
+- Computes fold-wise metrics:
+    * accuracy, f1, auc
+    * recall (sensitivity), specificity, precision
+    * (binary only) npv
+  Notes:
+    - For multiclass tasks: recall/precision are macro-averaged; specificity/npv are "None".
 - Saves into results/:
     * BASELINE_folds_<task>.csv          (fold-wise rows for all models)
-    * BASELINE_summary_<task>.json       (task + per-model mean/std for auc/f1/accuracy)
+    * BASELINE_summary_<task>.json       (task + per-model mean/std for all metrics)
 - Also creates plots like 3_final_results.py (ROC + CM + CM_norm) but tagged as baseline.
 
 Usage:
-  python3 Results-baseline.py --task healthy_vs_cancer --model all
-  python3 Results-baseline.py --task MC --model svm --no-gpu
+  python3 4_results_baseline.py --task healthy_vs_cancer --model all
+  python3 4_results_baseline.py --task MC --model svm --no-gpu
 """
 
 import argparse
@@ -25,9 +30,15 @@ from typing import Any, Dict, List, Tuple
 import numpy as np
 import pandas as pd
 
-# from sklearn.model_selection import GroupKFold
 from sklearn.model_selection import StratifiedGroupKFold as GroupKFold
-from sklearn.metrics import roc_auc_score, accuracy_score, f1_score
+from sklearn.metrics import (
+    roc_auc_score,
+    accuracy_score,
+    f1_score,
+    recall_score,
+    precision_score,
+    confusion_matrix,
+)
 
 # CPU models
 from sklearn.svm import SVC as skSVC
@@ -73,10 +84,16 @@ def class_names_for_task(class_task: str) -> List[str]:
 
 def compute_all_metrics(
     y_true: np.ndarray, y_pred: np.ndarray, y_score: np.ndarray
-) -> Tuple[float, float, float]:
+) -> Dict[str, float]:
     """
-    Returns: (accuracy, f1, auc)
-    y_score must be probability matrix shape (N, K) where K=n_classes.
+    Returns a dict with:
+      - accuracy, f1, auc
+      - recall (sensitivity), specificity, precision
+      - npv (binary only; else "None")
+
+    y_score must be:
+      - binary: (N,2) probabilities
+      - multiclass: (N,K) probabilities
     """
     n_classes = int(np.unique(y_true).size)
 
@@ -85,17 +102,44 @@ def compute_all_metrics(
     if n_classes <= 2:
         f1 = float(f1_score(y_true, y_pred))
         auc = float(roc_auc_score(y_true, y_score[:, 1]))
-    else:
-        f1 = float(f1_score(y_true, y_pred, average="macro"))
-        auc = float(roc_auc_score(y_true, y_score, multi_class="ovr", average="macro"))
 
-    return acc, f1, auc
+        recall = float(recall_score(y_true, y_pred))  # sensitivity
+        precision = float(precision_score(y_true, y_pred))
+
+        tn, fp, fn, tp = confusion_matrix(y_true, y_pred).ravel()
+        specificity = float(tn / (tn + fp)) if (tn + fp) > 0 else "None"
+        npv = float(tn / (tn + fn)) if (tn + fn) > 0 else "None"
+
+        return dict(
+            accuracy=acc,
+            f1=f1,
+            auc=auc,
+            recall=recall,
+            specificity=specificity,
+            precision=precision,
+            npv=npv,
+        )
+
+    # multiclass
+    f1 = float(f1_score(y_true, y_pred, average="macro"))
+    auc = float(roc_auc_score(y_true, y_score, multi_class="ovr", average="macro"))
+    recall = float(recall_score(y_true, y_pred, average="macro"))
+    precision = float(precision_score(y_true, y_pred, average="macro", zero_division=0))
+
+    return dict(
+        accuracy=acc,
+        f1=f1,
+        auc=auc,
+        recall=recall,
+        specificity="None",
+        precision=precision,
+        npv="None",
+    )
 
 
 def make_cpu_model(name: str):
     name = name.lower()
     if name == "svm":
-        # default sklearn SVC (rbf) + proba for ROC
         return skSVC(probability=True, random_state=0)
     if name == "rf":
         return skRF(random_state=0)
@@ -105,11 +149,6 @@ def make_cpu_model(name: str):
 
 
 def make_gpu_model(name: str):
-    """
-    Default-ish cuML models.
-    NOTE: cuML SVC with probability=True can throw KernelCache errors on some setups;
-          we catch and CPU-fallback fold-wise.
-    """
     name = name.lower()
     if name == "svm":
         return cuSVC(probability=True, max_iter=5000)
@@ -130,7 +169,6 @@ def fit_predict_proba_with_fallback(
     """
     Returns (probs_cpu (N,K), preds_cpu (N,), backend_used in {"cuml","cpu"})
     """
-    # --- Try GPU first ---
     if prefer_gpu and GPU_AVAILABLE:
         try:
             Xtr_g = cp.asarray(X_train.astype(np.float32, copy=False))
@@ -140,28 +178,24 @@ def fit_predict_proba_with_fallback(
             m = make_gpu_model(model_name)
             m.fit(Xtr_g, ytr_g)
 
-            probs = m.predict_proba(Xte_g).get()  # -> numpy
+            probs = m.predict_proba(Xte_g).get()
             preds = np.argmax(probs, axis=1).astype(int)
             return probs, preds, "cuml"
-
         except Exception as e:
             print(
                 f"[WARN] GPU failed for {model_name.upper()} -> CPU fallback. Reason: {e}"
             )
 
-    # --- CPU fallback ---
     m = make_cpu_model(model_name)
     m.fit(X_train, y_train)
-    probs = m.predict_proba(X_test)  # numpy
+    probs = m.predict_proba(X_test)
     preds = np.argmax(probs, axis=1).astype(int)
     return probs, preds, "cpu"
 
 
 def backend_summary(backends: List[str]) -> str:
     u = sorted(set(backends))
-    if len(u) == 1:
-        return u[0]
-    return "mixed"
+    return u[0] if len(u) == 1 else "mixed"
 
 
 # -----------------------------
@@ -177,20 +211,16 @@ def run_baseline_model(
 ) -> Tuple[Dict[str, Any], pd.DataFrame]:
     print(f"\n=== BASELINE {model_name.upper()} | task={class_task} ===")
 
-    # load data (same as your other scripts)
     X, Y_labels, _, Case, _, _ = Results_data_loading(
         class_task, data_augmentation=False
     )
 
-    # Baseline: flatten full tensor (no freq/mask selection)
     X_flat = X.reshape(X.shape[0], -1)
-
     cv = GroupKFold(n_splits=5)
 
     fold_rows: List[Dict[str, Any]] = []
     backends_used: List[str] = []
 
-    # For plots: collect predictions over all folds
     y_true_all: List[int] = []
     y_pred_all: List[int] = []
     y_score_all: List[np.ndarray] = []
@@ -208,7 +238,7 @@ def run_baseline_model(
         y_pred = preds.astype(int)
         y_score = probs
 
-        acc, f1, auc = compute_all_metrics(y_true, y_pred, y_score)
+        m = compute_all_metrics(y_true, y_pred, y_score)
 
         fold_rows.append(
             dict(
@@ -216,16 +246,17 @@ def run_baseline_model(
                 model=model_name,
                 backend=backend_used,
                 fold=fold_id,
-                accuracy=acc,
-                f1=f1,
-                auc=auc,
                 n_test=int(len(te)),
+                **m,
             )
         )
         backends_used.append(backend_used)
 
         print(
-            f"Fold {fold_id}: AUC={auc:.4f}  F1={f1:.4f}  ACC={acc:.4f}  backend={backend_used}"
+            f"Fold {fold_id}: "
+            f"AUC={m['auc']:.4f}  F1={m['f1']:.4f}  ACC={m['accuracy']:.4f}  "
+            f"REC={m['recall']:.4f}  SPEC={m['specificity']:.4f}  "
+            f"PREC={m['precision']:.4f}  backend={backend_used}"
         )
 
         y_true_all.extend(y_true.tolist())
@@ -239,16 +270,24 @@ def run_baseline_model(
         "task": class_task,
         "model": model_name,
         "backend": backend_summary(backends_used),
+        "n_folds": int(len(fold_df)),
         "accuracy_mean": float(fold_df["accuracy"].mean()),
         "accuracy_std": float(fold_df["accuracy"].std(ddof=0)),
         "f1_mean": float(fold_df["f1"].mean()),
         "f1_std": float(fold_df["f1"].std(ddof=0)),
         "auc_mean": float(fold_df["auc"].mean()),
         "auc_std": float(fold_df["auc"].std(ddof=0)),
-        "n_folds": int(len(fold_df)),
+        "recall_mean": float(fold_df["recall"].mean()),
+        "recall_std": float(fold_df["recall"].std(ddof=0)),
+        "specificity_mean": float(fold_df["specificity"].mean()),
+        "specificity_std": float(fold_df["specificity"].std(ddof=0)),
+        "precision_mean": float(fold_df["precision"].mean()),
+        "precision_std": float(fold_df["precision"].std(ddof=0)),
+        "npv_mean": float(fold_df["npv"].mean()),
+        "npv_std": float(fold_df["npv"].std(ddof=0)),
     }
 
-    # ---- Save plots (like 3_final_results.py, but baseline-tagged) ----
+    # ---- Save plots (baseline-tagged) ----
     ensure_dir(plots_dir)
     tag = f"baseline_{class_task}_{model_name}"
 
@@ -256,7 +295,6 @@ def run_baseline_model(
     y_pred_all_np = np.asarray(y_pred_all, dtype=int)
     y_score_all_np = np.asarray(y_score_all, dtype=float)
 
-    # ROC
     ResultsROCAUC(
         class_task,
         y_true_all_np,
@@ -265,7 +303,6 @@ def run_baseline_model(
         s_name=str(plots_dir / f"ROC_{tag}.pdf"),
     )
 
-    # Confusion matrices
     class_names = class_names_for_task(class_task)
     plot_confusion_matrix_custom(
         y_true_all_np,
@@ -317,7 +354,6 @@ def main():
 
     models = ["svm", "rf", "lr"] if args.model == "all" else [args.model]
 
-    # Plots dir (baseline explicit)
     plots_dir = results_path / f"plots_{class_task}_baseline"
     ensure_dir(plots_dir)
 
@@ -335,16 +371,12 @@ def main():
         all_summaries.append(summary)
         all_fold_dfs.append(fold_df)
 
-    # -----------------------------
     # Save CSV (fold-wise)
-    # -----------------------------
     folds_all = pd.concat(all_fold_dfs, ignore_index=True)
     folds_csv = results_path / f"BASELINE_folds_{class_task}.csv"
     folds_all.to_csv(folds_csv, index=False)
 
-    # -----------------------------
-    # Save JSON (task + scores of f1/auc/accuracy)
-    # -----------------------------
+    # Save JSON (summary)
     summary_json_path = results_path / f"BASELINE_summary_{class_task}.json"
     payload = {
         "task": class_task,
@@ -360,13 +392,21 @@ def main():
                 "f1_std": s["f1_std"],
                 "auc_mean": s["auc_mean"],
                 "auc_std": s["auc_std"],
+                "recall_mean": s["recall_mean"],
+                "recall_std": s["recall_std"],
+                "specificity_mean": s["specificity_mean"],
+                "specificity_std": s["specificity_std"],
+                "precision_mean": s["precision_mean"],
+                "precision_std": s["precision_std"],
+                "npv_mean": s["npv_mean"],
+                "npv_std": s["npv_std"],
             }
             for s in all_summaries
         },
     }
     summary_json_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
 
-    # Print a nice terminal summary
+    # Terminal summary
     summary_df = pd.DataFrame(all_summaries).sort_values("auc_mean", ascending=False)
     print("\n=== BASELINE SUMMARY (mean over folds) ===")
     print(
@@ -381,6 +421,14 @@ def main():
                 "f1_std",
                 "accuracy_mean",
                 "accuracy_std",
+                "recall_mean",
+                "recall_std",
+                "specificity_mean",
+                "specificity_std",
+                "precision_mean",
+                "precision_std",
+                "npv_mean",
+                "npv_std",
             ]
         ].to_string(index=False)
     )

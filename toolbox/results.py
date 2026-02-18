@@ -28,7 +28,7 @@ def Results_data_loading(class_task, data_augmentation=True):
         Avg_Cutpats,
         LesionAssessment,
         labels_healthy_vs_cancer,
-        labels_hr_vs_lr,
+        labels_cancer_vs_lr_hr,
         labels_MC,
     ) = load_data(path="data", Cutpats_threshold=60, norm="freq")
     if class_task == "healthy_vs_cancer":
@@ -50,21 +50,23 @@ def Results_data_loading(class_task, data_augmentation=True):
         }
         visualize_Category_hist(labels)
 
-    elif class_task == "hr_vs_lr":
-        print("\nHigh risk vs. Low risk\n")
+    elif class_task == "cancer_vs_lr_hr":
+        print("\nCancer vs. High risk vs. Low risk\n")
         select_idx = find_all_indices(
-            labels_hr_vs_lr, ["High risk", "Low risk"], split=False
+            labels_cancer_vs_lr_hr, ["Cancer", "High risk", "Low risk"], split=False
         )
-        labels = labels_hr_vs_lr[select_idx]
+        labels = labels_cancer_vs_lr_hr[select_idx]
         Y, inverse_mapping = hot_coding(labels)
         Y_labels = np.argmax(Y, axis=1)
         cp = {
-            0: "#FF6361",  # "High risk
-            1: "#58508D",  # "Low risk
+            0: "#FFA600",  # "Cancer
+            1: "#FF6361",  # "High risk
+            2: "#58508D",  # "Low risk
         }
         cp_l = {
-            0: "High risk",  # High risk
-            1: "Low risk",  # Low risk
+            0: "Cancer",  # Cancer
+            1: "High risk",  # High risk
+            2: "Low risk",  # Low risk
         }
         visualize_Category_hist(labels)
 
@@ -125,15 +127,15 @@ def ResultsROCAUC(
     # Color + label maps
     label_roc_plot = {
         "healthy_vs_cancer": "Healthy vs. cancer",
-        "hr_vs_lr": "High risk vs. low risk",
+        "cancer_vs_lr_hr": "Cancer vs. high risk vs. low risk",
     }
 
     if class_task == "healthy_vs_cancer":
         cp = {1: "#003F5C", 0: "#FFA600"}
         cp_l = {1: "healthy", 0: "cancer"}
-    elif class_task == "hr_vs_lr":
-        cp = {0: "#FF6361", 1: "#58508D"}
-        cp_l = {0: "High risk", 1: "Low risk"}
+    elif class_task == "cancer_vs_lr_hr":
+        cp = {0: "#FFA600", 1: "#FF6361", 2: "#003F5C"}
+        cp_l = {0: "Cancer", 1: "High risk", 2: "Low risk"}
     elif class_task == "MC":
         cp = {3: "#58508D", 0: "#FFA600", 1: "#003F5C", 2: "#FF6361"}
         cp_l = {

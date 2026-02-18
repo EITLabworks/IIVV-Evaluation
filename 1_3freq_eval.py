@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """
-Frequency selection evaluation (GPU) with the same CLI/structure/output style
-as 1_1iivv_gpu_eval.py, but iterating over top-N frequencies.
+Frequency selection evaluation (GPU) with the same CLI/structure/output .
 
 Outputs (per task + metric):
 - results/FREQ-analysis_<task>_<metric>_gpu.csv              (raw fold stats, incl. selected freqs)
@@ -23,7 +22,13 @@ import numpy as np
 import pandas as pd
 from cuml.decomposition import PCA
 from cuml.svm import SVC
-from sklearn.metrics import accuracy_score, f1_score, roc_auc_score
+from sklearn.metrics import (
+    accuracy_score,
+    f1_score,
+    roc_auc_score,
+    recall_score,
+    confusion_matrix,
+)
 
 from toolbox.results import Results_data_loading
 
@@ -147,10 +152,10 @@ def eval_one_fold(
         m.fit(X_train_flat, y_train_gpu)
 
         if need_proba:
-            y_score = m.predict_proba(X_test_flat).get()  # CPU
+            y_score = m.predict_proba(X_test_flat).get()
             score = compute_metric_from_proba(metric, y_test, y_score, n_classes)
+            y_pred = np.argmax(y_score, axis=1)
         else:
-            # predict gives labels; we compute accuracy/f1 directly
             y_pred = m.predict(X_test_flat).get().astype(np.int64)
             if metric == "acc":
                 score = float(accuracy_score(y_test, y_pred))
@@ -161,6 +166,18 @@ def eval_one_fold(
                     score = float(f1_score(y_test, y_pred, average="macro"))
             else:
                 raise ValueError(f"Unknown metric: {metric}")
+
+        # --- NEW: always compute recall / specificity ---
+        if n_classes == 2:
+            recall = float(recall_score(y_test, y_pred))
+        else:
+            recall = float(recall_score(y_test, y_pred, average="macro"))
+
+        if n_classes == 2:
+            tn, fp, fn, tp = confusion_matrix(y_test, y_pred).ravel()
+            spec = float(tn / (tn + fp))
+        else:
+            spec = float("nan")
 
         scores_by_n[n - 1] = score
 
@@ -175,6 +192,8 @@ def eval_one_fold(
         "avg_fold_score": float(np.nanmean(scores_by_n)),
         # store per-N scores compactly
         "scores_by_n": scores_by_n.tolist(),
+        "recall": recall,
+        "specificity": spec,
     }
 
 
@@ -189,13 +208,13 @@ def main():
     parser.add_argument("--max_iter", type=int, default=5000)
     parser.add_argument("--max_freqs", type=int, default=31)
     parser.add_argument("--results_dir", type=str, default="results")
-    parser.add_argument("--logs_dir", type=str, default="logs")
+    # parser.add_argument("--logs_dir", type=str, default="logs")
     args = parser.parse_args()
 
     results_dir = Path(args.results_dir)
-    logs_dir = Path(args.logs_dir)
+    # logs_dir = Path(args.logs_dir)
     ensure_dir(results_dir)
-    ensure_dir(logs_dir)
+    # ensure_dir(logs_dir)
 
     class_task = args.task
     metric = args.metric
@@ -251,8 +270,11 @@ def main():
                     "Fold": r["Fold"],
                     "N_freqs": n,
                     "score": float(scores[n - 1]),
+                    "recall": float(r["recall"]),
+                    "specificity": float(r["specificity"]),
                 }
             )
+
     df_long = pd.DataFrame(rows)
 
     df_rank = (
@@ -260,6 +282,10 @@ def main():
         .agg(
             mean_score=("score", "mean"),
             std_score=("score", "std"),
+            mean_recall=("recall", "mean"),
+            std_recall=("recall", "std"),
+            mean_specificity=("specificity", "mean"),
+            std_specificity=("specificity", "std"),
             n_runs=("score", "count"),
         )
         .sort_values(["mean_score", "std_score"], ascending=[False, True])

@@ -38,7 +38,12 @@ except Exception:
 from sklearn.metrics import (
     accuracy_score,
     auc,
+    balanced_accuracy_score,
+    confusion_matrix,
     f1_score,
+    matthews_corrcoef,
+    precision_score,
+    recall_score,
     roc_auc_score,
     roc_curve,
 )
@@ -70,20 +75,16 @@ MASK_SEL = {
 }
 
 
-def get_z_threshold_for_task(class_task: str) -> int | None:
-    """
-    Map task -> z-threshold.
-    """
-    if class_task == "healthy_vs_cancer":
-        print("Task 1 Z-threshold: 424")
-        return 424
-    if class_task == "cancer_vs_lr_hr":
-        print("Task 2 Z-threshold: 314")
-        return 314
-    if class_task == "MC":
-        print("Task 3 Z-threshold: 212")
-        return 212
-    return None
+DEFAULT_Z_THRESHOLDS = {
+    # fallbacks ! only for auc metric, and only if no tuned value is found in the provided z_thresholds_file
+    "healthy_vs_cancer": 424,
+    "cancer_vs_lr_hr": 314,
+    "MC": 212,
+}
+
+
+def ensure_dir(p: Path):
+    p.mkdir(parents=True, exist_ok=True)
 
 
 def shuffled_group_kfold(groups: np.ndarray, n_splits: int, seed: int):
@@ -112,18 +113,140 @@ def compute_auc(y_true: np.ndarray, probs: np.ndarray, classes: np.ndarray) -> f
     return float(auc(fpr, tpr))
 
 
-def compute_accuracy(y_true: np.ndarray, y_pred: np.ndarray) -> float:
-    return float(accuracy_score(y_true, y_pred))
+def compute_primary_metric(
+    metric: str, y_true: np.ndarray, y_pred: np.ndarray, probs, classes: np.ndarray
+) -> float:
+    if metric == "auc":
+        return compute_auc(y_true, probs, classes)
+    if metric == "acc":
+        return float(accuracy_score(y_true, y_pred))
+    if metric == "f1":
+        if len(classes) == 2:
+            mapping = {c: i for i, c in enumerate(classes)}
+            y_true_idx = np.vectorize(mapping.get)(y_true)
+            return float(f1_score(y_true_idx, y_pred, average="binary"))
+        return float(f1_score(y_true, y_pred, average="macro"))
+    raise ValueError(f"Unknown metric: {metric}")
 
 
-def compute_f1(y_true: np.ndarray, y_pred: np.ndarray, classes: np.ndarray) -> float:
+def compute_extra_metrics(
+    y_true: np.ndarray, y_pred: np.ndarray, classes: np.ndarray
+) -> dict:
+    """
+    Extra metrics ONLY for logging/saving (not selectable as --metric).
+    Binary: recall, sensitivity_sn, specificity_sp, precision, npv, balanced_acc, mcc
+    Multi: recall_macro, precision_macro, f1_macro, specificity_sp_macro, balanced_acc, mcc
+    """
+    out: dict[str, float] = {}
     n_classes = len(classes)
+
     if n_classes == 2:
-        # Ensure 0/1 encoding for binary f1
         mapping = {c: i for i, c in enumerate(classes)}
-        y_true_idx = np.vectorize(mapping.get)(y_true)
-        return float(f1_score(y_true_idx, y_pred, average="binary"))
-    return float(f1_score(y_true, y_pred, average="macro"))
+        yt = np.vectorize(mapping.get)(y_true).astype(int)
+        yp = y_pred.astype(int)
+
+        cm = confusion_matrix(yt, yp, labels=[0, 1])
+        tn, fp, fn, tp = cm.ravel()
+
+        sn = tp / (tp + fn) if (tp + fn) > 0 else np.nan
+        sp = tn / (tn + fp) if (tn + fp) > 0 else np.nan
+        prec = tp / (tp + fp) if (tp + fp) > 0 else np.nan
+        npv = tn / (tn + fn) if (tn + fn) > 0 else np.nan
+
+        out["recall"] = float(recall_score(yt, yp, average="binary", zero_division=0))
+        out["sensitivity_sn"] = float(sn) if np.isfinite(sn) else np.nan
+        out["specificity_sp"] = float(sp) if np.isfinite(sp) else np.nan
+        out["precision"] = float(
+            precision_score(yt, yp, average="binary", zero_division=0)
+        )
+        out["npv"] = float(npv) if np.isfinite(npv) else np.nan
+        out["balanced_acc"] = float(balanced_accuracy_score(yt, yp))
+        out["mcc"] = float(matthews_corrcoef(yt, yp))
+        return out
+
+    yt = y_true.astype(int)
+    yp = y_pred.astype(int)
+
+    out["recall_macro"] = float(recall_score(yt, yp, average="macro", zero_division=0))
+    out["precision_macro"] = float(
+        precision_score(yt, yp, average="macro", zero_division=0)
+    )
+    out["f1_macro"] = float(f1_score(yt, yp, average="macro", zero_division=0))
+    out["balanced_acc"] = float(balanced_accuracy_score(yt, yp))
+    out["mcc"] = float(matthews_corrcoef(yt, yp))
+
+    cms = confusion_matrix(yt, yp, labels=np.unique(yt))
+    specs = []
+    for i in range(cms.shape[0]):
+        tp = cms[i, i]
+        fn = cms[i, :].sum() - tp
+        fp = cms[:, i].sum() - tp
+        tn = cms.sum() - (tp + fn + fp)
+        spec = tn / (tn + fp) if (tn + fp) > 0 else np.nan
+        specs.append(spec)
+    out["specificity_sp_macro"] = float(np.nanmean(specs)) if len(specs) else np.nan
+    return out
+
+
+def load_z_thresholds_map(z_thresholds_file: Path) -> dict:
+    if not z_thresholds_file.exists():
+        print("No z-thresholds file found, proceeding with defaults.")
+        return {}
+    try:
+        return json.loads(z_thresholds_file.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+
+
+def get_z_threshold_for_task_and_metric(
+    class_task: str,
+    metric: str,
+    z_map: dict,
+) -> int:
+    """
+    Prefer tuned value from z_map[task][metric], else fallback to DEFAULT_Z_THRESHOLDS[task].
+    """
+    try:
+        v = z_map.get(class_task, {}).get(metric, None)
+        if v is not None:
+            return int(v)
+    except Exception:
+        pass
+    return int(DEFAULT_Z_THRESHOLDS.get(class_task, 0))
+
+
+def apply_mask_selection(
+    *,
+    mask_name: str,
+    class_task: str,
+    metric: str,
+    X: np.ndarray,
+    mask: Masking,
+    avg_Z_fp: np.ndarray,
+    z_map: dict,
+) -> tuple[np.ndarray, int | None]:
+    """
+    Returns (flattened_X_tmp, used_z_threshold or None)
+    """
+    if mask_name == "All":
+        return X.reshape(X.shape[0], -1), None
+
+    if mask_name == "Z-threshold":
+        z_thresh = get_z_threshold_for_task_and_metric(class_task, metric, z_map)
+        if z_thresh <= 0:
+            raise ValueError(
+                f"No z-threshold configured for task='{class_task}', metric='{metric}'"
+            )
+
+        sel = avg_Z_fp[0, :] <= z_thresh
+        X_tmp = X[:, :, sel]
+        return X_tmp.reshape(X_tmp.shape[0], -1), int(z_thresh)
+
+    # IIVV-based masking
+    mask_key = MASK_SEL[mask_name]
+    mask.IIVV_mask(mask_key, plot=False)
+    X_tmp = X[:, :, mask.mask]
+    return X_tmp.reshape(X_tmp.shape[0], -1), None
 
 
 def run_single_fold(
@@ -138,12 +261,8 @@ def run_single_fold(
     classes: np.ndarray,
     max_iter: int,
     metric: str,
+    used_z_threshold: int | None,
 ):
-    """
-    Train one fold on GPU and compute selected metric.
-    Avoids probability=True unless metric == "auc".
-    Avoids unnecessary GPU->CPU transfers.
-    """
     X_train = cp.asarray(X_tmp[train_idx])
     X_test = cp.asarray(X_tmp[test_idx])
     y_train = cp.asarray(y_labels[train_idx].astype(np.int32))
@@ -156,69 +275,36 @@ def run_single_fold(
     def _get(a):
         return a.get() if hasattr(a, "get") else a
 
-    if metric == "auc":
+    y_pred_cpu = _get(m.predict(X_test)).astype(np.int64)
+    y_test_cpu = cp.asnumpy(y_test).astype(np.int64)
+
+    probs = None
+    if need_proba:
         probs = _get(m.predict_proba(X_test))
-        y_test_cpu = cp.asnumpy(y_test)
-        score = compute_auc(y_test_cpu, probs, classes)
-    else:
-        y_pred_cpu = _get(m.predict(X_test)).astype(np.int64)
-        y_test_cpu = cp.asnumpy(y_test).astype(np.int64)
 
-        if metric == "acc":
-            score = compute_accuracy(y_test_cpu, y_pred_cpu)
-        elif metric == "f1":
-            score = compute_f1(y_test_cpu, y_pred_cpu, classes)
-        else:
-            raise ValueError(f"Unknown metric: {metric}")
+    primary = compute_primary_metric(metric, y_test_cpu, y_pred_cpu, probs, classes)
+    extras = compute_extra_metrics(y_test_cpu, y_pred_cpu, classes)
 
-    return {
+    row = {
         "Task": class_task,
-        "Fold": fold_id,
+        "Fold": int(fold_id),
         "IIVV": mask_name,
-        "rs": rs,
+        "rs": int(rs),
         "metric": metric,
-        "score": float(score),
+        "score": float(primary),
         "n_params": int(X_tmp.shape[1]),
         "need_proba": bool(need_proba),
+        "z_threshold_used": (
+            "None" if used_z_threshold is None else int(used_z_threshold)
+        ),
     }
+    # store extras (output only)
+    for k, v in extras.items():
+        row[k] = (
+            None if (v is None or (isinstance(v, float) and np.isnan(v))) else float(v)
+        )
 
-
-def ensure_dir(p: Path):
-    p.mkdir(parents=True, exist_ok=True)
-
-
-def apply_mask_selection(
-    *,
-    mask_name: str,
-    class_task: str,
-    X: np.ndarray,
-    mask: Masking,
-    avg_Z_fp: np.ndarray,
-) -> np.ndarray:
-    """
-    Returns flattened X_tmp after applying:
-      - "All" -> flatten all patterns
-      - "Z-threshold" -> select patterns with avg_Z_fp[0, :] <= task-specific z_thresh
-      - otherwise -> apply IIVV mask then flatten
-    """
-    if mask_name == "All":
-        return X.reshape(X.shape[0], -1)
-
-    if mask_name == "Z-threshold":
-        z_thresh = get_z_threshold_for_task(class_task)
-        if z_thresh is None:
-            raise ValueError(f"No z-threshold configured for task '{class_task}'")
-
-        # Select columns/patterns for this threshold
-        above_threshold = avg_Z_fp[0, :] <= z_thresh
-        X_tmp = X[:, :, above_threshold]
-        return X_tmp.reshape(X_tmp.shape[0], -1)
-    else:
-        # IIVV-based masking
-        mask_key = MASK_SEL[mask_name]
-        mask.IIVV_mask(mask_key, plot=False)
-        X_tmp = X[:, :, mask.mask]
-        return X_tmp.reshape(X_tmp.shape[0], -1)
+    return row
 
 
 def main():
@@ -233,19 +319,26 @@ def main():
         "--metric",
         default="auc",
         choices=["auc", "acc", "f1"],
-        help="Metric used for scoring and ranking masks",
+        help="Metric used for scoring and ranking masks (extras are still saved in output)",
     )
     parser.add_argument("--n_trials", type=int, default=5)
     parser.add_argument("--n_folds", type=int, default=5)
     parser.add_argument("--max_iter", type=int, default=5000)
     parser.add_argument("--results_dir", type=str, default="results")
-    parser.add_argument("--logs_dir", type=str, default="logs")
+
+    # NEW: load tuned z-thresholds
+    parser.add_argument(
+        "--z_thresholds_file",
+        type=str,
+        default="results/z_thresholds_best.json",
+        help="JSON file created by tuning script 1_1iivv_zthresh.py.",
+    )
     args = parser.parse_args()
 
     results_dir = Path(args.results_dir)
-    logs_dir = Path(args.logs_dir)
     ensure_dir(results_dir)
-    ensure_dir(logs_dir)
+
+    z_map = load_z_thresholds_map(Path(args.z_thresholds_file))
 
     # load masking patterns
     IIVV = np.loadtxt("source/IIVV_patterns.txt", dtype=int)
@@ -260,19 +353,21 @@ def main():
     print(f"\n=== Running task: {class_task} | metric: {metric} ===")
 
     # load data
-    X, y_labels, _, Case, _, Y = Results_data_loading(
+    X, y_labels, _, Case, _, _Y = Results_data_loading(
         class_task, data_augmentation=False
     )
     classes = np.unique(y_labels)
 
     stats = []
     for mask_name in MASK_SEL.keys():
-        X_tmp = apply_mask_selection(
+        X_tmp, used_z = apply_mask_selection(
             mask_name=mask_name,
             class_task=class_task,
+            metric=metric,
             X=X,
             mask=mask,
             avg_Z_fp=avg_Z_fp,
+            z_map=z_map,
         )
 
         for rs in range(args.n_trials):
@@ -292,12 +387,13 @@ def main():
                         classes=classes,
                         max_iter=args.max_iter,
                         metric=metric,
+                        used_z_threshold=used_z,
                     )
                 )
 
     df_stats = pd.DataFrame(stats)
 
-    # Save raw fold stats
+    # Save raw fold stats (includes extra metrics)
     out_csv = results_dir / f"IIVV-analysis_{class_task}_{metric}_gpu.csv"
     df_stats.to_csv(out_csv, index=False)
     print(f"Saved fold stats: {out_csv}")
@@ -310,6 +406,7 @@ def main():
             std_score=("score", "std"),
             n_runs=("score", "count"),
             n_params=("n_params", "first"),
+            z_threshold_used=("z_threshold_used", "first"),
         )
         .sort_values(["mean_score", "std_score"], ascending=[False, True])
         .reset_index(drop=True)
@@ -333,6 +430,7 @@ def main():
                 "metric": metric,
                 "order_good_to_bad": ordered_masks,
                 "ranking_table": df_rank.to_dict(orient="records"),
+                "z_thresholds_file": str(Path(args.z_thresholds_file)),
             },
             indent=2,
         )

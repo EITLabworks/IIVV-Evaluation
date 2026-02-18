@@ -11,6 +11,14 @@ from typing import Any, Dict, List, Optional, Tuple
 import numpy as np
 import pandas as pd
 
+from sklearn.metrics import (
+    accuracy_score,
+    f1_score,
+    roc_auc_score,
+    recall_score,
+    confusion_matrix,
+)
+
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 
@@ -164,6 +172,38 @@ def run_model(results_path, outdir, class_task, metric, model_name):
     y_pred = np.array(y_pred)
     y_score = np.array(y_score)
 
+    # ---- NEW: compute metrics + save CSV ----
+    n_classes = len(np.unique(y_true))
+
+    acc = float(accuracy_score(y_true, y_pred))
+
+    if n_classes == 2:
+        f1 = float(f1_score(y_true, y_pred))
+        auc = float(roc_auc_score(y_true, y_score[:, 1]))
+        recall = float(recall_score(y_true, y_pred))
+        tn, fp, fn, tp = confusion_matrix(y_true, y_pred).ravel()
+        spec = float(tn / (tn + fp))
+    else:
+        f1 = float(f1_score(y_true, y_pred, average="macro"))
+        auc = float(roc_auc_score(y_true, y_score, multi_class="ovr", average="macro"))
+        recall = float(recall_score(y_true, y_pred, average="macro"))
+        spec = float("nan")
+
+    metrics_df = pd.DataFrame(
+        [
+            {
+                "task": class_task,
+                "model": model_name,
+                "metric_opt": metric,
+                "accuracy": acc,
+                "f1": f1,
+                "auc": auc,
+                "recall": recall,
+                "specificity": spec,
+            }
+        ]
+    )
+
     Path(outdir).mkdir(parents=True, exist_ok=True)
 
     tag = f"{class_task}_{model_name}_{metric}"
@@ -191,6 +231,10 @@ def run_model(results_path, outdir, class_task, metric, model_name):
         normalize=True,
         path=str(Path(outdir) / f"CM_{tag}_norm.pdf"),
     )
+
+    metrics_path = Path(outdir) / f"METRICS_{tag}.csv"
+    metrics_df.to_csv(metrics_path, index=False)
+    print("Metrics CSV saved:", metrics_path)
 
     print("Plots saved.")
 

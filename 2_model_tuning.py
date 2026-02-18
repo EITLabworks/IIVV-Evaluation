@@ -24,6 +24,8 @@ import time
 from pathlib import Path
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Tuple
+from sklearn.metrics import recall_score, confusion_matrix
+
 
 import numpy as np
 import pandas as pd
@@ -176,20 +178,54 @@ def maybe_standardize_cpu(
     return X_train_s, X_val_s
 
 
+def _softmax_rows(z: np.ndarray) -> np.ndarray:
+    z = np.asarray(z)
+    z = z - np.max(z, axis=1, keepdims=True)  # stability
+    ez = np.exp(z)
+    return ez / np.sum(ez, axis=1, keepdims=True)
+
+
+def _pad_to_n_classes(scores: np.ndarray, model, n_classes: int) -> np.ndarray:
+    """
+    Map columns of `scores` (which correspond to model.classes_) into a full (N, n_classes) matrix.
+    Missing classes get 0s.
+    """
+    scores = np.asarray(scores)
+    if scores.ndim != 2:
+        raise ValueError(f"Expected 2D scores for multiclass, got shape={scores.shape}")
+
+    # If already correct, keep
+    if scores.shape[1] == n_classes:
+        return scores
+
+    if not hasattr(model, "classes_"):
+        raise ValueError(
+            f"Scores have {scores.shape[1]} cols but n_classes={n_classes}, and model has no classes_."
+        )
+
+    full = np.zeros((scores.shape[0], n_classes), dtype=float)
+    cls = np.asarray(model.classes_).astype(int)
+
+    if len(cls) != scores.shape[1]:
+        raise ValueError(
+            f"len(model.classes_)={len(cls)} but scores has {scores.shape[1]} columns."
+        )
+
+    # Put each trained-class column into its global slot
+    for j, c in enumerate(cls):
+        if 0 <= c < n_classes:
+            full[:, c] = scores[:, j]
+    return full
+
+
 def get_outputs_for_metric(model, X, metric: str, n_classes: int):
-    """
-    For f1/acc -> return hard predictions (shape: [N])
-    For auc:
-      - binary -> return scores/probabilities (shape: [N])
-      - multiclass -> return probability matrix (shape: [N, K]) if possible
-    """
     metric = metric.lower()
 
     if metric in {"f1", "acc"}:
         y_pred = model.predict(X)
         return to_cpu(y_pred).ravel()
 
-    # AUC branch
+    # AUC
     if n_classes <= 2:
         if hasattr(model, "decision_function"):
             s = model.decision_function(X)
@@ -197,34 +233,48 @@ def get_outputs_for_metric(model, X, metric: str, n_classes: int):
         if hasattr(model, "predict_proba"):
             p = to_cpu(model.predict_proba(X))
             return p[:, 1].ravel()
-        y_pred = to_cpu(model.predict(X)).ravel()
-        return y_pred
+        return to_cpu(model.predict(X)).ravel()
 
-    # multiclass AUC needs (N,K) probabilities/scores
+    # multiclass AUC -> need (N, n_classes)
     if hasattr(model, "predict_proba"):
-        return to_cpu(model.predict_proba(X))
+        p = to_cpu(model.predict_proba(X))
+        p = _pad_to_n_classes(p, model, n_classes)
+        return p
+
     if hasattr(model, "decision_function"):
-        return to_cpu(model.decision_function(X))
-    raise ValueError(
-        "Multiclass AUC requires predict_proba or decision_function matrix."
-    )
+        s = to_cpu(model.decision_function(X))
+        s = _pad_to_n_classes(s, model, n_classes)
+        # convert scores to row-summing pseudo-probabilities (sklearn requires this for multiclass roc_auc)
+        return _softmax_rows(s)
+
+    raise ValueError("Multiclass AUC requires predict_proba or decision_function.")
 
 
 def metric_fn(y_true: np.ndarray, y_out, metric: str, n_classes: int) -> float:
     metric = metric.lower()
+    y_true = np.asarray(y_true).astype(int)
+    uniq = np.unique(y_true)
 
     if metric == "acc":
         return float(accuracy_score(y_true, y_out))
 
     if metric == "f1":
-        y_pred = y_out.astype(int)
+        y_pred = np.asarray(y_out).astype(int)
         if n_classes <= 2:
-            return float(f1_score(y_true, y_pred))
-        return float(f1_score(y_true, y_pred, average="macro"))
+            return float(f1_score(y_true, y_pred, zero_division=0))
+        return float(f1_score(y_true, y_pred, average="macro", zero_division=0))
 
     if metric == "auc":
+        # AUC is undefined if only one class is present in this fold
         if n_classes <= 2:
+            if uniq.size < 2:
+                return float(np.nan)
             return float(roc_auc_score(y_true, y_out))
+
+        # Multiclass AUC requires all classes present in y_true for that fold
+        if uniq.size < n_classes:
+            return float(np.nan)
+
         return float(roc_auc_score(y_true, y_out, multi_class="ovr", average="macro"))
 
     raise ValueError(f"Unknown metric: {metric}")
@@ -536,7 +586,9 @@ def sample_params(model_name: str, rng: np.random.Generator) -> Dict[str, Any]:
     raise ValueError(f"Unknown model_name: {model_name}")
 
 
-def make_model(model_name: str, params: Dict[str, Any], backend: str, metric: str):
+def make_model(
+    model_name: str, params: Dict[str, Any], backend: str, metric: str, task: str
+):
     """
     IMPORTANT: probability=True only when needed.
     - For AUC:
@@ -569,7 +621,7 @@ def make_model(model_name: str, params: Dict[str, Any], backend: str, metric: st
     if model_name_l == "svm":
         p = filter_params_for_model(skSVC, params)
         # decision_function is enough for AUC on CPU; keep probability False for speed.
-        p.setdefault("probability", False)
+        p.setdefault("probability", True if task != "healthy_vs_cancer" else False)
         return skSVC(**p)
 
     if model_name_l == "rf":
@@ -604,6 +656,8 @@ class TrialResult:
     metric: str
     score_mean: float
     score_std: float
+    recall_mean: float
+    specificity_mean: float
     params_json: str
 
 
@@ -725,6 +779,9 @@ def run_tuning(
                 y_vec = y.astype(int, copy=False)
 
             for trial in range(1, n_trials + 1):
+
+                recall_scores = []
+                spec_scores = []
                 rng = np.random.default_rng(int(rng_master.integers(0, 1_000_000_000)))
                 params = sample_params(model_name, rng)
 
@@ -759,6 +816,7 @@ def run_tuning(
                             params=params,
                             backend=backend,
                             metric=metric,
+                            task=class_task,
                         )
                         model.fit(X_tr, y_tr)
 
@@ -767,14 +825,48 @@ def run_tuning(
                         )
                         y_true = to_cpu(y_va).astype(int)
 
+                        # --- NEW: derive predictions for recall/spec ---
+                        if metric == "auc" and n_classes > 2:
+                            y_pred_fold = np.argmax(y_out, axis=1)
+                        elif metric == "auc":
+                            y_pred_fold = (y_out >= 0.5).astype(int)
+                        else:
+                            y_pred_fold = y_out.astype(int)
+
+                        if n_classes == 2:
+                            # If a fold has no positives/negatives, recall can be undefined:
+                            # make it explicit and silence UndefinedMetricWarning.
+                            recall_fold = recall_score(
+                                y_true, y_pred_fold, zero_division=0
+                            )
+                            # Force a 2x2 confusion matrix even if a class is missing in this fold.
+                            cm = confusion_matrix(y_true, y_pred_fold, labels=[0, 1])
+                            tn, fp, fn, tp = cm.ravel()
+                            denom = tn + fp
+                            spec_fold = (tn / denom) if denom > 0 else np.nan
+                        else:
+                            # Macro recall across a fixed label set; also handles missing classes cleanly.
+                            recall_fold = recall_score(
+                                y_true,
+                                y_pred_fold,
+                                average="macro",
+                                labels=np.arange(n_classes),
+                                zero_division=0,
+                            )
+                            spec_fold = np.nan
+
+                        recall_scores.append(recall_fold)
+                        spec_scores.append(spec_fold)
                         fold_scores.append(
                             metric_fn(y_true, y_out, metric=metric, n_classes=n_classes)
                         )
 
-                    scores.append(float(np.mean(fold_scores)))
+                    scores.append(float(np.nanmean(fold_scores)))
 
-                score_mean = float(np.mean(scores))
-                score_std = float(np.std(scores))
+                score_mean = float(np.nanmean(scores))
+                score_std = float(np.nanstd(scores))
+                recall_mean = float(np.nanmean(recall_scores))
+                spec_mean = float(np.nanmean(spec_scores))
 
                 if score_mean > best_global:
                     best_global = score_mean
@@ -802,6 +894,8 @@ def run_tuning(
                         metric=metric,
                         score_mean=score_mean,
                         score_std=score_std,
+                        recall_mean=recall_mean,
+                        specificity_mean=spec_mean,
                         params_json=json.dumps(params, sort_keys=True),
                     )
                 )
