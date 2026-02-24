@@ -107,8 +107,8 @@ def compute_all_metrics(
         precision = float(precision_score(y_true, y_pred))
 
         tn, fp, fn, tp = confusion_matrix(y_true, y_pred).ravel()
-        specificity = float(tn / (tn + fp)) if (tn + fp) > 0 else "None"
-        npv = float(tn / (tn + fn)) if (tn + fn) > 0 else "None"
+        specificity = float(tn / (tn + fp)) if (tn + fp) > 0 else np.nan
+        npv = float(tn / (tn + fn)) if (tn + fn) > 0 else np.nan
 
         return dict(
             accuracy=acc,
@@ -131,9 +131,9 @@ def compute_all_metrics(
         f1=f1,
         auc=auc,
         recall=recall,
-        specificity="None",
+        specificity=np.nan,
         precision=precision,
-        npv="None",
+        npv=np.nan,
     )
 
 
@@ -303,6 +303,14 @@ def run_baseline_model(
         s_name=str(plots_dir / f"ROC_{tag}.pdf"),
     )
 
+    ResultsROCAUC(
+        class_task,
+        y_true_all_np,
+        y_score_all_np,
+        Y_labels,
+        s_name=str(plots_dir / f"ROC_{tag}.png"),
+    )
+
     class_names = class_names_for_task(class_task)
     plot_confusion_matrix_custom(
         y_true_all_np,
@@ -317,6 +325,21 @@ def run_baseline_model(
         class_names,
         normalize=True,
         path=str(plots_dir / f"CM_{tag}_norm.pdf"),
+    )
+
+    plot_confusion_matrix_custom(
+        y_true_all_np,
+        y_pred_all_np,
+        class_names,
+        normalize=False,
+        path=str(plots_dir / f"CM_{tag}.png"),
+    )
+    plot_confusion_matrix_custom(
+        y_true_all_np,
+        y_pred_all_np,
+        class_names,
+        normalize=True,
+        path=str(plots_dir / f"CM_{tag}_norm.png"),
     )
 
     return summary, fold_df

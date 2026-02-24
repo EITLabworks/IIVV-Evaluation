@@ -2,6 +2,11 @@ archive
 .ipynb_checkpoints/
 __pycache__
 results/*
+results/**
+!results/plots_*/
+!results/plots_*/**
+results/plots_*/**
+!results/plots_*/**/*.png
 !results/Optschedule_v3_sketch.png
 data/
 eng*.ipynb

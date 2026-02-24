@@ -232,6 +232,29 @@ def run_model(results_path, outdir, class_task, metric, model_name):
         path=str(Path(outdir) / f"CM_{tag}_norm.pdf"),
     )
 
+    ResultsROCAUC(
+        class_task,
+        y_true,
+        y_score,
+        Y_labels,
+        s_name=str(Path(outdir) / f"ROC_{tag}.png"),
+    )
+
+    plot_confusion_matrix_custom(
+        y_true,
+        y_pred,
+        class_names,
+        normalize=False,
+        path=str(Path(outdir) / f"CM_{tag}.png"),
+    )
+
+    plot_confusion_matrix_custom(
+        y_true,
+        y_pred,
+        class_names,
+        normalize=True,
+        path=str(Path(outdir) / f"CM_{tag}_norm.png"),
+    )
     metrics_path = Path(outdir) / f"METRICS_{tag}.csv"
     metrics_df.to_csv(metrics_path, index=False)
     print("Metrics CSV saved:", metrics_path)
