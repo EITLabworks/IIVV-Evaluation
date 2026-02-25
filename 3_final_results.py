@@ -3,11 +3,10 @@
 
 import argparse
 import json
-import os
 import re
-import time
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
+
 import numpy as np
 import pandas as pd
 
@@ -16,13 +15,12 @@ from sklearn.metrics import (
     f1_score,
     roc_auc_score,
     recall_score,
+    precision_score,
     confusion_matrix,
 )
 
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
-
-# from sklearn.model_selection import GroupKFold
 from sklearn.model_selection import StratifiedGroupKFold as GroupKFold
 from sklearn.svm import SVC
 
@@ -72,22 +70,15 @@ def load_freq_indices(
     return np.array(order[:n_freq], dtype=int) - 1  # convert to 0-based
 
 
-def load_best_trial(csv_path: Path) -> Dict:
+def load_best_trial(csv_path: Path) -> Dict[str, Any]:
     df = pd.read_csv(csv_path)
     best = df.loc[df["score_mean"].idxmax()]
-
     params = json.loads(best["params_json"])
-
-    return {
-        "fsel": best["fsel"],
-        "msel": best["msel"],
-        "params": params,
-    }
+    return {"fsel": best["fsel"], "msel": best["msel"], "params": params}
 
 
-def make_model(name: str, params: Dict):
+def make_model(name: str, params: Dict[str, Any]):
     name = name.lower()
-
     if name == "svm":
         return SVC(probability=True, random_state=0, **params)
     if name == "rf":
@@ -95,18 +86,130 @@ def make_model(name: str, params: Dict):
     if name == "lr":
         params.setdefault("max_iter", 1000)
         return LogisticRegression(random_state=0, **params)
-
     raise ValueError(name)
 
 
-def z_threshold_for_task(class_task: str) -> Optional[int]:
+def class_names_for_task(class_task: str) -> List[str]:
     if class_task == "healthy_vs_cancer":
-        return 424
+        return ["Healthy", "Cancer"]
     if class_task == "cancer_vs_lr_hr":
-        return 314
+        return ["Cancer", "Low-Risk", "High-Risk"]
     if class_task == "MC":
-        return 212
-    return None
+        return ["Cancer", "Healthy", "High-grade\ndysplasia", "Non-malignant"]
+    raise ValueError(f"Unknown task: {class_task}")
+
+
+def choose_pos_label_for_task(class_task: str, global_classes: np.ndarray) -> int:
+    """
+    Deterministic positive class choice for binary ROC/AUC.
+    If you want "Cancer" to be positive, set it explicitly here.
+    """
+    if len(global_classes) != 2:
+        raise ValueError("choose_pos_label_for_task called for non-binary task.")
+    return int(global_classes[-1])
+
+
+def align_proba_to_global_classes(
+    probs: np.ndarray,
+    model_classes: np.ndarray,
+    global_classes: np.ndarray,
+) -> np.ndarray:
+    """
+    Reorder probability columns so they match global_classes exactly.
+    Raises if anything is missing.
+    """
+    probs = np.asarray(probs)
+    model_classes = np.asarray(model_classes)
+    global_classes = np.asarray(global_classes)
+
+    if probs.ndim != 2:
+        raise ValueError(f"probs must be 2D (N,K), got shape {probs.shape}")
+
+    if probs.shape[1] != len(model_classes):
+        raise ValueError(
+            f"probs has {probs.shape[1]} columns but model_classes has {len(model_classes)} labels."
+        )
+
+    missing = [c for c in global_classes if c not in set(model_classes.tolist())]
+    if missing:
+        raise ValueError(
+            f"Missing classes in model output: {missing}. "
+            f"model_classes={model_classes.tolist()} global_classes={global_classes.tolist()}"
+        )
+
+    col_idx = [int(np.where(model_classes == c)[0][0]) for c in global_classes]
+    return probs[:, col_idx]
+
+
+def compute_metrics(
+    y_true: np.ndarray,
+    y_pred: np.ndarray,
+    y_score_aligned: np.ndarray,
+    global_classes: np.ndarray,
+    pos_label: Optional[int] = None,
+) -> Dict[str, float]:
+    """
+    Compute metrics safely. y_score_aligned columns MUST be ordered as global_classes.
+    """
+    global_classes = np.asarray(global_classes)
+    n_classes = int(len(global_classes))
+
+    acc = float(accuracy_score(y_true, y_pred))
+
+    if n_classes == 2:
+        if pos_label is None:
+            pos_label = int(global_classes[-1])
+
+        pos_idx = int(np.where(global_classes == pos_label)[0][0])
+        y_true_bin = (y_true == pos_label).astype(int)
+
+        f1 = float(f1_score(y_true, y_pred, pos_label=pos_label))
+        aucv = float(roc_auc_score(y_true_bin, y_score_aligned[:, pos_idx]))
+        recall = float(recall_score(y_true, y_pred, pos_label=pos_label))
+        precision = float(
+            precision_score(y_true, y_pred, pos_label=pos_label, zero_division=0)
+        )
+
+        neg_label = int([c for c in global_classes.tolist() if c != pos_label][0])
+        cm = confusion_matrix(y_true, y_pred, labels=[neg_label, pos_label])
+        tn, fp, fn, tp = cm.ravel()
+
+        spec = float(tn / (tn + fp)) if (tn + fp) > 0 else np.nan
+        npv = float(tn / (tn + fn)) if (tn + fn) > 0 else np.nan
+
+        return dict(
+            accuracy=acc,
+            f1=f1,
+            auc=aucv,
+            recall=recall,
+            specificity=spec,
+            precision=precision,
+            npv=npv,
+        )
+
+    # multiclass
+    f1 = float(f1_score(y_true, y_pred, average="macro"))
+    aucv = float(
+        roc_auc_score(
+            y_true,
+            y_score_aligned,
+            multi_class="ovr",
+            average="macro",
+            labels=global_classes,
+        )
+    )
+    recall = float(recall_score(y_true, y_pred, average="macro"))
+    precision = float(precision_score(y_true, y_pred, average="macro", zero_division=0))
+
+    return dict(
+        accuracy=acc,
+        f1=f1,
+        auc=aucv,
+        recall=recall,
+        specificity=np.nan,
+        precision=precision,
+        npv=np.nan,
+    )
 
 
 # ------------------------------------------------------------
@@ -114,15 +217,14 @@ def z_threshold_for_task(class_task: str) -> Optional[int]:
 # ------------------------------------------------------------
 
 
-def run_model(results_path, outdir, class_task, metric, model_name):
-
+def run_model(
+    results_path: str, outdir: str, class_task: str, metric: str, model_name: str
+) -> None:
     csv_path = Path(results_path) / f"GPU_tuning_{model_name}_{class_task}_{metric}.csv"
     best = load_best_trial(csv_path)
 
     n_freq = parse_topN_from_fsel(best["fsel"])
     freq_idx = load_freq_indices(results_path, class_task, metric, n_freq)
-
-    mask_idx = best["msel"]
 
     print(f"\n=== {model_name.upper()} ===")
     print("Top N freq:", n_freq)
@@ -134,19 +236,20 @@ def run_model(results_path, outdir, class_task, metric, model_name):
         class_task, data_augmentation=False
     )
 
-    if class_task == "healthy_vs_cancer":
-        class_names = ["Healthy", "Cancer"]
-    elif class_task == "cancer_vs_lr_hr":
-        class_names = ["Cancer", "Low-Risk", "High-Risk"]
-    elif class_task == "MC":
-        class_names = ["Cancer", "Healthy", "High-grade\ndysplasia", "Non-malignant"]
+    # fixed global class order (used everywhere)
+    global_classes = np.array(sorted(np.unique(Y_labels))).astype(int)
+    pos_label: Optional[int] = None
+    if len(global_classes) == 2:
+        pos_label = choose_pos_label_for_task(class_task, global_classes)
+
+    class_names = class_names_for_task(class_task)
 
     # masking
     IIVV = np.loadtxt("source/IIVV_patterns.txt", dtype=int)
     mask = Masking(IIVV, plot=False, prints=False)
     mask.IIVV_mask(MASK_SEL_ALL[best["msel"]], plot=False)
-    print(f"Selected mask: {MASK_SEL_ALL[best['msel']]} (index {mask_idx})")
-    print(f"Seleted freq indices (0-based): {freq_idx}")
+    print(f"Selected mask: {MASK_SEL_ALL[best['msel']]} (index {best['msel']})")
+    print(f"Selected freq indices (0-based): {freq_idx}")
 
     X_tmp = X[:, freq_idx, :]
     X_tmp = X_tmp[:, :, mask.mask]
@@ -157,37 +260,40 @@ def run_model(results_path, outdir, class_task, metric, model_name):
     # CV
     cv = GroupKFold(n_splits=5)
 
-    y_true, y_pred, y_score = [], [], []
+    y_true_all: List[int] = []
+    y_pred_all: List[int] = []
+    y_score_all: List[np.ndarray] = []
+    backends: List[str] = []  # keep for parity / debug
 
     for tr, te in cv.split(X_tmp, Y_labels, Case):
         clf.fit(X_tmp[tr], Y_labels[tr])
-        probs = clf.predict_proba(X_tmp[te])
-        preds = np.argmax(probs, axis=1)
 
-        y_true.extend(Y_labels[te])
-        y_pred.extend(preds)
-        y_score.extend(probs)
+        probs_raw = clf.predict_proba(X_tmp[te])
+        model_classes = np.asarray(clf.classes_).astype(int)
 
-    y_true = np.array(y_true)
-    y_pred = np.array(y_pred)
-    y_score = np.array(y_score)
+        # align proba to global class order
+        probs = align_proba_to_global_classes(probs_raw, model_classes, global_classes)
 
-    # ---- NEW: compute metrics + save CSV ----
-    n_classes = len(np.unique(y_true))
+        # predictions from aligned probs (NEVER argmax->label)
+        preds = global_classes[np.argmax(probs, axis=1)].astype(int)
 
-    acc = float(accuracy_score(y_true, y_pred))
+        y_true_all.extend(Y_labels[te].astype(int).tolist())
+        y_pred_all.extend(preds.tolist())
+        y_score_all.extend(list(probs))
+        backends.append("cpu")
 
-    if n_classes == 2:
-        f1 = float(f1_score(y_true, y_pred))
-        auc = float(roc_auc_score(y_true, y_score[:, 1]))
-        recall = float(recall_score(y_true, y_pred))
-        tn, fp, fn, tp = confusion_matrix(y_true, y_pred).ravel()
-        spec = float(tn / (tn + fp))
-    else:
-        f1 = float(f1_score(y_true, y_pred, average="macro"))
-        auc = float(roc_auc_score(y_true, y_score, multi_class="ovr", average="macro"))
-        recall = float(recall_score(y_true, y_pred, average="macro"))
-        spec = float("nan")
+    y_true = np.asarray(y_true_all, dtype=int)
+    y_pred = np.asarray(y_pred_all, dtype=int)
+    y_score = np.asarray(y_score_all, dtype=float)
+
+    # metrics
+    m = compute_metrics(
+        y_true=y_true,
+        y_pred=y_pred,
+        y_score_aligned=y_score,
+        global_classes=global_classes,
+        pos_label=pos_label,
+    )
 
     metrics_df = pd.DataFrame(
         [
@@ -195,41 +301,34 @@ def run_model(results_path, outdir, class_task, metric, model_name):
                 "task": class_task,
                 "model": model_name,
                 "metric_opt": metric,
-                "accuracy": acc,
-                "f1": f1,
-                "auc": auc,
-                "recall": recall,
-                "specificity": spec,
+                "accuracy": m["accuracy"],
+                "f1": m["f1"],
+                "auc": m["auc"],
+                "recall": m["recall"],
+                "specificity": m["specificity"],
+                "precision": m["precision"],
+                "npv": m["npv"],
+                "pos_label": (pos_label if pos_label is not None else ""),
+                "global_classes": ",".join(map(str, global_classes.tolist())),
             }
         ]
     )
 
-    Path(outdir).mkdir(parents=True, exist_ok=True)
+    outdir_p = Path(outdir)
+    outdir_p.mkdir(parents=True, exist_ok=True)
 
     tag = f"{class_task}_{model_name}_{metric}"
 
+    # ROC (requires new ResultsROCAUC signature: score_classes mandatory)
     ResultsROCAUC(
         class_task,
         y_true,
         y_score,
         Y_labels,
-        s_name=str(Path(outdir) / f"ROC_{tag}.pdf"),
-    )
-
-    plot_confusion_matrix_custom(
-        y_true,
-        y_pred,
-        class_names,
-        normalize=False,
-        path=str(Path(outdir) / f"CM_{tag}.pdf"),
-    )
-
-    plot_confusion_matrix_custom(
-        y_true,
-        y_pred,
-        class_names,
-        normalize=True,
-        path=str(Path(outdir) / f"CM_{tag}_norm.pdf"),
+        s_name=str(outdir_p / f"ROC_{tag}.pdf"),
+        score_classes=global_classes,
+        eval_classes=global_classes,
+        pos_label=pos_label,
     )
 
     ResultsROCAUC(
@@ -237,7 +336,26 @@ def run_model(results_path, outdir, class_task, metric, model_name):
         y_true,
         y_score,
         Y_labels,
-        s_name=str(Path(outdir) / f"ROC_{tag}.png"),
+        s_name=str(outdir_p / f"ROC_{tag}.png"),
+        score_classes=global_classes,
+        eval_classes=global_classes,
+        pos_label=pos_label,
+    )
+
+    # Confusion matrices
+    plot_confusion_matrix_custom(
+        y_true,
+        y_pred,
+        class_names,
+        normalize=False,
+        path=str(outdir_p / f"CM_{tag}.pdf"),
+    )
+    plot_confusion_matrix_custom(
+        y_true,
+        y_pred,
+        class_names,
+        normalize=True,
+        path=str(outdir_p / f"CM_{tag}_norm.pdf"),
     )
 
     plot_confusion_matrix_custom(
@@ -245,20 +363,19 @@ def run_model(results_path, outdir, class_task, metric, model_name):
         y_pred,
         class_names,
         normalize=False,
-        path=str(Path(outdir) / f"CM_{tag}.png"),
+        path=str(outdir_p / f"CM_{tag}.png"),
     )
-
     plot_confusion_matrix_custom(
         y_true,
         y_pred,
         class_names,
         normalize=True,
-        path=str(Path(outdir) / f"CM_{tag}_norm.png"),
+        path=str(outdir_p / f"CM_{tag}_norm.png"),
     )
-    metrics_path = Path(outdir) / f"METRICS_{tag}.csv"
+
+    metrics_path = outdir_p / f"METRICS_{tag}.csv"
     metrics_df.to_csv(metrics_path, index=False)
     print("Metrics CSV saved:", metrics_path)
-
     print("Plots saved.")
 
 
@@ -282,7 +399,6 @@ def main():
     outdir = args.outdir or f"{args.results_path}/plots_{class_task}_{args.metric}"
 
     models = ["rf", "lr", "svm"] if args.model == "all" else [args.model]
-
     for m in models:
         run_model(args.results_path, outdir, class_task, args.metric, m)
 

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Results-baseline.py
+4_results_baseline.py
 
 Baseline evaluation (NO masking, NO frequency selection) for default SVM / RF / LR.
 - Tries GPU (RAPIDS cuML) first; if it fails for a model/fold, falls back to CPU (scikit-learn).
@@ -11,11 +11,20 @@ Baseline evaluation (NO masking, NO frequency selection) for default SVM / RF / 
     * recall (sensitivity), specificity, precision
     * (binary only) npv
   Notes:
-    - For multiclass tasks: recall/precision are macro-averaged; specificity/npv are "None".
+    - For multiclass tasks: recall/precision are macro-averaged; specificity/npv are NaN.
 - Saves into results/:
     * BASELINE_folds_<task>.csv          (fold-wise rows for all models)
     * BASELINE_summary_<task>.json       (task + per-model mean/std for all metrics)
-- Also creates plots like 3_final_results.py (ROC + CM + CM_norm) but tagged as baseline.
+- Also creates plots (ROC + CM + CM_norm) but tagged as baseline.
+
+IMPORTANT (label safety):
+- This version NEVER assumes that prob-column j corresponds to class label j.
+- It always:
+    1) takes the model's "classes_" (or a safe fallback),
+    2) aligns probabilities to a global, fixed class order (global_classes),
+    3) derives predictions from the aligned probabilities,
+    4) computes AUC/ROC using the exact same alignment.
+So labels/prob-columns cannot silently get swapped.
 
 Usage:
   python3 4_results_baseline.py --task healthy_vs_cancer --model all
@@ -82,38 +91,98 @@ def class_names_for_task(class_task: str) -> List[str]:
     raise ValueError(f"Unknown task: {class_task}")
 
 
+def choose_pos_label_for_task(class_task: str, global_classes: np.ndarray) -> int:
+    """
+    Deterministic choice of positive class for binary ROC/AUC.
+    Change this if you want a different "positive" meaning.
+
+    Default: largest label (same rule as many ROC helpers).
+    """
+    if len(global_classes) != 2:
+        raise ValueError("choose_pos_label_for_task called for non-binary task.")
+    return int(global_classes[-1])
+
+
+def align_proba_to_global_classes(
+    probs: np.ndarray,
+    model_classes: np.ndarray,
+    global_classes: np.ndarray,
+) -> np.ndarray:
+    """
+    Reorder probability columns so that they match global_classes exactly.
+    Raises if any global class is missing in model_classes.
+    """
+    model_classes = np.asarray(model_classes)
+    global_classes = np.asarray(global_classes)
+
+    if probs.ndim != 2:
+        raise ValueError(f"probs must be 2D (N,K), got shape {probs.shape}")
+
+    if probs.shape[1] != len(model_classes):
+        raise ValueError(
+            f"probs has {probs.shape[1]} columns but model_classes has {len(model_classes)} labels."
+        )
+
+    missing = [c for c in global_classes if c not in set(model_classes.tolist())]
+    if missing:
+        raise ValueError(
+            f"Missing classes in model output: {missing}. "
+            f"model_classes={model_classes.tolist()} global_classes={global_classes.tolist()}"
+        )
+
+    col_idx = [int(np.where(model_classes == c)[0][0]) for c in global_classes]
+    return probs[:, col_idx]
+
+
 def compute_all_metrics(
-    y_true: np.ndarray, y_pred: np.ndarray, y_score: np.ndarray
+    y_true: np.ndarray,
+    y_pred: np.ndarray,
+    y_score_aligned: np.ndarray,
+    global_classes: np.ndarray,
+    pos_label: int | None = None,
 ) -> Dict[str, float]:
     """
     Returns a dict with:
       - accuracy, f1, auc
       - recall (sensitivity), specificity, precision
-      - npv (binary only; else "None")
+      - npv (binary only; else NaN)
 
-    y_score must be:
-      - binary: (N,2) probabilities
-      - multiclass: (N,K) probabilities
+    Requirements:
+      - y_score_aligned columns MUST be ordered as global_classes.
     """
-    n_classes = int(np.unique(y_true).size)
+    global_classes = np.asarray(global_classes)
+    n_classes = int(len(global_classes))
 
     acc = float(accuracy_score(y_true, y_pred))
 
-    if n_classes <= 2:
-        f1 = float(f1_score(y_true, y_pred))
-        auc = float(roc_auc_score(y_true, y_score[:, 1]))
+    if n_classes == 2:
+        if pos_label is None:
+            pos_label = int(global_classes[-1])
 
-        recall = float(recall_score(y_true, y_pred))  # sensitivity
-        precision = float(precision_score(y_true, y_pred))
+        # Find column for pos_label in aligned score matrix
+        pos_idx = int(np.where(global_classes == pos_label)[0][0])
+        y_true_bin = (y_true == pos_label).astype(int)
 
-        tn, fp, fn, tp = confusion_matrix(y_true, y_pred).ravel()
+        f1 = float(f1_score(y_true, y_pred, pos_label=pos_label))
+        aucv = float(roc_auc_score(y_true_bin, y_score_aligned[:, pos_idx]))
+
+        recall = float(recall_score(y_true, y_pred, pos_label=pos_label))  # sensitivity
+        precision = float(
+            precision_score(y_true, y_pred, pos_label=pos_label, zero_division=0)
+        )
+
+        # Confusion matrix in fixed label order: [neg, pos]
+        neg_label = int([c for c in global_classes.tolist() if c != pos_label][0])
+        cm = confusion_matrix(y_true, y_pred, labels=[neg_label, pos_label])
+        tn, fp, fn, tp = cm.ravel()
+
         specificity = float(tn / (tn + fp)) if (tn + fp) > 0 else np.nan
         npv = float(tn / (tn + fn)) if (tn + fn) > 0 else np.nan
 
         return dict(
             accuracy=acc,
             f1=f1,
-            auc=auc,
+            auc=aucv,
             recall=recall,
             specificity=specificity,
             precision=precision,
@@ -122,14 +191,22 @@ def compute_all_metrics(
 
     # multiclass
     f1 = float(f1_score(y_true, y_pred, average="macro"))
-    auc = float(roc_auc_score(y_true, y_score, multi_class="ovr", average="macro"))
+    aucv = float(
+        roc_auc_score(
+            y_true,
+            y_score_aligned,
+            multi_class="ovr",
+            average="macro",
+            labels=global_classes,
+        )
+    )
     recall = float(recall_score(y_true, y_pred, average="macro"))
     precision = float(precision_score(y_true, y_pred, average="macro", zero_division=0))
 
     return dict(
         accuracy=acc,
         f1=f1,
-        auc=auc,
+        auc=aucv,
         recall=recall,
         specificity=np.nan,
         precision=precision,
@@ -159,6 +236,16 @@ def make_gpu_model(name: str):
     raise ValueError(f"Unknown model: {name}")
 
 
+def _safe_get_classes_after_fit(model: Any, y_train: np.ndarray) -> np.ndarray:
+    """
+    Prefer model.classes_ if present; else fall back to sorted unique y_train.
+    """
+    cls = getattr(model, "classes_", None)
+    if cls is None:
+        return np.array(sorted(np.unique(y_train))).astype(int)
+    return np.asarray(cls).astype(int)
+
+
 def fit_predict_proba_with_fallback(
     model_name: str,
     X_train: np.ndarray,
@@ -167,7 +254,7 @@ def fit_predict_proba_with_fallback(
     prefer_gpu: bool,
 ) -> Tuple[np.ndarray, np.ndarray, str]:
     """
-    Returns (probs_cpu (N,K), preds_cpu (N,), backend_used in {"cuml","cpu"})
+    Returns (probs (N,K), model_classes (K,), backend_used in {"cuml","cpu"})
     """
     if prefer_gpu and GPU_AVAILABLE:
         try:
@@ -179,8 +266,8 @@ def fit_predict_proba_with_fallback(
             m.fit(Xtr_g, ytr_g)
 
             probs = m.predict_proba(Xte_g).get()
-            preds = np.argmax(probs, axis=1).astype(int)
-            return probs, preds, "cuml"
+            model_classes = _safe_get_classes_after_fit(m, y_train)
+            return probs, model_classes, "cuml"
         except Exception as e:
             print(
                 f"[WARN] GPU failed for {model_name.upper()} -> CPU fallback. Reason: {e}"
@@ -188,9 +275,10 @@ def fit_predict_proba_with_fallback(
 
     m = make_cpu_model(model_name)
     m.fit(X_train, y_train)
+
     probs = m.predict_proba(X_test)
-    preds = np.argmax(probs, axis=1).astype(int)
-    return probs, preds, "cpu"
+    model_classes = _safe_get_classes_after_fit(m, y_train)
+    return probs, model_classes, "cpu"
 
 
 def backend_summary(backends: List[str]) -> str:
@@ -215,6 +303,14 @@ def run_baseline_model(
         class_task, data_augmentation=False
     )
 
+    # Fixed, global class order (THIS is the only order used everywhere)
+    global_classes = np.array(sorted(np.unique(Y_labels))).astype(int)
+
+    # Positive label (binary only) — deterministic; change in choose_pos_label_for_task if needed
+    pos_label = None
+    if len(global_classes) == 2:
+        pos_label = choose_pos_label_for_task(class_task, global_classes)
+
     X_flat = X.reshape(X.shape[0], -1)
     cv = GroupKFold(n_splits=5)
 
@@ -226,7 +322,7 @@ def run_baseline_model(
     y_score_all: List[np.ndarray] = []
 
     for fold_id, (tr, te) in enumerate(cv.split(X_flat, Y_labels, Case), start=1):
-        probs, preds, backend_used = fit_predict_proba_with_fallback(
+        probs_raw, model_classes, backend_used = fit_predict_proba_with_fallback(
             model_name=model_name,
             X_train=X_flat[tr],
             y_train=Y_labels[tr],
@@ -234,11 +330,24 @@ def run_baseline_model(
             prefer_gpu=use_gpu,
         )
 
-        y_true = Y_labels[te].astype(int)
-        y_pred = preds.astype(int)
-        y_score = probs
+        # Align probability columns to global_classes (prevents label swapping)
+        probs_aligned = align_proba_to_global_classes(
+            probs_raw, model_classes, global_classes
+        )
 
-        m = compute_all_metrics(y_true, y_pred, y_score)
+        # Derive predictions from aligned probs (so labels match global_classes)
+        y_pred = global_classes[np.argmax(probs_aligned, axis=1)].astype(int)
+
+        y_true = Y_labels[te].astype(int)
+        y_score = probs_aligned
+
+        m = compute_all_metrics(
+            y_true=y_true,
+            y_pred=y_pred,
+            y_score_aligned=y_score,
+            global_classes=global_classes,
+            pos_label=pos_label,
+        )
 
         fold_rows.append(
             dict(
@@ -295,12 +404,17 @@ def run_baseline_model(
     y_pred_all_np = np.asarray(y_pred_all, dtype=int)
     y_score_all_np = np.asarray(y_score_all, dtype=float)
 
+    # NOTE: This assumes you replaced toolbox.results.ResultsROCAUC with the robust version
+    # that REQUIRES score_classes and aligns properly.
     ResultsROCAUC(
         class_task,
         y_true_all_np,
         y_score_all_np,
         Y_labels,
         s_name=str(plots_dir / f"ROC_{tag}.pdf"),
+        score_classes=global_classes,
+        eval_classes=global_classes,
+        pos_label=pos_label,
     )
 
     ResultsROCAUC(
@@ -309,6 +423,9 @@ def run_baseline_model(
         y_score_all_np,
         Y_labels,
         s_name=str(plots_dir / f"ROC_{tag}.png"),
+        score_classes=global_classes,
+        eval_classes=global_classes,
+        pos_label=pos_label,
     )
 
     class_names = class_names_for_task(class_task)

@@ -144,7 +144,7 @@ def main():
 
     # 3.
     def build_filename(task, model, metric):
-        return f"plots_{task}_{metric}/ROC_{task}_{model}_{metric}.npz"
+        return f"plots_{task}_{metric}/ROC_{task}_{model}_{metric}.pdf"
 
     status = {}
 
@@ -169,7 +169,7 @@ def main():
 
     # 4.
     def build_filename(task, model, metric):
-        return f"plots_{task}_baseline/ROC_baseline_{task}_{model}.npz"
+        return f"plots_{task}_baseline/ROC_baseline_{task}_{model}.pdf"
 
     status = {}
 

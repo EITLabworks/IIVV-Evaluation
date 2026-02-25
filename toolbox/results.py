@@ -114,20 +114,55 @@ def Results_data_loading(class_task, data_augmentation=True):
     return X, Y_labels, labels, Case, inverse_mapping, Y
 
 
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.metrics import roc_curve, auc
+from sklearn.preprocessing import label_binarize
+
+
 def ResultsROCAUC(
-    class_task, y_true, y_score, Y_labels, s_name=None, score_classes=None
+    class_task,
+    y_true,
+    y_score,
+    Y_labels=None,
+    s_name=None,
+    *,
+    score_classes,
+    eval_classes=None,
+    pos_label=None,
+    plot_macro=True,
 ):
     """
-    score_classes: array-like of shape (n_classes,)
+    Robust ROC/AUC plotting that NEVER silently swaps labels.
+
+    Parameters
+    ----------
+    y_true : array-like (N,)
+        True labels (any hashable / ints).
+    y_score : array-like (N, K) or (N,)
+        Probabilities/scores per class in the order given by score_classes.
+    score_classes : array-like (K,)
         The class labels corresponding to columns in y_score.
-        If you have a sklearn classifier, pass clf.classes_ here.
-        If None, we assume columns correspond to sorted unique labels from Y_labels.
+        This MUST be provided (e.g. clf.classes_).
+    eval_classes : array-like (K,), optional
+        The stable class order to evaluate/plot. If None, uses sorted unique labels from Y_labels if given,
+        else from y_true.
+    pos_label : label, optional
+        For binary ROC: explicitly define the positive class.
+        If None: uses the *largest* label in eval_classes.
+    plot_macro : bool
+        For multiclass: whether to plot macro-average ROC.
+
+    Raises
+    ------
+    ValueError if classes are missing/misaligned.
     """
 
-    # Color + label maps
+    # --- label/color maps (keep your existing mappings if you want) ---
     label_roc_plot = {
         "healthy_vs_cancer": "Healthy vs. cancer",
         "cancer_vs_lr_hr": "Cancer vs. high risk vs. low risk",
+        "MC": "Multiclass",
     }
 
     if class_task == "healthy_vs_cancer":
@@ -147,130 +182,149 @@ def ResultsROCAUC(
     else:
         raise ValueError(f"Unknown class_task={class_task}")
 
-    # Define the label set we want to evaluate (and plot) in a stable order
-    eval_classes = np.array(sorted(np.unique(Y_labels)))
+    y_true = np.asarray(y_true)
 
-    # Define the class order for the score columns
-    if score_classes is None:
-        score_classes = eval_classes
+    # Decide eval_classes (stable target order)
+    if eval_classes is None:
+        if Y_labels is not None:
+            eval_classes = np.array(sorted(np.unique(Y_labels)))
+        else:
+            eval_classes = np.array(sorted(np.unique(y_true)))
     else:
-        score_classes = np.array(score_classes)
+        eval_classes = np.asarray(eval_classes)
 
+    # y_score shape normalize
+    y_score = np.asarray(y_score)
     if y_score.ndim == 1:
-        # If someone passed probability of positive class only, make it (n,2)
-        y_score = np.vstack([1 - y_score, y_score]).T
+        # Only allowed for binary: score for ONE class.
+        if len(eval_classes) != 2:
+            raise ValueError("y_score is 1D but eval_classes is not binary.")
+        # Interpret as score for pos_label (must be provided or default below)
+        # We'll expand to (N,2) after pos_label is known.
+        pass
 
-    n_score_classes = y_score.shape[1]
-    if n_score_classes != len(score_classes):
+    score_classes = np.asarray(score_classes)
+    if score_classes.ndim != 1:
+        raise ValueError("score_classes must be a 1D array-like of labels.")
+
+    # Validate that y_true labels are known
+    unknown_y = set(np.unique(y_true)) - set(eval_classes.tolist())
+    if unknown_y:
         raise ValueError(
-            f"y_score has {n_score_classes} columns, but score_classes has {len(score_classes)} labels."
+            f"y_true contains labels not in eval_classes: {sorted(unknown_y)}"
         )
 
-    # Map label -> column index in y_score
-    score_col = {lbl: j for j, lbl in enumerate(score_classes)}
-
-    # Make sure every eval class exists in the score columns
-    missing = [c for c in eval_classes if c not in score_col]
+    # Validate that eval_classes exist in score_classes
+    missing = [c for c in eval_classes if c not in set(score_classes.tolist())]
     if missing:
         raise ValueError(
-            f"These classes are in Y_labels but not in score_classes/y_score columns: {missing}. "
-            f"Pass score_classes=clf.classes_ (or correct the order) to fix."
+            f"These classes are in eval_classes but missing in score_classes/y_score columns: {missing}. "
+            "Pass score_classes=clf.classes_ (or the correct column order)."
+        )
+
+    # Build mapping from class -> column index in y_score
+    score_col = {lbl: j for j, lbl in enumerate(score_classes)}
+
+    # Align y_score columns to eval_classes order (this is the key!)
+    if y_score.ndim == 1:
+        # Binary only: treat provided scores as scores for pos_label
+        if pos_label is None:
+            pos_label = eval_classes[-1]
+        if pos_label not in eval_classes:
+            raise ValueError(
+                f"pos_label={pos_label} not in eval_classes={eval_classes.tolist()}"
+            )
+        # Build (N,2) aligned: column0 = other class, column1 = pos_label (in eval order)
+        other = [c for c in eval_classes if c != pos_label][0]
+        s_pos = y_score.astype(float)
+        s_other = 1.0 - s_pos
+        # Now align to eval_classes order:
+        aligned = np.column_stack(
+            [s_pos if c == pos_label else s_other for c in eval_classes]
+        )
+        y_score_aligned = aligned
+    else:
+        if y_score.shape[1] != len(score_classes):
+            raise ValueError(
+                f"y_score has {y_score.shape[1]} columns, but score_classes has {len(score_classes)} labels."
+            )
+        y_score_aligned = np.column_stack(
+            [y_score[:, score_col[c]] for c in eval_classes]
         )
 
     plt.figure(figsize=(5.5, 3))
 
     # ----- Binary case -----
     if len(eval_classes) == 2:
-        # Decide which label is the "positive" class for ROC.
-        # Common choice: the higher label; you can change this if needed.
-        pos_label = eval_classes[1]
-        pos_col = score_col[pos_label]
+        if pos_label is None:
+            pos_label = eval_classes[-1]  # deterministic default: "largest" label
+        if pos_label not in eval_classes:
+            raise ValueError(
+                f"pos_label={pos_label} not in eval_classes={eval_classes.tolist()}"
+            )
 
-        # IMPORTANT: pass y_true as {0,1} indicator for pos_label if labels aren't already 0/1
-        y_true_bin = (np.array(y_true) == pos_label).astype(int)
+        pos_idx = int(np.where(eval_classes == pos_label)[0][0])
+        y_true_bin = (y_true == pos_label).astype(int)
 
-        fpr, tpr, _ = roc_curve(y_true_bin, y_score[:, pos_col])
+        fpr, tpr, _ = roc_curve(y_true_bin, y_score_aligned[:, pos_idx])
         roc_auc = auc(fpr, tpr)
 
-        # Plot using the positive class color if available, else fallback
         color = cp.get(pos_label, "#003F5C")
         label_txt = f"{label_roc_plot.get(class_task, 'ROC')} (AUC = {roc_auc:.2f})"
         plt.plot(fpr, tpr, color=color, label=label_txt)
         print("AUC =", roc_auc)
 
-        if s_name is not None:
-            np.savez(
-                s_name.split(".pdf")[0] + ".npz",
-                fpr=fpr,
-                tpr=tpr,
-                color=color,
-                roc_auc=roc_auc,
-                label=label_txt,
-                class_task=class_task,
-                pos_label=pos_label,
-                score_classes=score_classes,
-            )
-
-    # ----- Multiclass case (OvR) -----
+    # ----- Multiclass OvR -----
     else:
-        # Binarize with columns in eval_classes order
         y_bin = label_binarize(y_true, classes=eval_classes)
-        MC_save_npz = {}
 
-        # One-vs-rest ROC for each class label c
+        # per-class OvR
         for k, c in enumerate(eval_classes):
-            col = score_col[c]  # column in y_score for class c
-            fpr, tpr, _ = roc_curve(y_bin[:, k], y_score[:, col])
+            fpr, tpr, _ = roc_curve(y_bin[:, k], y_score_aligned[:, k])
             roc_auc = auc(fpr, tpr)
-
-            # NO FLIPPING. If <0.5, it’s telling you something is misaligned or inverted.
             plt.plot(
                 fpr,
                 tpr,
                 color=cp.get(c, None),
                 label=f"{cp_l.get(c, str(c))} (AUC = {roc_auc:.2f})",
             )
-            MC_save_npz[cp_l.get(c, str(c))] = (
-                fpr,
-                tpr,
-                cp.get(c, None),
-                f"{cp_l.get(c, str(c))} (AUC = {roc_auc:.2f})",
+
+        # macro-average (optional)
+        if plot_macro:
+            # gemeinsames FPR-Gitter
+            mean_fpr = np.linspace(0.0, 1.0, 200)
+
+            tprs = []
+            aucs = []
+
+            for k in range(len(eval_classes)):
+                fpr_k, tpr_k, _ = roc_curve(y_bin[:, k], y_score_aligned[:, k])
+                auc_k = auc(fpr_k, tpr_k)
+                aucs.append(auc_k)
+
+                # TPR auf gemeinsames Gitter interpolieren
+                tpr_interp = np.interp(mean_fpr, fpr_k, tpr_k)
+                tpr_interp[0] = 0.0
+                tprs.append(tpr_interp)
+
+            # Mittelwert der interpolierten TPRs
+            mean_tpr = np.mean(tprs, axis=0)
+            mean_tpr[-1] = 1.0
+
+            # AUC der gemittelten Kurve
+            macro_auc = auc(mean_fpr, mean_tpr)
+
+            plt.plot(
+                mean_fpr,
+                mean_tpr,
+                color="black",
+                linestyle="--",
+                label=f"Macro-average (AUC = {macro_auc:.2f})",
             )
 
-        # Micro-average: use the *same column alignment* as above
-        y_score_aligned = np.column_stack(
-            [y_score[:, score_col[c]] for c in eval_classes]
-        )
-        fpr, tpr, _ = roc_curve(y_bin.ravel(), y_score_aligned.ravel())
-        roc_auc = auc(fpr, tpr)
+            print("Macro-average AUC =", macro_auc)
 
-        plt.plot(
-            fpr,
-            tpr,
-            color="black",
-            linestyle="--",
-            label=f"Micro-average (AUC = {roc_auc:.2f})",
-        )
-        print("Micro-average AUC =", roc_auc)
-
-        MC_save_npz["Micro-average"] = (
-            fpr,
-            tpr,
-            "black",
-            f"Micro-average (AUC = {roc_auc:.2f})",
-        )
-
-        if s_name is not None:
-            np.savez(
-                s_name.split(".pdf")[0] + ".npz",
-                info="(fpr, tpr, color, label)",
-                MC_save_npz=MC_save_npz,
-                class_task=class_task,
-                eval_classes=eval_classes,
-                score_classes=score_classes,
-            )
-
-    # Plot formatting
+    # Formatting
     plt.plot([0, 1], [0, 1], "k--", linewidth=1)
     plt.xlim([-0.03, 1.03])
     plt.ylim([0.0, 1.03])

@@ -11,53 +11,71 @@ Repository for the IEEE-TBME paper: _A Machine-Learning Approach to Optimize Ele
 
   **LR**
 
+<p align="center">
   <img src="results/plots_healthy_vs_cancer_baseline/CM_baseline_healthy_vs_cancer_lr_norm.png" width="25%"/>
   <img src="results/plots_healthy_vs_cancer_baseline/ROC_baseline_healthy_vs_cancer_lr.png" width="40%"/>
+</p>
 
   **RF**
 
+<p align="center">
   <img src="results/plots_healthy_vs_cancer_baseline/CM_baseline_healthy_vs_cancer_rf_norm.png" width="25%"/>
   <img src="results/plots_healthy_vs_cancer_baseline/ROC_baseline_healthy_vs_cancer_rf.png" width="40%"/>
+</p>
 
   **SVM**
 
+<p align="center">
   <img src="results/plots_healthy_vs_cancer_baseline/CM_baseline_healthy_vs_cancer_svm_norm.png" width="25%"/>
   <img src="results/plots_healthy_vs_cancer_baseline/ROC_baseline_healthy_vs_cancer_svm.png" width="40%"/>
+</p>
 
 ### Cancer vs. high risk vs. low risk
   
   **LR**
 
+<p align="center">
   <img src="results/plots_cancer_vs_lr_hr_baseline/CM_baseline_cancer_vs_lr_hr_lr_norm.png" width="25%"/>
   <img src="results/plots_cancer_vs_lr_hr_baseline/ROC_baseline_cancer_vs_lr_hr_lr.png" width="40%"/>
+</p>
 
   **RF**
 
+<p align="center">
   <img src="results/plots_cancer_vs_lr_hr_baseline/CM_baseline_cancer_vs_lr_hr_rf_norm.png" width="25%"/>
   <img src="results/plots_cancer_vs_lr_hr_baseline/ROC_baseline_cancer_vs_lr_hr_rf.png" width="40%"/>
+</p>
 
   **SVM**
 
+<p align="center">
   <img src="results/plots_cancer_vs_lr_hr_baseline/CM_baseline_cancer_vs_lr_hr_svm_norm.png" width="25%"/>
   <img src="results/plots_cancer_vs_lr_hr_baseline/ROC_baseline_cancer_vs_lr_hr_svm.png" width="40%"/>
+</p>
 
 
 ### Multiclass
   
   **LR**
 
+<p align="center">
   <img src="results/plots_MC_baseline/CM_baseline_MC_lr_norm.png" width="25%"/>
   <img src="results/plots_MC_baseline/ROC_baseline_MC_lr.png" width="40%"/>
+</p>
 
   **RF**
 
+<p align="center">
   <img src="results/plots_MC_baseline/CM_baseline_MC_rf_norm.png" width="25%"/>
   <img src="results/plots_MC_baseline/ROC_baseline_MC_rf.png" width="40%"/>
+</p>
 
   **SVM**
 
+<p align="center">
   <img src="results/plots_MC_baseline/CM_baseline_MC_svm_norm.png" width="25%"/>
   <img src="results/plots_MC_baseline/ROC_baseline_MC_svm.png" width="40%"/>
+</p>
 
 
 <!-- ========= AUC ========= -->
@@ -67,57 +85,73 @@ Repository for the IEEE-TBME paper: _A Machine-Learning Approach to Optimize Ele
 
   **LR**
 
+<p align="center">
   <img src="results/plots_healthy_vs_cancer_auc/CM_healthy_vs_cancer_lr_auc_norm.png" width="25%"/>  
   <img src="results/plots_healthy_vs_cancer_auc/ROC_healthy_vs_cancer_lr_auc.png" width="40%"/>
+</p>
 
   **RF**
 
+<p align="center">
   <img src="results/plots_healthy_vs_cancer_auc/CM_healthy_vs_cancer_rf_auc_norm.png" width="25%"/>
   <img src="results/plots_healthy_vs_cancer_auc/ROC_healthy_vs_cancer_rf_auc.png" width="40%"/>
+</p>
 
   
   **SVM**
 
+<p align="center">
   <img src="results/plots_healthy_vs_cancer_auc/CM_healthy_vs_cancer_svm_auc_norm.png" width="25%"/>
   <img src="results/plots_healthy_vs_cancer_auc/ROC_healthy_vs_cancer_svm_auc.png" width="40%"/>
+</p>
 
 
 ### Cancer vs. high risk vs. low risk
 
   **LR**
 
+<p align="center">
   <img src="results/plots_cancer_vs_lr_hr_auc/CM_cancer_vs_lr_hr_lr_auc_norm.png" width="25%"/>  
   <img src="results/plots_cancer_vs_lr_hr_auc/ROC_cancer_vs_lr_hr_lr_auc.png" width="40%"/>
+</p>
 
   **RF**
 
+<p align="center">
   <img src="results/plots_cancer_vs_lr_hr_auc/CM_cancer_vs_lr_hr_rf_auc_norm.png" width="25%"/>
   <img src="results/plots_cancer_vs_lr_hr_auc/ROC_cancer_vs_lr_hr_rf_auc.png" width="40%"/>
+</p>
 
   
   **SVM**
 
+<p align="center">
   <img src="results/plots_cancer_vs_lr_hr_auc/CM_cancer_vs_lr_hr_svm_auc_norm.png" width="25%"/>
   <img src="results/plots_cancer_vs_lr_hr_auc/ROC_cancer_vs_lr_hr_svm_auc.png" width="40%"/>
-
-
+</p>
 
 ### Multiclass
 
   **LR**
 
+<p align="center">
   <img src="results/plots_MC_auc/CM_MC_lr_auc_norm.png" width="25%"/>  
   <img src="results/plots_MC_auc/ROC_MC_lr_auc.png" width="40%"/>
+</p>
 
   **RF**
 
+<p align="center">
   <img src="results/plots_MC_auc/CM_MC_rf_auc_norm.png" width="25%"/>
   <img src="results/plots_MC_auc/ROC_MC_rf_auc.png" width="40%"/>
-  
+</p>
+
   **SVM**
 
+<p align="center">
   <img src="results/plots_MC_auc/CM_MC_svm_auc_norm.png" width="25%"/>
   <img src="results/plots_MC_auc/ROC_MC_svm_auc.png" width="40%"/>
+</p>
 
 
 
@@ -128,38 +162,49 @@ Repository for the IEEE-TBME paper: _A Machine-Learning Approach to Optimize Ele
 
   **LR**
 
+<p align="center">
   <img src="results/plots_healthy_vs_cancer_f1/CM_healthy_vs_cancer_lr_f1_norm.png" width="25%"/>  
   <img src="results/plots_healthy_vs_cancer_f1/ROC_healthy_vs_cancer_lr_f1.png" width="40%"/>
+</p>
 
   **RF**
 
+<p align="center">
   <img src="results/plots_healthy_vs_cancer_f1/CM_healthy_vs_cancer_rf_f1_norm.png" width="25%"/>
   <img src="results/plots_healthy_vs_cancer_f1/ROC_healthy_vs_cancer_rf_f1.png" width="40%"/>
+</p>
 
   
   **SVM**
 
+<p align="center">
   <img src="results/plots_healthy_vs_cancer_f1/CM_healthy_vs_cancer_svm_f1_norm.png" width="25%"/>
   <img src="results/plots_healthy_vs_cancer_f1/ROC_healthy_vs_cancer_svm_f1.png" width="40%"/>
-
+</p>
 
 ### Cancer vs. high risk vs. low risk
 
   **LR**
 
+<p align="center">
   <img src="results/plots_cancer_vs_lr_hr_f1/CM_cancer_vs_lr_hr_lr_f1_norm.png" width="25%"/>  
   <img src="results/plots_cancer_vs_lr_hr_f1/ROC_cancer_vs_lr_hr_lr_f1.png" width="40%"/>
+</p>
 
   **RF**
 
+<p align="center">
   <img src="results/plots_cancer_vs_lr_hr_f1/CM_cancer_vs_lr_hr_rf_f1_norm.png" width="25%"/>
   <img src="results/plots_cancer_vs_lr_hr_f1/ROC_cancer_vs_lr_hr_rf_f1.png" width="40%"/>
+</p>
 
   
   **SVM**
 
+<p align="center">
   <img src="results/plots_cancer_vs_lr_hr_f1/CM_cancer_vs_lr_hr_svm_f1_norm.png" width="25%"/>
   <img src="results/plots_cancer_vs_lr_hr_f1/ROC_cancer_vs_lr_hr_svm_f1.png" width="40%"/>
+</p>
 
 
 
@@ -167,18 +212,24 @@ Repository for the IEEE-TBME paper: _A Machine-Learning Approach to Optimize Ele
 
   **LR**
 
+<p align="center">
   <img src="results/plots_MC_f1/CM_MC_lr_f1_norm.png" width="25%"/>  
   <img src="results/plots_MC_f1/ROC_MC_lr_f1.png" width="40%"/>
+</p>
 
   **RF**
 
+<p align="center">
   <img src="results/plots_MC_f1/CM_MC_rf_f1_norm.png" width="25%"/>
   <img src="results/plots_MC_f1/ROC_MC_rf_f1.png" width="40%"/>
+</p>
   
   **SVM**
 
+<p align="center">
   <img src="results/plots_MC_f1/CM_MC_svm_f1_norm.png" width="25%"/>
   <img src="results/plots_MC_f1/ROC_MC_svm_f1.png" width="40%"/>
+</p>
 
 
 
@@ -190,38 +241,50 @@ Repository for the IEEE-TBME paper: _A Machine-Learning Approach to Optimize Ele
 
   **LR**
 
+<p align="center">
   <img src="results/plots_healthy_vs_cancer_acc/CM_healthy_vs_cancer_lr_acc_norm.png" width="25%"/>  
   <img src="results/plots_healthy_vs_cancer_acc/ROC_healthy_vs_cancer_lr_acc.png" width="40%"/>
+</p>
 
   **RF**
 
+<p align="center">
   <img src="results/plots_healthy_vs_cancer_acc/CM_healthy_vs_cancer_rf_acc_norm.png" width="25%"/>
   <img src="results/plots_healthy_vs_cancer_acc/ROC_healthy_vs_cancer_rf_acc.png" width="40%"/>
+</p>
 
   
   **SVM**
 
+<p align="center">
   <img src="results/plots_healthy_vs_cancer_acc/CM_healthy_vs_cancer_svm_acc_norm.png" width="25%"/>
   <img src="results/plots_healthy_vs_cancer_acc/ROC_healthy_vs_cancer_svm_acc.png" width="40%"/>
+</p>
 
 
 ### Cancer vs. high risk vs. low risk
 
   **LR**
 
+<p align="center">
   <img src="results/plots_cancer_vs_lr_hr_acc/CM_cancer_vs_lr_hr_lr_acc_norm.png" width="25%"/>  
   <img src="results/plots_cancer_vs_lr_hr_acc/ROC_cancer_vs_lr_hr_lr_acc.png" width="40%"/>
+</p>
 
   **RF**
 
+<p align="center">
   <img src="results/plots_cancer_vs_lr_hr_acc/CM_cancer_vs_lr_hr_rf_acc_norm.png" width="25%"/>
   <img src="results/plots_cancer_vs_lr_hr_acc/ROC_cancer_vs_lr_hr_rf_acc.png" width="40%"/>
+</p>
 
   
   **SVM**
 
+<p align="center">
   <img src="results/plots_cancer_vs_lr_hr_acc/CM_cancer_vs_lr_hr_svm_acc_norm.png" width="25%"/>
   <img src="results/plots_cancer_vs_lr_hr_acc/ROC_cancer_vs_lr_hr_svm_acc.png" width="40%"/>
+</p>
 
 
 
@@ -229,18 +292,24 @@ Repository for the IEEE-TBME paper: _A Machine-Learning Approach to Optimize Ele
 
   **LR**
 
+<p align="center">
   <img src="results/plots_MC_acc/CM_MC_lr_acc_norm.png" width="25%"/>  
   <img src="results/plots_MC_acc/ROC_MC_lr_acc.png" width="40%"/>
+</p>
 
   **RF**
 
+<p align="center">
   <img src="results/plots_MC_acc/CM_MC_rf_acc_norm.png" width="25%"/>
   <img src="results/plots_MC_acc/ROC_MC_rf_acc.png" width="40%"/>
-  
+</p>
+ 
   **SVM**
 
+<p align="center">
   <img src="results/plots_MC_acc/CM_MC_svm_acc_norm.png" width="25%"/>
   <img src="results/plots_MC_acc/ROC_MC_svm_acc.png" width="40%"/>
+</p>
 
 
 
