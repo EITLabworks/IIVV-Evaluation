@@ -1,0 +1,2101 @@
+Task,Fold,IIVV,rs,auc,n_params
+healthy_vs_cancer,1,Long a+,0,0.730769231,496
+healthy_vs_cancer,2,Long a+,0,0.879551821,496
+healthy_vs_cancer,3,Long a+,0,0.934256055,496
+healthy_vs_cancer,4,Long a+,0,0.898245614,496
+healthy_vs_cancer,5,Long a+,0,0.861591696,496
+healthy_vs_cancer,1,Long a+,1,0.949760766,496
+healthy_vs_cancer,2,Long a+,1,0.983333333,496
+healthy_vs_cancer,3,Long a+,1,0.749226006,496
+healthy_vs_cancer,4,Long a+,1,0.648148148,496
+healthy_vs_cancer,5,Long a+,1,0.859375,496
+healthy_vs_cancer,1,Long a+,2,0.87962963,496
+healthy_vs_cancer,2,Long a+,2,0.851851852,496
+healthy_vs_cancer,3,Long a+,2,0.803030303,496
+healthy_vs_cancer,4,Long a+,2,0.87037037,496
+healthy_vs_cancer,5,Long a+,2,0.948412698,496
+healthy_vs_cancer,1,Long a+,3,0.646875,496
+healthy_vs_cancer,2,Long a+,3,0.865131579,496
+healthy_vs_cancer,3,Long a+,3,0.972222222,496
+healthy_vs_cancer,4,Long a+,3,0.857142857,496
+healthy_vs_cancer,5,Long a+,3,0.845833333,496
+healthy_vs_cancer,1,Long a+,4,0.784444444,496
+healthy_vs_cancer,2,Long a+,4,0.931888545,496
+healthy_vs_cancer,3,Long a+,4,0.855955679,496
+healthy_vs_cancer,4,Long a+,4,0.844875346,496
+healthy_vs_cancer,5,Long a+,4,0.840336134,496
+healthy_vs_cancer,1,Long a+,5,0.954248366,496
+healthy_vs_cancer,2,Long a+,5,0.809688581,496
+healthy_vs_cancer,3,Long a+,5,0.779448622,496
+healthy_vs_cancer,4,Long a+,5,0.842105263,496
+healthy_vs_cancer,5,Long a+,5,0.834224599,496
+healthy_vs_cancer,1,Long a+,6,0.838888889,496
+healthy_vs_cancer,2,Long a+,6,0.842592593,496
+healthy_vs_cancer,3,Long a+,6,0.871148459,496
+healthy_vs_cancer,4,Long a+,6,0.905263158,496
+healthy_vs_cancer,5,Long a+,6,0.843137255,496
+healthy_vs_cancer,1,Long a+,7,0.828254848,496
+healthy_vs_cancer,2,Long a+,7,0.914285714,496
+healthy_vs_cancer,3,Long a+,7,0.912393162,496
+healthy_vs_cancer,4,Long a+,7,0.713235294,496
+healthy_vs_cancer,5,Long a+,7,0.841176471,496
+healthy_vs_cancer,1,Long a+,8,0.829166667,496
+healthy_vs_cancer,2,Long a+,8,0.970238095,496
+healthy_vs_cancer,3,Long a+,8,0.858024691,496
+healthy_vs_cancer,4,Long a+,8,0.871853547,496
+healthy_vs_cancer,5,Long a+,8,0.796791444,496
+healthy_vs_cancer,1,Long a+,9,0.821875,496
+healthy_vs_cancer,2,Long a+,9,0.824074074,496
+healthy_vs_cancer,3,Long a+,9,0.960648148,496
+healthy_vs_cancer,4,Long a+,9,0.874493927,496
+healthy_vs_cancer,5,Long a+,9,0.786967419,496
+healthy_vs_cancer,1,Long a+ ext.,0,0.775,3720
+healthy_vs_cancer,2,Long a+ ext.,0,0.885154062,3720
+healthy_vs_cancer,3,Long a+ ext.,0,0.923875433,3720
+healthy_vs_cancer,4,Long a+ ext.,0,0.870175439,3720
+healthy_vs_cancer,5,Long a+ ext.,0,0.889273356,3720
+healthy_vs_cancer,1,Long a+ ext.,1,0.940191388,3720
+healthy_vs_cancer,2,Long a+ ext.,1,0.977777778,3720
+healthy_vs_cancer,3,Long a+ ext.,1,0.786377709,3720
+healthy_vs_cancer,4,Long a+ ext.,1,0.682539683,3720
+healthy_vs_cancer,5,Long a+ ext.,1,0.890625,3720
+healthy_vs_cancer,1,Long a+ ext.,2,0.87962963,3720
+healthy_vs_cancer,2,Long a+ ext.,2,0.872685185,3720
+healthy_vs_cancer,3,Long a+ ext.,2,0.805555556,3720
+healthy_vs_cancer,4,Long a+ ext.,2,0.858024691,3720
+healthy_vs_cancer,5,Long a+ ext.,2,0.956349206,3720
+healthy_vs_cancer,1,Long a+ ext.,3,0.665625,3720
+healthy_vs_cancer,2,Long a+ ext.,3,0.884868421,3720
+healthy_vs_cancer,3,Long a+ ext.,3,0.979166667,3720
+healthy_vs_cancer,4,Long a+ ext.,3,0.881773399,3720
+healthy_vs_cancer,5,Long a+ ext.,3,0.841666667,3720
+healthy_vs_cancer,1,Long a+ ext.,4,0.802222222,3720
+healthy_vs_cancer,2,Long a+ ext.,4,0.947368421,3720
+healthy_vs_cancer,3,Long a+ ext.,4,0.872576177,3720
+healthy_vs_cancer,4,Long a+ ext.,4,0.847645429,3720
+healthy_vs_cancer,5,Long a+ ext.,4,0.890756303,3720
+healthy_vs_cancer,1,Long a+ ext.,5,0.954248366,3720
+healthy_vs_cancer,2,Long a+ ext.,5,0.847750865,3720
+healthy_vs_cancer,3,Long a+ ext.,5,0.796992481,3720
+healthy_vs_cancer,4,Long a+ ext.,5,0.853185596,3720
+healthy_vs_cancer,5,Long a+ ext.,5,0.898395722,3720
+healthy_vs_cancer,1,Long a+ ext.,6,0.85,3720
+healthy_vs_cancer,2,Long a+ ext.,6,0.87037037,3720
+healthy_vs_cancer,3,Long a+ ext.,6,0.843137255,3720
+healthy_vs_cancer,4,Long a+ ext.,6,0.913157895,3720
+healthy_vs_cancer,5,Long a+ ext.,6,0.852941176,3720
+healthy_vs_cancer,1,Long a+ ext.,7,0.858725762,3720
+healthy_vs_cancer,2,Long a+ ext.,7,0.914285714,3720
+healthy_vs_cancer,3,Long a+ ext.,7,0.916666667,3720
+healthy_vs_cancer,4,Long a+ ext.,7,0.753676471,3720
+healthy_vs_cancer,5,Long a+ ext.,7,0.841176471,3720
+healthy_vs_cancer,1,Long a+ ext.,8,0.854166667,3720
+healthy_vs_cancer,2,Long a+ ext.,8,0.967261905,3720
+healthy_vs_cancer,3,Long a+ ext.,8,0.858024691,3720
+healthy_vs_cancer,4,Long a+ ext.,8,0.871853547,3720
+healthy_vs_cancer,5,Long a+ ext.,8,0.826203209,3720
+healthy_vs_cancer,1,Long a+ ext.,9,0.81875,3720
+healthy_vs_cancer,2,Long a+ ext.,9,0.836419753,3720
+healthy_vs_cancer,3,Long a+ ext.,9,0.969907407,3720
+healthy_vs_cancer,4,Long a+ ext.,9,0.906882591,3720
+healthy_vs_cancer,5,Long a+ ext.,9,0.819548872,3720
+healthy_vs_cancer,1,Med. a+ ext.,0,0.809615385,3720
+healthy_vs_cancer,2,Med. a+ ext.,0,0.899159664,3720
+healthy_vs_cancer,3,Med. a+ ext.,0,0.871972318,3720
+healthy_vs_cancer,4,Med. a+ ext.,0,0.898245614,3720
+healthy_vs_cancer,5,Med. a+ ext.,0,0.916955017,3720
+healthy_vs_cancer,1,Med. a+ ext.,1,0.949760766,3720
+healthy_vs_cancer,2,Med. a+ ext.,1,0.997222222,3720
+healthy_vs_cancer,3,Med. a+ ext.,1,0.795665635,3720
+healthy_vs_cancer,4,Med. a+ ext.,1,0.732804233,3720
+healthy_vs_cancer,5,Med. a+ ext.,1,0.890625,3720
+healthy_vs_cancer,1,Med. a+ ext.,2,0.827160494,3720
+healthy_vs_cancer,2,Med. a+ ext.,2,0.905092593,3720
+healthy_vs_cancer,3,Med. a+ ext.,2,0.838383838,3720
+healthy_vs_cancer,4,Med. a+ ext.,2,0.864197531,3720
+healthy_vs_cancer,5,Med. a+ ext.,2,0.98015873,3720
+healthy_vs_cancer,1,Med. a+ ext.,3,0.775,3720
+healthy_vs_cancer,2,Med. a+ ext.,3,0.815789474,3720
+healthy_vs_cancer,3,Med. a+ ext.,3,0.972222222,3720
+healthy_vs_cancer,4,Med. a+ ext.,3,0.912972085,3720
+healthy_vs_cancer,5,Med. a+ ext.,3,0.791666667,3720
+healthy_vs_cancer,1,Med. a+ ext.,4,0.862222222,3720
+healthy_vs_cancer,2,Med. a+ ext.,4,0.950464396,3720
+healthy_vs_cancer,3,Med. a+ ext.,4,0.861495845,3720
+healthy_vs_cancer,4,Med. a+ ext.,4,0.8033241,3720
+healthy_vs_cancer,5,Med. a+ ext.,4,0.941176471,3720
+healthy_vs_cancer,1,Med. a+ ext.,5,0.954248366,3720
+healthy_vs_cancer,2,Med. a+ ext.,5,0.847750865,3720
+healthy_vs_cancer,3,Med. a+ ext.,5,0.819548872,3720
+healthy_vs_cancer,4,Med. a+ ext.,5,0.844875346,3720
+healthy_vs_cancer,5,Med. a+ ext.,5,0.874331551,3720
+healthy_vs_cancer,1,Med. a+ ext.,6,0.916666667,3720
+healthy_vs_cancer,2,Med. a+ ext.,6,0.867283951,3720
+healthy_vs_cancer,3,Med. a+ ext.,6,0.890756303,3720
+healthy_vs_cancer,4,Med. a+ ext.,6,0.928947368,3720
+healthy_vs_cancer,5,Med. a+ ext.,6,0.823529412,3720
+healthy_vs_cancer,1,Med. a+ ext.,7,0.808864266,3720
+healthy_vs_cancer,2,Med. a+ ext.,7,0.889285714,3720
+healthy_vs_cancer,3,Med. a+ ext.,7,0.944444444,3720
+healthy_vs_cancer,4,Med. a+ ext.,7,0.838235294,3720
+healthy_vs_cancer,5,Med. a+ ext.,7,0.826470588,3720
+healthy_vs_cancer,1,Med. a+ ext.,8,0.866666667,3720
+healthy_vs_cancer,2,Med. a+ ext.,8,0.967261905,3720
+healthy_vs_cancer,3,Med. a+ ext.,8,0.793209877,3720
+healthy_vs_cancer,4,Med. a+ ext.,8,0.885583524,3720
+healthy_vs_cancer,5,Med. a+ ext.,8,0.847593583,3720
+healthy_vs_cancer,1,Med. a+ ext.,9,0.75625,3720
+healthy_vs_cancer,2,Med. a+ ext.,9,0.888888889,3720
+healthy_vs_cancer,3,Med. a+ ext.,9,0.9375,3720
+healthy_vs_cancer,4,Med. a+ ext.,9,0.882591093,3720
+healthy_vs_cancer,5,Med. a+ ext.,9,0.834586466,3720
+healthy_vs_cancer,1,Skip1 close,0,0.790384615,11160
+healthy_vs_cancer,2,Skip1 close,0,0.8767507,11160
+healthy_vs_cancer,3,Skip1 close,0,0.934256055,11160
+healthy_vs_cancer,4,Skip1 close,0,0.901754386,11160
+healthy_vs_cancer,5,Skip1 close,0,0.896193772,11160
+healthy_vs_cancer,1,Skip1 close,1,0.954545455,11160
+healthy_vs_cancer,2,Skip1 close,1,0.988888889,11160
+healthy_vs_cancer,3,Skip1 close,1,0.749226006,11160
+healthy_vs_cancer,4,Skip1 close,1,0.722222222,11160
+healthy_vs_cancer,5,Skip1 close,1,0.90234375,11160
+healthy_vs_cancer,1,Skip1 close,2,0.898148148,11160
+healthy_vs_cancer,2,Skip1 close,2,0.854166667,11160
+healthy_vs_cancer,3,Skip1 close,2,0.835858586,11160
+healthy_vs_cancer,4,Skip1 close,2,0.845679012,11160
+healthy_vs_cancer,5,Skip1 close,2,0.952380952,11160
+healthy_vs_cancer,1,Skip1 close,3,0.709375,11160
+healthy_vs_cancer,2,Skip1 close,3,0.871710526,11160
+healthy_vs_cancer,3,Skip1 close,3,0.986111111,11160
+healthy_vs_cancer,4,Skip1 close,3,0.850574713,11160
+healthy_vs_cancer,5,Skip1 close,3,0.841666667,11160
+healthy_vs_cancer,1,Skip1 close,4,0.833333333,11160
+healthy_vs_cancer,2,Skip1 close,4,0.953560372,11160
+healthy_vs_cancer,3,Skip1 close,4,0.861495845,11160
+healthy_vs_cancer,4,Skip1 close,4,0.855955679,11160
+healthy_vs_cancer,5,Skip1 close,4,0.865546218,11160
+healthy_vs_cancer,1,Skip1 close,5,0.970588235,11160
+healthy_vs_cancer,2,Skip1 close,5,0.84083045,11160
+healthy_vs_cancer,3,Skip1 close,5,0.80952381,11160
+healthy_vs_cancer,4,Skip1 close,5,0.83933518,11160
+healthy_vs_cancer,5,Skip1 close,5,0.885026738,11160
+healthy_vs_cancer,1,Skip1 close,6,0.886111111,11160
+healthy_vs_cancer,2,Skip1 close,6,0.87037037,11160
+healthy_vs_cancer,3,Skip1 close,6,0.823529412,11160
+healthy_vs_cancer,4,Skip1 close,6,0.907894737,11160
+healthy_vs_cancer,5,Skip1 close,6,0.849673203,11160
+healthy_vs_cancer,1,Skip1 close,7,0.831024931,11160
+healthy_vs_cancer,2,Skip1 close,7,0.9,11160
+healthy_vs_cancer,3,Skip1 close,7,0.920940171,11160
+healthy_vs_cancer,4,Skip1 close,7,0.775735294,11160
+healthy_vs_cancer,5,Skip1 close,7,0.847058824,11160
+healthy_vs_cancer,1,Skip1 close,8,0.833333333,11160
+healthy_vs_cancer,2,Skip1 close,8,0.973214286,11160
+healthy_vs_cancer,3,Skip1 close,8,0.854938272,11160
+healthy_vs_cancer,4,Skip1 close,8,0.862700229,11160
+healthy_vs_cancer,5,Skip1 close,8,0.815508021,11160
+healthy_vs_cancer,1,Skip1 close,9,0.8125,11160
+healthy_vs_cancer,2,Skip1 close,9,0.848765432,11160
+healthy_vs_cancer,3,Skip1 close,9,0.953703704,11160
+healthy_vs_cancer,4,Skip1 close,9,0.910931174,11160
+healthy_vs_cancer,5,Skip1 close,9,0.817042607,11160
+healthy_vs_cancer,1,Adj. close,0,0.794230769,9052
+healthy_vs_cancer,2,Adj. close,0,0.865546218,9052
+healthy_vs_cancer,3,Adj. close,0,0.948096886,9052
+healthy_vs_cancer,4,Adj. close,0,0.905263158,9052
+healthy_vs_cancer,5,Adj. close,0,0.903114187,9052
+healthy_vs_cancer,1,Adj. close,1,0.959330144,9052
+healthy_vs_cancer,2,Adj. close,1,0.980555556,9052
+healthy_vs_cancer,3,Adj. close,1,0.770897833,9052
+healthy_vs_cancer,4,Adj. close,1,0.743386243,9052
+healthy_vs_cancer,5,Adj. close,1,0.89453125,9052
+healthy_vs_cancer,1,Adj. close,2,0.895061728,9052
+healthy_vs_cancer,2,Adj. close,2,0.847222222,9052
+healthy_vs_cancer,3,Adj. close,2,0.848484848,9052
+healthy_vs_cancer,4,Adj. close,2,0.864197531,9052
+healthy_vs_cancer,5,Adj. close,2,0.944444444,9052
+healthy_vs_cancer,1,Adj. close,3,0.746875,9052
+healthy_vs_cancer,2,Adj. close,3,0.884868421,9052
+healthy_vs_cancer,3,Adj. close,3,0.993055556,9052
+healthy_vs_cancer,4,Adj. close,3,0.844006568,9052
+healthy_vs_cancer,5,Adj. close,3,0.85,9052
+healthy_vs_cancer,1,Adj. close,4,0.86,9052
+healthy_vs_cancer,2,Adj. close,4,0.959752322,9052
+healthy_vs_cancer,3,Adj. close,4,0.850415512,9052
+healthy_vs_cancer,4,Adj. close,4,0.858725762,9052
+healthy_vs_cancer,5,Adj. close,4,0.865546218,9052
+healthy_vs_cancer,1,Adj. close,5,0.964052288,9052
+healthy_vs_cancer,2,Adj. close,5,0.844290657,9052
+healthy_vs_cancer,3,Adj. close,5,0.814536341,9052
+healthy_vs_cancer,4,Adj. close,5,0.853185596,9052
+healthy_vs_cancer,5,Adj. close,5,0.895721925,9052
+healthy_vs_cancer,1,Adj. close,6,0.905555556,9052
+healthy_vs_cancer,2,Adj. close,6,0.87962963,9052
+healthy_vs_cancer,3,Adj. close,6,0.831932773,9052
+healthy_vs_cancer,4,Adj. close,6,0.894736842,9052
+healthy_vs_cancer,5,Adj. close,6,0.892156863,9052
+healthy_vs_cancer,1,Adj. close,7,0.847645429,9052
+healthy_vs_cancer,2,Adj. close,7,0.914285714,9052
+healthy_vs_cancer,3,Adj. close,7,0.927350427,9052
+healthy_vs_cancer,4,Adj. close,7,0.801470588,9052
+healthy_vs_cancer,5,Adj. close,7,0.847058824,9052
+healthy_vs_cancer,1,Adj. close,8,0.8375,9052
+healthy_vs_cancer,2,Adj. close,8,0.976190476,9052
+healthy_vs_cancer,3,Adj. close,8,0.888888889,9052
+healthy_vs_cancer,4,Adj. close,8,0.876430206,9052
+healthy_vs_cancer,5,Adj. close,8,0.831550802,9052
+healthy_vs_cancer,1,Adj. close,9,0.83125,9052
+healthy_vs_cancer,2,Adj. close,9,0.854938272,9052
+healthy_vs_cancer,3,Adj. close,9,0.960648148,9052
+healthy_vs_cancer,4,Adj. close,9,0.910931174,9052
+healthy_vs_cancer,5,Adj. close,9,0.807017544,9052
+healthy_vs_cancer,1,Med. adj.,0,0.813461538,11997
+healthy_vs_cancer,2,Med. adj.,0,0.893557423,11997
+healthy_vs_cancer,3,Med. adj.,0,0.958477509,11997
+healthy_vs_cancer,4,Med. adj.,0,0.926315789,11997
+healthy_vs_cancer,5,Med. adj.,0,0.916955017,11997
+healthy_vs_cancer,1,Med. adj.,1,0.940191388,11997
+healthy_vs_cancer,2,Med. adj.,1,0.994444444,11997
+healthy_vs_cancer,3,Med. adj.,1,0.780185759,11997
+healthy_vs_cancer,4,Med. adj.,1,0.785714286,11997
+healthy_vs_cancer,5,Med. adj.,1,0.89453125,11997
+healthy_vs_cancer,1,Med. adj.,2,0.882716049,11997
+healthy_vs_cancer,2,Med. adj.,2,0.895833333,11997
+healthy_vs_cancer,3,Med. adj.,2,0.858585859,11997
+healthy_vs_cancer,4,Med. adj.,2,0.858024691,11997
+healthy_vs_cancer,5,Med. adj.,2,0.956349206,11997
+healthy_vs_cancer,1,Med. adj.,3,0.790625,11997
+healthy_vs_cancer,2,Med. adj.,3,0.881578947,11997
+healthy_vs_cancer,3,Med. adj.,3,0.982638889,11997
+healthy_vs_cancer,4,Med. adj.,3,0.894909688,11997
+healthy_vs_cancer,5,Med. adj.,3,0.841666667,11997
+healthy_vs_cancer,1,Med. adj.,4,0.882222222,11997
+healthy_vs_cancer,2,Med. adj.,4,0.959752322,11997
+healthy_vs_cancer,3,Med. adj.,4,0.878116343,11997
+healthy_vs_cancer,4,Med. adj.,4,0.833795014,11997
+healthy_vs_cancer,5,Med. adj.,4,0.907563025,11997
+healthy_vs_cancer,1,Med. adj.,5,0.954248366,11997
+healthy_vs_cancer,2,Med. adj.,5,0.875432526,11997
+healthy_vs_cancer,3,Med. adj.,5,0.839598997,11997
+healthy_vs_cancer,4,Med. adj.,5,0.894736842,11997
+healthy_vs_cancer,5,Med. adj.,5,0.877005348,11997
+healthy_vs_cancer,1,Med. adj.,6,0.941666667,11997
+healthy_vs_cancer,2,Med. adj.,6,0.907407407,11997
+healthy_vs_cancer,3,Med. adj.,6,0.879551821,11997
+healthy_vs_cancer,4,Med. adj.,6,0.915789474,11997
+healthy_vs_cancer,5,Med. adj.,6,0.852941176,11997
+healthy_vs_cancer,1,Med. adj.,7,0.872576177,11997
+healthy_vs_cancer,2,Med. adj.,7,0.878571429,11997
+healthy_vs_cancer,3,Med. adj.,7,0.94017094,11997
+healthy_vs_cancer,4,Med. adj.,7,0.841911765,11997
+healthy_vs_cancer,5,Med. adj.,7,0.858823529,11997
+healthy_vs_cancer,1,Med. adj.,8,0.891666667,11997
+healthy_vs_cancer,2,Med. adj.,8,0.976190476,11997
+healthy_vs_cancer,3,Med. adj.,8,0.858024691,11997
+healthy_vs_cancer,4,Med. adj.,8,0.883295195,11997
+healthy_vs_cancer,5,Med. adj.,8,0.879679144,11997
+healthy_vs_cancer,1,Med. adj.,9,0.81875,11997
+healthy_vs_cancer,2,Med. adj.,9,0.898148148,11997
+healthy_vs_cancer,3,Med. adj.,9,0.939814815,11997
+healthy_vs_cancer,4,Med. adj.,9,0.927125506,11997
+healthy_vs_cancer,5,Med. adj.,9,0.852130326,11997
+healthy_vs_cancer,1,Adj. far,0,0.813461538,20460
+healthy_vs_cancer,2,Adj. far,0,0.913165266,20460
+healthy_vs_cancer,3,Adj. far,0,0.948096886,20460
+healthy_vs_cancer,4,Adj. far,0,0.90877193,20460
+healthy_vs_cancer,5,Adj. far,0,0.91349481,20460
+healthy_vs_cancer,1,Adj. far,1,0.928229665,20460
+healthy_vs_cancer,2,Adj. far,1,0.983333333,20460
+healthy_vs_cancer,3,Adj. far,1,0.811145511,20460
+healthy_vs_cancer,4,Adj. far,1,0.793650794,20460
+healthy_vs_cancer,5,Adj. far,1,0.921875,20460
+healthy_vs_cancer,1,Adj. far,2,0.867283951,20460
+healthy_vs_cancer,2,Adj. far,2,0.923611111,20460
+healthy_vs_cancer,3,Adj. far,2,0.868686869,20460
+healthy_vs_cancer,4,Adj. far,2,0.87345679,20460
+healthy_vs_cancer,5,Adj. far,2,0.964285714,20460
+healthy_vs_cancer,1,Adj. far,3,0.809375,20460
+healthy_vs_cancer,2,Adj. far,3,0.881578947,20460
+healthy_vs_cancer,3,Adj. far,3,0.947916667,20460
+healthy_vs_cancer,4,Adj. far,3,0.914614122,20460
+healthy_vs_cancer,5,Adj. far,3,0.870833333,20460
+healthy_vs_cancer,1,Adj. far,4,0.902222222,20460
+healthy_vs_cancer,2,Adj. far,4,0.962848297,20460
+healthy_vs_cancer,3,Adj. far,4,0.891966759,20460
+healthy_vs_cancer,4,Adj. far,4,0.808864266,20460
+healthy_vs_cancer,5,Adj. far,4,0.928571429,20460
+healthy_vs_cancer,1,Adj. far,5,0.947712418,20460
+healthy_vs_cancer,2,Adj. far,5,0.91349481,20460
+healthy_vs_cancer,3,Adj. far,5,0.842105263,20460
+healthy_vs_cancer,4,Adj. far,5,0.880886427,20460
+healthy_vs_cancer,5,Adj. far,5,0.893048128,20460
+healthy_vs_cancer,1,Adj. far,6,0.95,20460
+healthy_vs_cancer,2,Adj. far,6,0.895061728,20460
+healthy_vs_cancer,3,Adj. far,6,0.904761905,20460
+healthy_vs_cancer,4,Adj. far,6,0.931578947,20460
+healthy_vs_cancer,5,Adj. far,6,0.866013072,20460
+healthy_vs_cancer,1,Adj. far,7,0.88365651,20460
+healthy_vs_cancer,2,Adj. far,7,0.875,20460
+healthy_vs_cancer,3,Adj. far,7,0.933760684,20460
+healthy_vs_cancer,4,Adj. far,7,0.867647059,20460
+healthy_vs_cancer,5,Adj. far,7,0.841176471,20460
+healthy_vs_cancer,1,Adj. far,8,0.883333333,20460
+healthy_vs_cancer,2,Adj. far,8,0.982142857,20460
+healthy_vs_cancer,3,Adj. far,8,0.811728395,20460
+healthy_vs_cancer,4,Adj. far,8,0.890160183,20460
+healthy_vs_cancer,5,Adj. far,8,0.890374332,20460
+healthy_vs_cancer,1,Adj. far,9,0.8625,20460
+healthy_vs_cancer,2,Adj. far,9,0.888888889,20460
+healthy_vs_cancer,3,Adj. far,9,0.930555556,20460
+healthy_vs_cancer,4,Adj. far,9,0.923076923,20460
+healthy_vs_cancer,5,Adj. far,9,0.874686717,20460
+healthy_vs_cancer,1,Skip1 medium,0,0.828846154,13640
+healthy_vs_cancer,2,Skip1 medium,0,0.896358543,13640
+healthy_vs_cancer,3,Skip1 medium,0,0.91349481,13640
+healthy_vs_cancer,4,Skip1 medium,0,0.912280702,13640
+healthy_vs_cancer,5,Skip1 medium,0,0.916955017,13640
+healthy_vs_cancer,1,Skip1 medium,1,0.947368421,13640
+healthy_vs_cancer,2,Skip1 medium,1,0.997222222,13640
+healthy_vs_cancer,3,Skip1 medium,1,0.814241486,13640
+healthy_vs_cancer,4,Skip1 medium,1,0.798941799,13640
+healthy_vs_cancer,5,Skip1 medium,1,0.91015625,13640
+healthy_vs_cancer,1,Skip1 medium,2,0.861111111,13640
+healthy_vs_cancer,2,Skip1 medium,2,0.914351852,13640
+healthy_vs_cancer,3,Skip1 medium,2,0.848484848,13640
+healthy_vs_cancer,4,Skip1 medium,2,0.864197531,13640
+healthy_vs_cancer,5,Skip1 medium,2,0.98015873,13640
+healthy_vs_cancer,1,Skip1 medium,3,0.796875,13640
+healthy_vs_cancer,2,Skip1 medium,3,0.851973684,13640
+healthy_vs_cancer,3,Skip1 medium,3,0.951388889,13640
+healthy_vs_cancer,4,Skip1 medium,3,0.912972085,13640
+healthy_vs_cancer,5,Skip1 medium,3,0.829166667,13640
+healthy_vs_cancer,1,Skip1 medium,4,0.915555556,13640
+healthy_vs_cancer,2,Skip1 medium,4,0.962848297,13640
+healthy_vs_cancer,3,Skip1 medium,4,0.87534626,13640
+healthy_vs_cancer,4,Skip1 medium,4,0.817174515,13640
+healthy_vs_cancer,5,Skip1 medium,4,0.945378151,13640
+healthy_vs_cancer,1,Skip1 medium,5,0.964052288,13640
+healthy_vs_cancer,2,Skip1 medium,5,0.910034602,13640
+healthy_vs_cancer,3,Skip1 medium,5,0.832080201,13640
+healthy_vs_cancer,4,Skip1 medium,5,0.855955679,13640
+healthy_vs_cancer,5,Skip1 medium,5,0.887700535,13640
+healthy_vs_cancer,1,Skip1 medium,6,0.95,13640
+healthy_vs_cancer,2,Skip1 medium,6,0.913580247,13640
+healthy_vs_cancer,3,Skip1 medium,6,0.885154062,13640
+healthy_vs_cancer,4,Skip1 medium,6,0.926315789,13640
+healthy_vs_cancer,5,Skip1 medium,6,0.839869281,13640
+healthy_vs_cancer,1,Skip1 medium,7,0.858725762,13640
+healthy_vs_cancer,2,Skip1 medium,7,0.896428571,13640
+healthy_vs_cancer,3,Skip1 medium,7,0.950854701,13640
+healthy_vs_cancer,4,Skip1 medium,7,0.852941176,13640
+healthy_vs_cancer,5,Skip1 medium,7,0.855882353,13640
+healthy_vs_cancer,1,Skip1 medium,8,0.895833333,13640
+healthy_vs_cancer,2,Skip1 medium,8,0.976190476,13640
+healthy_vs_cancer,3,Skip1 medium,8,0.796296296,13640
+healthy_vs_cancer,4,Skip1 medium,8,0.885583524,13640
+healthy_vs_cancer,5,Skip1 medium,8,0.887700535,13640
+healthy_vs_cancer,1,Skip1 medium,9,0.790625,13640
+healthy_vs_cancer,2,Skip1 medium,9,0.895061728,13640
+healthy_vs_cancer,3,Skip1 medium,9,0.93287037,13640
+healthy_vs_cancer,4,Skip1 medium,9,0.927125506,13640
+healthy_vs_cancer,5,Skip1 medium,9,0.852130326,13640
+healthy_vs_cancer,1,Skip1 far,0,0.823076923,6944
+healthy_vs_cancer,2,Skip1 far,0,0.927170868,6944
+healthy_vs_cancer,3,Skip1 far,0,0.92733564,6944
+healthy_vs_cancer,4,Skip1 far,0,0.89122807,6944
+healthy_vs_cancer,5,Skip1 far,0,0.865051903,6944
+healthy_vs_cancer,1,Skip1 far,1,0.93062201,6944
+healthy_vs_cancer,2,Skip1 far,1,0.980555556,6944
+healthy_vs_cancer,3,Skip1 far,1,0.820433437,6944
+healthy_vs_cancer,4,Skip1 far,1,0.783068783,6944
+healthy_vs_cancer,5,Skip1 far,1,0.921875,6944
+healthy_vs_cancer,1,Skip1 far,2,0.87962963,6944
+healthy_vs_cancer,2,Skip1 far,2,0.9375,6944
+healthy_vs_cancer,3,Skip1 far,2,0.805555556,6944
+healthy_vs_cancer,4,Skip1 far,2,0.904320988,6944
+healthy_vs_cancer,5,Skip1 far,2,0.972222222,6944
+healthy_vs_cancer,1,Skip1 far,3,0.796875,6944
+healthy_vs_cancer,2,Skip1 far,3,0.878289474,6944
+healthy_vs_cancer,3,Skip1 far,3,0.920138889,6944
+healthy_vs_cancer,4,Skip1 far,3,0.926108374,6944
+healthy_vs_cancer,5,Skip1 far,3,0.833333333,6944
+healthy_vs_cancer,1,Skip1 far,4,0.913333333,6944
+healthy_vs_cancer,2,Skip1 far,4,0.959752322,6944
+healthy_vs_cancer,3,Skip1 far,4,0.889196676,6944
+healthy_vs_cancer,4,Skip1 far,4,0.847645429,6944
+healthy_vs_cancer,5,Skip1 far,4,0.932773109,6944
+healthy_vs_cancer,1,Skip1 far,5,0.960784314,6944
+healthy_vs_cancer,2,Skip1 far,5,0.934256055,6944
+healthy_vs_cancer,3,Skip1 far,5,0.824561404,6944
+healthy_vs_cancer,4,Skip1 far,5,0.844875346,6944
+healthy_vs_cancer,5,Skip1 far,5,0.874331551,6944
+healthy_vs_cancer,1,Skip1 far,6,0.95,6944
+healthy_vs_cancer,2,Skip1 far,6,0.895061728,6944
+healthy_vs_cancer,3,Skip1 far,6,0.890756303,6944
+healthy_vs_cancer,4,Skip1 far,6,0.918421053,6944
+healthy_vs_cancer,5,Skip1 far,6,0.846405229,6944
+healthy_vs_cancer,1,Skip1 far,7,0.889196676,6944
+healthy_vs_cancer,2,Skip1 far,7,0.914285714,6944
+healthy_vs_cancer,3,Skip1 far,7,0.918803419,6944
+healthy_vs_cancer,4,Skip1 far,7,0.845588235,6944
+healthy_vs_cancer,5,Skip1 far,7,0.864705882,6944
+healthy_vs_cancer,1,Skip1 far,8,0.908333333,6944
+healthy_vs_cancer,2,Skip1 far,8,0.967261905,6944
+healthy_vs_cancer,3,Skip1 far,8,0.811728395,6944
+healthy_vs_cancer,4,Skip1 far,8,0.901601831,6944
+healthy_vs_cancer,5,Skip1 far,8,0.887700535,6944
+healthy_vs_cancer,1,Skip1 far,9,0.84375,6944
+healthy_vs_cancer,2,Skip1 far,9,0.87037037,6944
+healthy_vs_cancer,3,Skip1 far,9,0.94212963,6944
+healthy_vs_cancer,4,Skip1 far,9,0.91902834,6944
+healthy_vs_cancer,5,Skip1 far,9,0.854636591,6944
+healthy_vs_cancer,1,Opp. close,0,0.803846154,8184
+healthy_vs_cancer,2,Opp. close,0,0.8767507,8184
+healthy_vs_cancer,3,Opp. close,0,0.937716263,8184
+healthy_vs_cancer,4,Opp. close,0,0.894736842,8184
+healthy_vs_cancer,5,Opp. close,0,0.910034602,8184
+healthy_vs_cancer,1,Opp. close,1,0.942583732,8184
+healthy_vs_cancer,2,Opp. close,1,0.983333333,8184
+healthy_vs_cancer,3,Opp. close,1,0.801857585,8184
+healthy_vs_cancer,4,Opp. close,1,0.714285714,8184
+healthy_vs_cancer,5,Opp. close,1,0.8984375,8184
+healthy_vs_cancer,1,Opp. close,2,0.87962963,8184
+healthy_vs_cancer,2,Opp. close,2,0.868055556,8184
+healthy_vs_cancer,3,Opp. close,2,0.805555556,8184
+healthy_vs_cancer,4,Opp. close,2,0.858024691,8184
+healthy_vs_cancer,5,Opp. close,2,0.952380952,8184
+healthy_vs_cancer,1,Opp. close,3,0.696875,8184
+healthy_vs_cancer,2,Opp. close,3,0.884868421,8184
+healthy_vs_cancer,3,Opp. close,3,0.982638889,8184
+healthy_vs_cancer,4,Opp. close,3,0.886699507,8184
+healthy_vs_cancer,5,Opp. close,3,0.833333333,8184
+healthy_vs_cancer,1,Opp. close,4,0.822222222,8184
+healthy_vs_cancer,2,Opp. close,4,0.956656347,8184
+healthy_vs_cancer,3,Opp. close,4,0.872576177,8184
+healthy_vs_cancer,4,Opp. close,4,0.869806094,8184
+healthy_vs_cancer,5,Opp. close,4,0.886554622,8184
+healthy_vs_cancer,1,Opp. close,5,0.960784314,8184
+healthy_vs_cancer,2,Opp. close,5,0.85467128,8184
+healthy_vs_cancer,3,Opp. close,5,0.819548872,8184
+healthy_vs_cancer,4,Opp. close,5,0.858725762,8184
+healthy_vs_cancer,5,Opp. close,5,0.906417112,8184
+healthy_vs_cancer,1,Opp. close,6,0.883333333,8184
+healthy_vs_cancer,2,Opp. close,6,0.87962963,8184
+healthy_vs_cancer,3,Opp. close,6,0.840336134,8184
+healthy_vs_cancer,4,Opp. close,6,0.918421053,8184
+healthy_vs_cancer,5,Opp. close,6,0.833333333,8184
+healthy_vs_cancer,1,Opp. close,7,0.858725762,8184
+healthy_vs_cancer,2,Opp. close,7,0.907142857,8184
+healthy_vs_cancer,3,Opp. close,7,0.923076923,8184
+healthy_vs_cancer,4,Opp. close,7,0.757352941,8184
+healthy_vs_cancer,5,Opp. close,7,0.847058824,8184
+healthy_vs_cancer,1,Opp. close,8,0.858333333,8184
+healthy_vs_cancer,2,Opp. close,8,0.967261905,8184
+healthy_vs_cancer,3,Opp. close,8,0.845679012,8184
+healthy_vs_cancer,4,Opp. close,8,0.869565217,8184
+healthy_vs_cancer,5,Opp. close,8,0.834224599,8184
+healthy_vs_cancer,1,Opp. close,9,0.81875,8184
+healthy_vs_cancer,2,Opp. close,9,0.833333333,8184
+healthy_vs_cancer,3,Opp. close,9,0.958333333,8184
+healthy_vs_cancer,4,Opp. close,9,0.910931174,8184
+healthy_vs_cancer,5,Opp. close,9,0.827067669,8184
+healthy_vs_cancer,1,Opp. medium,0,0.819230769,8184
+healthy_vs_cancer,2,Opp. medium,0,0.913165266,8184
+healthy_vs_cancer,3,Opp. medium,0,0.934256055,8184
+healthy_vs_cancer,4,Opp. medium,0,0.912280702,8184
+healthy_vs_cancer,5,Opp. medium,0,0.91349481,8184
+healthy_vs_cancer,1,Opp. medium,1,0.944976077,8184
+healthy_vs_cancer,2,Opp. medium,1,0.994444444,8184
+healthy_vs_cancer,3,Opp. medium,1,0.817337461,8184
+healthy_vs_cancer,4,Opp. medium,1,0.796296296,8184
+healthy_vs_cancer,5,Opp. medium,1,0.9296875,8184
+healthy_vs_cancer,1,Opp. medium,2,0.851851852,8184
+healthy_vs_cancer,2,Opp. medium,2,0.928240741,8184
+healthy_vs_cancer,3,Opp. medium,2,0.840909091,8184
+healthy_vs_cancer,4,Opp. medium,2,0.87037037,8184
+healthy_vs_cancer,5,Opp. medium,2,0.976190476,8184
+healthy_vs_cancer,1,Opp. medium,3,0.8,8184
+healthy_vs_cancer,2,Opp. medium,3,0.875,8184
+healthy_vs_cancer,3,Opp. medium,3,0.9375,8184
+healthy_vs_cancer,4,Opp. medium,3,0.914614122,8184
+healthy_vs_cancer,5,Opp. medium,3,0.829166667,8184
+healthy_vs_cancer,1,Opp. medium,4,0.915555556,8184
+healthy_vs_cancer,2,Opp. medium,4,0.962848297,8184
+healthy_vs_cancer,3,Opp. medium,4,0.894736842,8184
+healthy_vs_cancer,4,Opp. medium,4,0.822714681,8184
+healthy_vs_cancer,5,Opp. medium,4,0.953781513,8184
+healthy_vs_cancer,1,Opp. medium,5,0.964052288,8184
+healthy_vs_cancer,2,Opp. medium,5,0.896193772,8184
+healthy_vs_cancer,3,Opp. medium,5,0.852130326,8184
+healthy_vs_cancer,4,Opp. medium,5,0.880886427,8184
+healthy_vs_cancer,5,Opp. medium,5,0.882352941,8184
+healthy_vs_cancer,1,Opp. medium,6,0.95,8184
+healthy_vs_cancer,2,Opp. medium,6,0.901234568,8184
+healthy_vs_cancer,3,Opp. medium,6,0.918767507,8184
+healthy_vs_cancer,4,Opp. medium,6,0.907894737,8184
+healthy_vs_cancer,5,Opp. medium,6,0.823529412,8184
+healthy_vs_cancer,1,Opp. medium,7,0.87534626,8184
+healthy_vs_cancer,2,Opp. medium,7,0.875,8184
+healthy_vs_cancer,3,Opp. medium,7,0.94017094,8184
+healthy_vs_cancer,4,Opp. medium,7,0.852941176,8184
+healthy_vs_cancer,5,Opp. medium,7,0.841176471,8184
+healthy_vs_cancer,1,Opp. medium,8,0.9125,8184
+healthy_vs_cancer,2,Opp. medium,8,0.979166667,8184
+healthy_vs_cancer,3,Opp. medium,8,0.796296296,8184
+healthy_vs_cancer,4,Opp. medium,8,0.892448513,8184
+healthy_vs_cancer,5,Opp. medium,8,0.887700535,8184
+healthy_vs_cancer,1,Opp. medium,9,0.809375,8184
+healthy_vs_cancer,2,Opp. medium,9,0.901234568,8184
+healthy_vs_cancer,3,Opp. medium,9,0.914351852,8184
+healthy_vs_cancer,4,Opp. medium,9,0.931174089,8184
+healthy_vs_cancer,5,Opp. medium,9,0.857142857,8184
+healthy_vs_cancer,1,Opp. far,0,0.815384615,8184
+healthy_vs_cancer,2,Opp. far,0,0.910364146,8184
+healthy_vs_cancer,3,Opp. far,0,0.930795848,8184
+healthy_vs_cancer,4,Opp. far,0,0.905263158,8184
+healthy_vs_cancer,5,Opp. far,0,0.906574394,8184
+healthy_vs_cancer,1,Opp. far,1,0.937799043,8184
+healthy_vs_cancer,2,Opp. far,1,0.991666667,8184
+healthy_vs_cancer,3,Opp. far,1,0.795665635,8184
+healthy_vs_cancer,4,Opp. far,1,0.772486772,8184
+healthy_vs_cancer,5,Opp. far,1,0.9296875,8184
+healthy_vs_cancer,1,Opp. far,2,0.851851852,8184
+healthy_vs_cancer,2,Opp. far,2,0.925925926,8184
+healthy_vs_cancer,3,Opp. far,2,0.828282828,8184
+healthy_vs_cancer,4,Opp. far,2,0.87037037,8184
+healthy_vs_cancer,5,Opp. far,2,0.976190476,8184
+healthy_vs_cancer,1,Opp. far,3,0.79375,8184
+healthy_vs_cancer,2,Opp. far,3,0.865131579,8184
+healthy_vs_cancer,3,Opp. far,3,0.947916667,8184
+healthy_vs_cancer,4,Opp. far,3,0.904761905,8184
+healthy_vs_cancer,5,Opp. far,3,0.8125,8184
+healthy_vs_cancer,1,Opp. far,4,0.895555556,8184
+healthy_vs_cancer,2,Opp. far,4,0.969040248,8184
+healthy_vs_cancer,3,Opp. far,4,0.889196676,8184
+healthy_vs_cancer,4,Opp. far,4,0.797783934,8184
+healthy_vs_cancer,5,Opp. far,4,0.941176471,8184
+healthy_vs_cancer,1,Opp. far,5,0.954248366,8184
+healthy_vs_cancer,2,Opp. far,5,0.892733564,8184
+healthy_vs_cancer,3,Opp. far,5,0.829573935,8184
+healthy_vs_cancer,4,Opp. far,5,0.87534626,8184
+healthy_vs_cancer,5,Opp. far,5,0.879679144,8184
+healthy_vs_cancer,1,Opp. far,6,0.941666667,8184
+healthy_vs_cancer,2,Opp. far,6,0.895061728,8184
+healthy_vs_cancer,3,Opp. far,6,0.907563025,8184
+healthy_vs_cancer,4,Opp. far,6,0.918421053,8184
+healthy_vs_cancer,5,Opp. far,6,0.833333333,8184
+healthy_vs_cancer,1,Opp. far,7,0.872576177,8184
+healthy_vs_cancer,2,Opp. far,7,0.853571429,8184
+healthy_vs_cancer,3,Opp. far,7,0.935897436,8184
+healthy_vs_cancer,4,Opp. far,7,0.845588235,8184
+healthy_vs_cancer,5,Opp. far,7,0.864705882,8184
+healthy_vs_cancer,1,Opp. far,8,0.891666667,8184
+healthy_vs_cancer,2,Opp. far,8,0.976190476,8184
+healthy_vs_cancer,3,Opp. far,8,0.799382716,8184
+healthy_vs_cancer,4,Opp. far,8,0.881006865,8184
+healthy_vs_cancer,5,Opp. far,8,0.879679144,8184
+healthy_vs_cancer,1,Opp. far,9,0.825,8184
+healthy_vs_cancer,2,Opp. far,9,0.885802469,8184
+healthy_vs_cancer,3,Opp. far,9,0.930555556,8184
+healthy_vs_cancer,4,Opp. far,9,0.927125506,8184
+healthy_vs_cancer,5,Opp. far,9,0.864661654,8184
+MC,1,Long a+,0,0.809801472,496
+MC,2,Long a+,0,0.769895929,496
+MC,3,Long a+,0,0.80125,496
+MC,4,Long a+,0,0.664571006,496
+MC,5,Long a+,0,0.743162571,496
+MC,1,Long a+,1,0.762655389,496
+MC,2,Long a+,1,0.68319877,496
+MC,3,Long a+,1,0.754837883,496
+MC,4,Long a+,1,0.709490741,496
+MC,5,Long a+,1,0.862258953,496
+MC,1,Long a+,2,0.765910523,496
+MC,2,Long a+,2,0.741197988,496
+MC,3,Long a+,2,0.730537202,496
+MC,4,Long a+,2,0.794668888,496
+MC,5,Long a+,2,0.657552083,496
+MC,1,Long a+,3,0.72671176,496
+MC,2,Long a+,3,0.797344198,496
+MC,3,Long a+,3,0.665833333,496
+MC,4,Long a+,3,0.736637512,496
+MC,5,Long a+,3,0.839746492,496
+MC,1,Long a+,4,0.753866667,496
+MC,2,Long a+,4,0.749131944,496
+MC,3,Long a+,4,0.741894143,496
+MC,4,Long a+,4,0.785893919,496
+MC,5,Long a+,4,0.718879791,496
+MC,1,Long a+,5,0.627748843,496
+MC,2,Long a+,5,0.763787721,496
+MC,3,Long a+,5,0.816477375,496
+MC,4,Long a+,5,0.741563361,496
+MC,5,Long a+,5,0.750646366,496
+MC,1,Long a+,6,0.715866667,496
+MC,2,Long a+,6,0.76462963,496
+MC,3,Long a+,6,0.863980716,496
+MC,4,Long a+,6,0.665075231,496
+MC,5,Long a+,6,0.779606767,496
+MC,1,Long a+,7,0.704542025,496
+MC,2,Long a+,7,0.794175343,496
+MC,3,Long a+,7,0.749466667,496
+MC,4,Long a+,7,0.695849113,496
+MC,5,Long a+,7,0.75473251,496
+MC,1,Long a+,8,0.773547492,496
+MC,2,Long a+,8,0.809662641,496
+MC,3,Long a+,8,0.773483948,496
+MC,4,Long a+,8,0.730173387,496
+MC,5,Long a+,8,0.719979495,496
+MC,1,Long a+,9,0.7548,496
+MC,2,Long a+,9,0.775085034,496
+MC,3,Long a+,9,0.643579297,496
+MC,4,Long a+,9,0.700385675,496
+MC,5,Long a+,9,0.788049769,496
+MC,1,Long a+ ext.,0,0.823545745,3720
+MC,2,Long a+ ext.,0,0.77509948,3720
+MC,3,Long a+ ext.,0,0.788125,3720
+MC,4,Long a+ ext.,0,0.679980276,3720
+MC,5,Long a+ ext.,0,0.747743996,3720
+MC,1,Long a+ ext.,1,0.768422402,3720
+MC,2,Long a+ ext.,1,0.712802768,3720
+MC,3,Long a+ ext.,1,0.787517621,3720
+MC,4,Long a+ ext.,1,0.685040509,3720
+MC,5,Long a+ ext.,1,0.849586777,3720
+MC,1,Long a+ ext.,2,0.753623188,3720
+MC,2,Long a+ ext.,2,0.766460905,3720
+MC,3,Long a+ ext.,2,0.726515369,3720
+MC,4,Long a+ ext.,2,0.817714841,3720
+MC,5,Long a+ ext.,2,0.680989583,3720
+MC,1,Long a+ ext.,3,0.740358372,3720
+MC,2,Long a+ ext.,3,0.788290327,3720
+MC,3,Long a+ ext.,3,0.642037037,3720
+MC,4,Long a+ ext.,3,0.723309732,3720
+MC,5,Long a+ ext.,3,0.837483024,3720
+MC,1,Long a+ ext.,4,0.752933333,3720
+MC,2,Long a+ ext.,4,0.762586806,3720
+MC,3,Long a+ ext.,4,0.738562092,3720
+MC,4,Long a+ ext.,4,0.76486054,3720
+MC,5,Long a+ ext.,4,0.709861161,3720
+MC,1,Long a+ ext.,5,0.652199074,3720
+MC,2,Long a+ ext.,5,0.777662157,3720
+MC,3,Long a+ ext.,5,0.825130701,3720
+MC,4,Long a+ ext.,5,0.723829201,3720
+MC,5,Long a+ ext.,5,0.685722494,3720
+MC,1,Long a+ ext.,6,0.721866667,3720
+MC,2,Long a+ ext.,6,0.7725,3720
+MC,3,Long a+ ext.,6,0.861570248,3720
+MC,4,Long a+ ext.,6,0.677083333,3720
+MC,5,Long a+ ext.,6,0.794810242,3720
+MC,1,Long a+ ext.,7,0.712388713,3720
+MC,2,Long a+ ext.,7,0.770484382,3720
+MC,3,Long a+ ext.,7,0.7628,3720
+MC,4,Long a+ ext.,7,0.700081681,3720
+MC,5,Long a+ ext.,7,0.755720165,3720
+MC,1,Long a+ ext.,8,0.757485624,3720
+MC,2,Long a+ ext.,8,0.780646953,3720
+MC,3,Long a+ ext.,8,0.741280222,3720
+MC,4,Long a+ ext.,8,0.751923669,3720
+MC,5,Long a+ ext.,8,0.71613482,3720
+MC,1,Long a+ ext.,9,0.761466667,3720
+MC,2,Long a+ ext.,9,0.801445578,3720
+MC,3,Long a+ ext.,9,0.622151803,3720
+MC,4,Long a+ ext.,9,0.722203857,3720
+MC,5,Long a+ ext.,9,0.794994213,3720
+MC,1,Med. a+ ext.,0,0.814521727,3720
+MC,2,Med. a+ ext.,0,0.809152127,3720
+MC,3,Med. a+ ext.,0,0.772916667,3720
+MC,4,Med. a+ ext.,0,0.663954635,3720
+MC,5,Med. a+ ext.,0,0.731223101,3720
+MC,1,Med. a+ ext.,1,0.759964116,3720
+MC,2,Med. a+ ext.,1,0.693066769,3720
+MC,3,Med. a+ ext.,1,0.765731129,3720
+MC,4,Med. a+ ext.,1,0.714265046,3720
+MC,5,Med. a+ ext.,1,0.829972452,3720
+MC,1,Med. a+ ext.,2,0.77347196,3720
+MC,2,Med. a+ ext.,2,0.76611797,3720
+MC,3,Med. a+ ext.,2,0.738772383,3720
+MC,4,Med. a+ ext.,2,0.763154241,3720
+MC,5,Med. a+ ext.,2,0.700665509,3720
+MC,1,Med. a+ ext.,3,0.726355761,3720
+MC,2,Med. a+ ext.,3,0.786177758,3720
+MC,3,Med. a+ ext.,3,0.692777778,3720
+MC,4,Med. a+ ext.,3,0.808690823,3720
+MC,5,Med. a+ ext.,3,0.83567225,3720
+MC,1,Med. a+ ext.,4,0.779333333,3720
+MC,2,Med. a+ ext.,4,0.744646991,3720
+MC,3,Med. a+ ext.,4,0.755606818,3720
+MC,4,Med. a+ ext.,4,0.792866941,3720
+MC,5,Med. a+ ext.,4,0.697757209,3720
+MC,1,Med. a+ ext.,5,0.649594907,3720
+MC,2,Med. a+ ext.,5,0.766215747,3720
+MC,3,Med. a+ ext.,5,0.81918154,3720
+MC,4,Med. a+ ext.,5,0.737258953,3720
+MC,5,Med. a+ ext.,5,0.699607393,3720
+MC,1,Med. a+ ext.,6,0.7268,3720
+MC,2,Med. a+ ext.,6,0.761574074,3720
+MC,3,Med. a+ ext.,6,0.862775482,3720
+MC,4,Med. a+ ext.,6,0.708478009,3720
+MC,5,Med. a+ ext.,6,0.798925469,3720
+MC,1,Med. a+ ext.,7,0.702278557,3720
+MC,2,Med. a+ ext.,7,0.792515467,3720
+MC,3,Med. a+ ext.,7,0.791733333,3720
+MC,4,Med. a+ ext.,7,0.707432984,3720
+MC,5,Med. a+ ext.,7,0.711604938,3720
+MC,1,Med. a+ ext.,8,0.746777712,3720
+MC,2,Med. a+ ext.,8,0.79230876,3720
+MC,3,Med. a+ ext.,8,0.757827983,3720
+MC,4,Med. a+ ext.,8,0.721144968,3720
+MC,5,Med. a+ ext.,8,0.741253364,3720
+MC,1,Med. a+ ext.,9,0.816,3720
+MC,2,Med. a+ ext.,9,0.76307398,3720
+MC,3,Med. a+ ext.,9,0.608721895,3720
+MC,4,Med. a+ ext.,9,0.762754821,3720
+MC,5,Med. a+ ext.,9,0.797164352,3720
+MC,1,Skip1 close,0,0.8202138,11160
+MC,2,Skip1 close,0,0.767064585,11160
+MC,3,Skip1 close,0,0.782916667,11160
+MC,4,Skip1 close,0,0.636464497,11160
+MC,5,Skip1 close,0,0.689296127,11160
+MC,1,Skip1 close,1,0.742406767,11160
+MC,2,Skip1 close,1,0.712161989,11160
+MC,3,Skip1 close,1,0.789439959,11160
+MC,4,Skip1 close,1,0.676359954,11160
+MC,5,Skip1 close,1,0.820826446,11160
+MC,1,Skip1 close,2,0.763074984,11160
+MC,2,Skip1 close,2,0.734339278,11160
+MC,3,Skip1 close,2,0.734367519,11160
+MC,4,Skip1 close,2,0.79092045,11160
+MC,5,Skip1 close,2,0.684172454,11160
+MC,1,Skip1 close,3,0.731577074,11160
+MC,2,Skip1 close,3,0.780594537,11160
+MC,3,Skip1 close,3,0.642314815,11160
+MC,4,Skip1 close,3,0.733860891,11160
+MC,5,Skip1 close,3,0.815150143,11160
+MC,1,Skip1 close,4,0.737466667,11160
+MC,2,Skip1 close,4,0.77025463,11160
+MC,3,Skip1 close,4,0.709470716,11160
+MC,4,Skip1 close,4,0.780521262,11160
+MC,5,Skip1 close,4,0.697994541,11160
+MC,1,Skip1 close,5,0.631655093,11160
+MC,2,Skip1 close,5,0.754595907,11160
+MC,3,Skip1 close,5,0.85559762,11160
+MC,4,Skip1 close,5,0.735020661,11160
+MC,5,Skip1 close,5,0.687350378,11160
+MC,1,Skip1 close,6,0.7144,11160
+MC,2,Skip1 close,6,0.747592593,11160
+MC,3,Skip1 close,6,0.858298898,11160
+MC,4,Skip1 close,6,0.667100694,11160
+MC,5,Skip1 close,6,0.760402378,11160
+MC,1,Skip1 close,7,0.702429455,11160
+MC,2,Skip1 close,7,0.761430512,11160
+MC,3,Skip1 close,7,0.787866667,11160
+MC,4,Skip1 close,7,0.700452959,11160
+MC,5,Skip1 close,7,0.750123457,11160
+MC,1,Skip1 close,8,0.75649415,11160
+MC,2,Skip1 close,8,0.765375538,11160
+MC,3,Skip1 close,8,0.756044392,11160
+MC,4,Skip1 close,8,0.726274751,11160
+MC,5,Skip1 close,8,0.706138665,11160
+MC,1,Skip1 close,9,0.774266667,11160
+MC,2,Skip1 close,9,0.763711735,11160
+MC,3,Skip1 close,9,0.6153614,11160
+MC,4,Skip1 close,9,0.726280992,11160
+MC,5,Skip1 close,9,0.774594907,11160
+MC,1,Adj. close,0,0.819658476,9052
+MC,2,Adj. close,0,0.751530456,9052
+MC,3,Adj. close,0,0.808958333,9052
+MC,4,Adj. close,0,0.667036489,9052
+MC,5,Adj. close,0,0.682354574,9052
+MC,1,Adj. close,1,0.725746508,9052
+MC,2,Adj. close,1,0.709598872,9052
+MC,3,Adj. close,1,0.767397155,9052
+MC,4,Adj. close,1,0.679253472,9052
+MC,5,Adj. close,1,0.797465565,9052
+MC,1,Adj. close,2,0.776465028,9052
+MC,2,Adj. close,2,0.741769547,9052
+MC,3,Adj. close,2,0.749018481,9052
+MC,4,Adj. close,2,0.78425656,9052
+MC,5,Adj. close,2,0.664641204,9052
+MC,1,Adj. close,3,0.728966417,9052
+MC,2,Adj. close,3,0.780594537,9052
+MC,3,Adj. close,3,0.653425926,9052
+MC,4,Adj. close,3,0.727891156,9052
+MC,5,Adj. close,3,0.83355968,9052
+MC,1,Adj. close,4,0.732533333,9052
+MC,2,Adj. close,4,0.737702546,9052
+MC,3,Adj. close,4,0.755478662,9052
+MC,4,Adj. close,4,0.758802012,9052
+MC,5,Adj. close,4,0.698825205,9052
+MC,1,Adj. close,5,0.65234375,9052
+MC,2,Adj. close,5,0.764481443,9052
+MC,3,Adj. close,5,0.864070669,9052
+MC,4,Adj. close,5,0.738119835,9052
+MC,5,Adj. close,5,0.702575888,9052
+MC,1,Adj. close,6,0.736133333,9052
+MC,2,Adj. close,6,0.743611111,9052
+MC,3,Adj. close,6,0.848657025,9052
+MC,4,Adj. close,6,0.676793981,9052
+MC,5,Adj. close,6,0.776977595,9052
+MC,1,Adj. close,7,0.684472612,9052
+MC,2,Adj. close,7,0.762486796,9052
+MC,3,Adj. close,7,0.8012,9052
+MC,4,Adj. close,7,0.69740848,9052
+MC,5,Adj. close,7,0.770041152,9052
+MC,1,Adj. close,8,0.742811818,9052
+MC,2,Adj. close,8,0.784117729,9052
+MC,3,Adj. close,8,0.769916766,9052
+MC,4,Adj. close,8,0.726274751,9052
+MC,5,Adj. close,8,0.717544534,9052
+MC,1,Adj. close,9,0.7864,9052
+MC,2,Adj. close,9,0.764880952,9052
+MC,3,Adj. close,9,0.635430813,9052
+MC,4,Adj. close,9,0.73707989,9052
+MC,5,Adj. close,9,0.770109954,9052
+MC,1,Med. adj.,0,0.836595863,11997
+MC,2,Med. adj.,0,0.763008877,11997
+MC,3,Med. adj.,0,0.816875,11997
+MC,4,Med. adj.,0,0.65581854,11997
+MC,5,Med. adj.,0,0.714702207,11997
+MC,1,Med. adj.,1,0.746892221,11997
+MC,2,Med. adj.,1,0.67704729,11997
+MC,3,Med. adj.,1,0.781366141,11997
+MC,4,Med. adj.,1,0.71484375,11997
+MC,5,Med. adj.,1,0.81046832,11997
+MC,1,Med. adj.,2,0.770478891,11997
+MC,2,Med. adj.,2,0.755944216,11997
+MC,3,Med. adj.,2,0.714258355,11997
+MC,4,Med. adj.,2,0.780508122,11997
+MC,5,Med. adj.,2,0.683449074,11997
+MC,1,Med. adj.,3,0.729559748,11997
+MC,2,Med. adj.,3,0.786630451,11997
+MC,3,Med. adj.,3,0.660462963,11997
+MC,4,Med. adj.,3,0.758711648,11997
+MC,5,Med. adj.,3,0.831145315,11997
+MC,1,Med. adj.,4,0.778533333,11997
+MC,2,Med. adj.,4,0.728298611,11997
+MC,3,Med. adj.,4,0.747533,11997
+MC,4,Med. adj.,4,0.806698674,11997
+MC,5,Med. adj.,4,0.719829121,11997
+MC,1,Med. adj.,5,0.639322917,11997
+MC,2,Med. adj.,5,0.775147416,11997
+MC,3,Med. adj.,5,0.821885704,11997
+MC,4,Med. adj.,5,0.733815427,11997
+MC,5,Med. adj.,5,0.699128603,11997
+MC,1,Med. adj.,6,0.728666667,11997
+MC,2,Med. adj.,6,0.736111111,11997
+MC,3,Med. adj.,6,0.856404959,11997
+MC,4,Med. adj.,6,0.697193287,11997
+MC,5,Med. adj.,6,0.786922725,11997
+MC,1,Med. adj.,7,0.701825864,11997
+MC,2,Med. adj.,7,0.795986117,11997
+MC,3,Med. adj.,7,0.7224,11997
+MC,4,Med. adj.,7,0.707581496,11997
+MC,5,Med. adj.,7,0.74781893,11997
+MC,1,Med. adj.,8,0.745984533,11997
+MC,2,Med. adj.,8,0.771206442,11997
+MC,3,Med. adj.,8,0.764863258,11997
+MC,4,Med. adj.,8,0.726685134,11997
+MC,5,Med. adj.,8,0.727540689,11997
+MC,1,Med. adj.,9,0.768133333,11997
+MC,2,Med. adj.,9,0.765412415,11997
+MC,3,Med. adj.,9,0.64056134,11997
+MC,4,Med. adj.,9,0.723305785,11997
+MC,5,Med. adj.,9,0.821759259,11997
+MC,1,Adj. far,0,0.821879772,20460
+MC,2,Adj. far,0,0.783210897,20460
+MC,3,Adj. far,0,0.804166667,20460
+MC,4,Adj. far,0,0.66321499,20460
+MC,5,Adj. far,0,0.726364015,20460
+MC,1,Adj. far,1,0.75586313,20460
+MC,2,Adj. far,1,0.711649366,20460
+MC,3,Adj. far,1,0.744841728,20460
+MC,4,Adj. far,1,0.734230324,20460
+MC,5,Adj. far,1,0.851570248,20460
+MC,1,Adj. far,2,0.758349086,20460
+MC,2,Adj. far,2,0.753657979,20460
+MC,3,Adj. far,2,0.713300776,20460
+MC,4,Adj. far,2,0.766625017,20460
+MC,5,Adj. far,2,0.750578704,20460
+MC,1,Adj. far,3,0.758751632,20460
+MC,2,Adj. far,3,0.815150143,20460
+MC,3,Adj. far,3,0.644537037,20460
+MC,4,Adj. far,3,0.78023046,20460
+MC,5,Adj. far,3,0.801720235,20460
+MC,1,Adj. far,4,0.752133333,20460
+MC,2,Adj. far,4,0.736255787,20460
+MC,3,Adj. far,4,0.789055491,20460
+MC,4,Adj. far,4,0.814243256,20460
+MC,5,Adj. far,4,0.693485226,20460
+MC,1,Adj. far,5,0.645978009,20460
+MC,2,Adj. far,5,0.786853972,20460
+MC,3,Adj. far,5,0.794122949,20460
+MC,4,Adj. far,5,0.745006887,20460
+MC,5,Adj. far,5,0.697117686,20460
+MC,1,Adj. far,6,0.725466667,20460
+MC,2,Adj. far,6,0.738333333,20460
+MC,3,Adj. far,6,0.87362259,20460
+MC,4,Adj. far,6,0.700665509,20460
+MC,5,Adj. far,6,0.815386374,20460
+MC,1,Adj. far,7,0.718122831,20460
+MC,2,Adj. far,7,0.795231628,20460
+MC,3,Adj. far,7,0.7856,20460
+MC,4,Adj. far,7,0.733125418,20460
+MC,5,Adj. far,7,0.743045267,20460
+MC,1,Adj. far,8,0.767003768,20460
+MC,2,Adj. far,8,0.771067611,20460
+MC,3,Adj. far,8,0.748018232,20460
+MC,4,Adj. far,8,0.733866831,20460
+MC,5,Adj. far,8,0.738049468,20460
+MC,1,Adj. far,9,0.792133333,20460
+MC,2,Adj. far,9,0.766156463,20460
+MC,3,Adj. far,9,0.627735023,20460
+MC,4,Adj. far,9,0.788870523,20460
+MC,5,Adj. far,9,0.822627315,20460
+MC,1,Skip1 medium,0,0.804525892,13640
+MC,2,Skip1 medium,0,0.799739822,13640
+MC,3,Skip1 medium,0,0.790625,13640
+MC,4,Skip1 medium,0,0.668392505,13640
+MC,5,Skip1 medium,0,0.718728308,13640
+MC,1,Skip1 medium,1,0.76047674,13640
+MC,2,Skip1 medium,1,0.708958093,13640
+MC,3,Skip1 medium,1,0.785210816,13640
+MC,4,Skip1 medium,1,0.72728588,13640
+MC,5,Skip1 medium,1,0.859614325,13640
+MC,1,Skip1 medium,2,0.779458097,13640
+MC,2,Skip1 medium,2,0.743712849,13640
+MC,3,Skip1 medium,2,0.735516614,13640
+MC,4,Skip1 medium,2,0.788560322,13640
+MC,5,Skip1 medium,2,0.711371528,13640
+MC,1,Skip1 medium,3,0.732170405,13640
+MC,2,Skip1 medium,3,0.811377697,13640
+MC,3,Skip1 medium,3,0.688240741,13640
+MC,4,Skip1 medium,3,0.796057198,13640
+MC,5,Skip1 medium,3,0.827071073,13640
+MC,1,Skip1 medium,4,0.767066667,13640
+MC,2,Skip1 medium,4,0.745804398,13640
+MC,3,Skip1 medium,4,0.7321543,13640
+MC,4,Skip1 medium,4,0.831618656,13640
+MC,5,Skip1 medium,4,0.707487837,13640
+MC,1,Skip1 medium,5,0.635416667,13640
+MC,2,Skip1 medium,5,0.789455428,13640
+MC,3,Skip1 medium,5,0.804398774,13640
+MC,4,Skip1 medium,5,0.741563361,13640
+MC,5,Skip1 medium,5,0.693766159,13640
+MC,1,Skip1 medium,6,0.707466667,13640
+MC,2,Skip1 medium,6,0.764444444,13640
+MC,3,Skip1 medium,6,0.854511019,13640
+MC,4,Skip1 medium,6,0.700810185,13640
+MC,5,Skip1 medium,6,0.808070416,13640
+MC,1,Skip1 medium,7,0.700467783,13640
+MC,2,Skip1 medium,7,0.798702279,13640
+MC,3,Skip1 medium,7,0.764533333,13640
+MC,4,Skip1 medium,7,0.713967476,13640
+MC,5,Skip1 medium,7,0.740411523,13640
+MC,1,Skip1 medium,8,0.748958953,13640
+MC,2,Skip1 medium,8,0.789532139,13640
+MC,3,Skip1 medium,8,0.767736821,13640
+MC,4,Skip1 medium,8,0.697342772,13640
+MC,5,Skip1 medium,8,0.724721261,13640
+MC,1,Skip1 medium,9,0.794133333,13640
+MC,2,Skip1 medium,9,0.744685374,13640
+MC,3,Skip1 medium,9,0.626376943,13640
+MC,4,Skip1 medium,9,0.767493113,13640
+MC,5,Skip1 medium,9,0.807002315,13640
+MC,1,Skip1 far,0,0.815910037,6944
+MC,2,Skip1 far,0,0.814661769,6944
+MC,3,Skip1 far,0,0.801458333,6944
+MC,4,Skip1 far,0,0.669008876,6944
+MC,5,Skip1 far,0,0.709981952,6944
+MC,1,Skip1 far,1,0.768294246,6944
+MC,2,Skip1 far,1,0.675381264,6944
+MC,3,Skip1 far,1,0.760092272,6944
+MC,4,Skip1 far,1,0.735532407,6944
+MC,5,Skip1 far,1,0.851129477,6944
+MC,1,Skip1 far,2,0.769533711,6944
+MC,2,Skip1 far,2,0.74439872,6944
+MC,3,Skip1 far,2,0.712151681,6944
+MC,4,Skip1 far,2,0.783840067,6944
+MC,5,Skip1 far,2,0.688946759,6944
+MC,1,Skip1 far,3,0.739527709,6944
+MC,2,Skip1 far,3,0.794477139,6944
+MC,3,Skip1 far,3,0.653148148,6944
+MC,4,Skip1 far,3,0.791198112,6944
+MC,5,Skip1 far,3,0.80911423,6944
+MC,1,Skip1 far,4,0.769066667,6944
+MC,2,Skip1 far,4,0.725115741,6944
+MC,3,Skip1 far,4,0.754966039,6944
+MC,4,Skip1 far,4,0.82441701,6944
+MC,5,Skip1 far,4,0.707369171,6944
+MC,1,Skip1 far,5,0.621383102,6944
+MC,2,Skip1 far,5,0.841224419,6944
+MC,3,Skip1 far,5,0.775914909,6944
+MC,4,Skip1 far,5,0.752582645,6944
+MC,5,Skip1 far,5,0.68543522,6944
+MC,1,Skip1 far,6,0.710266667,6944
+MC,2,Skip1 far,6,0.745648148,6944
+MC,3,Skip1 far,6,0.832988981,6944
+MC,4,Skip1 far,6,0.704282407,6944
+MC,5,Skip1 far,6,0.820530407,6944
+MC,1,Skip1 far,7,0.716161159,6944
+MC,2,Skip1 far,7,0.774558624,6944
+MC,3,Skip1 far,7,0.807333333,6944
+MC,4,Skip1 far,7,0.754733794,6944
+MC,5,Skip1 far,7,0.752427984,6944
+MC,1,Skip1 far,8,0.74459647,6944
+MC,2,Skip1 far,8,0.787727336,6944
+MC,3,Skip1 far,8,0.816191042,6944
+MC,4,Skip1 far,8,0.726274751,6944
+MC,5,Skip1 far,8,0.7069076,6944
+MC,1,Skip1 far,9,0.783066667,6944
+MC,2,Skip1 far,9,0.709289966,6944
+MC,3,Skip1 far,9,0.636788894,6944
+MC,4,Skip1 far,9,0.797355372,6944
+MC,5,Skip1 far,9,0.793258102,6944
+MC,1,Opp. close,0,0.806469527,8184
+MC,2,Opp. close,0,0.785047444,8184
+MC,3,Opp. close,0,0.779166667,8184
+MC,4,Opp. close,0,0.655941815,8184
+MC,5,Opp. close,0,0.717201166,8184
+MC,1,Opp. close,1,0.767012687,8184
+MC,2,Opp. close,1,0.687684224,8184
+MC,3,Opp. close,1,0.784313725,8184
+MC,4,Opp. close,1,0.686631944,8184
+MC,5,Opp. close,1,0.819283747,8184
+MC,1,Opp. close,2,0.767800882,8184
+MC,2,Opp. close,2,0.762688615,8184
+MC,3,Opp. close,2,0.738580868,8184
+MC,4,Opp. close,2,0.804109399,8184
+MC,5,Opp. close,2,0.691116898,8184
+MC,1,Opp. close,3,0.714133143,8184
+MC,2,Opp. close,3,0.791459182,8184
+MC,3,Opp. close,3,0.673518519,8184
+MC,4,Opp. close,3,0.749132306,8184
+MC,5,Opp. close,3,0.827674664,8184
+MC,1,Opp. close,4,0.742266667,8184
+MC,2,Opp. close,4,0.759114583,8184
+MC,3,Opp. close,4,0.757785467,8184
+MC,4,Opp. close,4,0.772176497,8184
+MC,5,Opp. close,4,0.714489142,8184
+MC,1,Opp. close,5,0.661313657,8184
+MC,2,Opp. close,5,0.790409296,8184
+MC,3,Opp. close,5,0.854515955,8184
+MC,4,Opp. close,5,0.741046832,8184
+MC,5,Opp. close,5,0.695298286,8184
+MC,1,Opp. close,6,0.732266667,8184
+MC,2,Opp. close,6,0.7775,8184
+MC,3,Opp. close,6,0.860709366,8184
+MC,4,Opp. close,6,0.673321759,8184
+MC,5,Opp. close,6,0.808184728,8184
+MC,1,Opp. close,7,0.70559831,8184
+MC,2,Opp. close,7,0.784668779,8184
+MC,3,Opp. close,7,0.8136,8184
+MC,4,Opp. close,7,0.715229821,8184
+MC,5,Opp. close,7,0.747160494,8184
+MC,1,Opp. close,8,0.762641285,8184
+MC,2,Opp. close,8,0.774816049,8184
+MC,3,Opp. close,8,0.763376932,8184
+MC,4,Opp. close,8,0.747614651,8184
+MC,5,Opp. close,8,0.712546456,8184
+MC,1,Opp. close,9,0.751066667,8184
+MC,2,Opp. close,9,0.786883503,8184
+MC,3,Opp. close,9,0.622000905,8184
+MC,4,Opp. close,9,0.733774105,8184
+MC,5,Opp. close,9,0.802662037,8184
+MC,1,Opp. medium,0,0.795640705,8184
+MC,2,Opp. medium,0,0.812442608,8184
+MC,3,Opp. medium,0,0.787291667,8184
+MC,4,Opp. medium,0,0.682075937,8184
+MC,5,Opp. medium,0,0.725253367,8184
+MC,1,Opp. medium,1,0.761245675,8184
+MC,2,Opp. medium,1,0.696014353,8184
+MC,3,Opp. medium,1,0.750480584,8184
+MC,4,Opp. medium,1,0.750144676,8184
+MC,5,Opp. medium,1,0.858512397,8184
+MC,1,Opp. medium,2,0.753150599,8184
+MC,2,Opp. medium,2,0.75617284,8184
+MC,3,Opp. medium,2,0.703533467,8184
+MC,4,Opp. medium,2,0.775926697,8184
+MC,5,Opp. medium,2,0.75,8184
+MC,1,Opp. medium,3,0.741070369,8184
+MC,2,Opp. medium,3,0.761279614,8184
+MC,3,Opp. medium,3,0.654259259,8184
+MC,4,Opp. medium,3,0.808135499,8184
+MC,5,Opp. medium,3,0.820733364,8184
+MC,1,Opp. medium,4,0.773733333,8184
+MC,2,Opp. medium,4,0.731626157,8184
+MC,3,Opp. medium,4,0.756888376,8184
+MC,4,Opp. medium,4,0.853909465,8184
+MC,5,Opp. medium,4,0.713895811,8184
+MC,1,Opp. medium,5,0.666521991,8184
+MC,2,Opp. medium,5,0.832292751,8184
+MC,3,Opp. medium,5,0.797548224,8184
+MC,4,Opp. medium,5,0.744318182,8184
+MC,5,Opp. medium,5,0.703150436,8184
+MC,1,Opp. medium,6,0.710666667,8184
+MC,2,Opp. medium,6,0.759259259,8184
+MC,3,Opp. medium,6,0.834710744,8184
+MC,4,Opp. medium,6,0.728009259,8184
+MC,5,Opp. medium,6,0.818015546,8184
+MC,1,Opp. medium,7,0.725969519,8184
+MC,2,Opp. medium,7,0.793269956,8184
+MC,3,Opp. medium,7,0.7764,8184
+MC,4,Opp. medium,7,0.735575852,8184
+MC,5,Opp. medium,7,0.742222222,8184
+MC,1,Opp. medium,8,0.768193536,8184
+MC,2,Opp. medium,8,0.804664723,8184
+MC,3,Opp. medium,8,0.742072929,8184
+MC,4,Opp. medium,8,0.735200575,8184
+MC,5,Opp. medium,8,0.695117263,8184
+MC,1,Opp. medium,9,0.793066667,8184
+MC,2,Opp. medium,9,0.76477466,8184
+MC,3,Opp. medium,9,0.651124189,8184
+MC,4,Opp. medium,9,0.773333333,8184
+MC,5,Opp. medium,9,0.790364583,8184
+MC,1,Opp. far,0,0.805914202,8184
+MC,2,Opp. far,0,0.804790328,8184
+MC,3,Opp. far,0,0.804375,8184
+MC,4,Opp. far,0,0.665557199,8184
+MC,5,Opp. far,0,0.708732473,8184
+MC,1,Opp. far,1,0.741253364,8184
+MC,2,Opp. far,1,0.698321159,8184
+MC,3,Opp. far,1,0.734076637,8184
+MC,4,Opp. far,1,0.724247685,8184
+MC,5,Opp. far,1,0.851900826,8184
+MC,1,Opp. far,2,0.744959042,8184
+MC,2,Opp. far,2,0.748171011,8184
+MC,3,Opp. far,2,0.708417122,8184
+MC,4,Opp. far,2,0.784673053,8184
+MC,5,Opp. far,2,0.73119213,8184
+MC,1,Opp. far,3,0.732882402,8184
+MC,2,Opp. far,3,0.805492681,8184
+MC,3,Opp. far,3,0.652222222,8184
+MC,4,Opp. far,3,0.807719006,8184
+MC,5,Opp. far,3,0.802172929,8184
+MC,1,Opp. far,4,0.769333333,8184
+MC,2,Opp. far,4,0.721643519,8184
+MC,3,Opp. far,4,0.761886454,8184
+MC,4,Opp. far,4,0.822016461,8184
+MC,5,Opp. far,4,0.706301175,8184
+MC,1,Opp. far,5,0.648148148,8184
+MC,2,Opp. far,5,0.785293097,8184
+MC,3,Opp. far,5,0.780602127,8184
+MC,4,Opp. far,5,0.752926997,8184
+MC,5,Opp. far,5,0.689648568,8184
+MC,1,Opp. far,6,0.7192,8184
+MC,2,Opp. far,6,0.764351852,8184
+MC,3,Opp. far,6,0.856577135,8184
+MC,4,Opp. far,6,0.706741898,8184
+MC,5,Opp. far,6,0.793324188,8184
+MC,1,Opp. far,7,0.711483326,8184
+MC,2,Opp. far,7,0.791157386,8184
+MC,3,Opp. far,7,0.7908,8184
+MC,4,Opp. far,7,0.727407737,8184
+MC,5,Opp. far,7,0.732345679,8184
+MC,1,Opp. far,8,0.769779893,8184
+MC,2,Opp. far,8,0.789948633,8184
+MC,3,Opp. far,8,0.763773286,8184
+MC,4,Opp. far,8,0.714373653,8184
+MC,5,Opp. far,8,0.724464949,8184
+MC,1,Opp. far,9,0.764133333,8184
+MC,2,Opp. far,9,0.754889456,8184
+MC,3,Opp. far,9,0.637694281,8184
+MC,4,Opp. far,9,0.732011019,8184
+MC,5,Opp. far,9,0.808738426,8184
+hr_vs_lr,1,Long a+,0,0.557575758,496
+hr_vs_lr,2,Long a+,0,0.709677419,496
+hr_vs_lr,3,Long a+,0,0.72,496
+hr_vs_lr,4,Long a+,0,0.784313725,496
+hr_vs_lr,5,Long a+,0,0.774410774,496
+hr_vs_lr,1,Long a+,1,0.68452381,496
+hr_vs_lr,2,Long a+,1,0.626984127,496
+hr_vs_lr,3,Long a+,1,0.65625,496
+hr_vs_lr,4,Long a+,1,0.535714286,496
+hr_vs_lr,5,Long a+,1,0.926406926,496
+hr_vs_lr,1,Long a+,2,0.644444444,496
+hr_vs_lr,2,Long a+,2,0.72,496
+hr_vs_lr,3,Long a+,2,0.668817204,496
+hr_vs_lr,4,Long a+,2,0.639751553,496
+hr_vs_lr,5,Long a+,2,0.719298246,496
+hr_vs_lr,1,Long a+,3,0.663265306,496
+hr_vs_lr,2,Long a+,3,0.907142857,496
+hr_vs_lr,3,Long a+,3,0.555555556,496
+hr_vs_lr,4,Long a+,3,0.65,496
+hr_vs_lr,5,Long a+,3,0.7625,496
+hr_vs_lr,1,Long a+,4,0.520833333,496
+hr_vs_lr,2,Long a+,4,0.69047619,496
+hr_vs_lr,3,Long a+,4,0.953333333,496
+hr_vs_lr,4,Long a+,4,0.714285714,496
+hr_vs_lr,5,Long a+,4,0.653333333,496
+hr_vs_lr,1,Long a+,5,0.733333333,496
+hr_vs_lr,2,Long a+,5,0.623076923,496
+hr_vs_lr,3,Long a+,5,0.717687075,496
+hr_vs_lr,4,Long a+,5,0.545454545,496
+hr_vs_lr,5,Long a+,5,0.610576923,496
+hr_vs_lr,1,Long a+,6,0.548850575,496
+hr_vs_lr,2,Long a+,6,0.824175824,496
+hr_vs_lr,3,Long a+,6,0.833333333,496
+hr_vs_lr,4,Long a+,6,0.690821256,496
+hr_vs_lr,5,Long a+,6,0.556521739,496
+hr_vs_lr,1,Long a+,7,0.726086957,496
+hr_vs_lr,2,Long a+,7,0.824074074,496
+hr_vs_lr,3,Long a+,7,0.695402299,496
+hr_vs_lr,4,Long a+,7,0.543333333,496
+hr_vs_lr,5,Long a+,7,0.791111111,496
+hr_vs_lr,1,Long a+,8,0.801242236,496
+hr_vs_lr,2,Long a+,8,0.742690058,496
+hr_vs_lr,3,Long a+,8,0.711111111,496
+hr_vs_lr,4,Long a+,8,0.603636364,496
+hr_vs_lr,5,Long a+,8,0.759856631,496
+hr_vs_lr,1,Long a+,9,0.77173913,496
+hr_vs_lr,2,Long a+,9,0.713333333,496
+hr_vs_lr,3,Long a+,9,0.695924765,496
+hr_vs_lr,4,Long a+,9,0.764705882,496
+hr_vs_lr,5,Long a+,9,0.720430108,496
+hr_vs_lr,1,Long a+ ext.,0,0.548484848,3720
+hr_vs_lr,2,Long a+ ext.,0,0.767741935,3720
+hr_vs_lr,3,Long a+ ext.,0,0.72,3720
+hr_vs_lr,4,Long a+ ext.,0,0.718954248,3720
+hr_vs_lr,5,Long a+ ext.,0,0.791245791,3720
+hr_vs_lr,1,Long a+ ext.,1,0.636904762,3720
+hr_vs_lr,2,Long a+ ext.,1,0.674603175,3720
+hr_vs_lr,3,Long a+ ext.,1,0.645833333,3720
+hr_vs_lr,4,Long a+ ext.,1,0.511904762,3720
+hr_vs_lr,5,Long a+ ext.,1,0.774891775,3720
+hr_vs_lr,1,Long a+ ext.,2,0.62962963,3720
+hr_vs_lr,2,Long a+ ext.,2,0.792,3720
+hr_vs_lr,3,Long a+ ext.,2,0.651612903,3720
+hr_vs_lr,4,Long a+ ext.,2,0.652173913,3720
+hr_vs_lr,5,Long a+ ext.,2,0.760233918,3720
+hr_vs_lr,1,Long a+ ext.,3,0.653061224,3720
+hr_vs_lr,2,Long a+ ext.,3,0.9,3720
+hr_vs_lr,3,Long a+ ext.,3,0.576131687,3720
+hr_vs_lr,4,Long a+ ext.,3,0.646666667,3720
+hr_vs_lr,5,Long a+ ext.,3,0.7625,3720
+hr_vs_lr,1,Long a+ ext.,4,0.548611111,3720
+hr_vs_lr,2,Long a+ ext.,4,0.728571429,3720
+hr_vs_lr,3,Long a+ ext.,4,0.893333333,3720
+hr_vs_lr,4,Long a+ ext.,4,0.588571429,3720
+hr_vs_lr,5,Long a+ ext.,4,0.713333333,3720
+hr_vs_lr,1,Long a+ ext.,5,0.755555556,3720
+hr_vs_lr,2,Long a+ ext.,5,0.615384615,3720
+hr_vs_lr,3,Long a+ ext.,5,0.649659864,3720
+hr_vs_lr,4,Long a+ ext.,5,0.53030303,3720
+hr_vs_lr,5,Long a+ ext.,5,0.600961538,3720
+hr_vs_lr,1,Long a+ ext.,6,0.597701149,3720
+hr_vs_lr,2,Long a+ ext.,6,0.785714286,3720
+hr_vs_lr,3,Long a+ ext.,6,0.861111111,3720
+hr_vs_lr,4,Long a+ ext.,6,0.77294686,3720
+hr_vs_lr,5,Long a+ ext.,6,0.613043478,3720
+hr_vs_lr,1,Long a+ ext.,7,0.726086957,3720
+hr_vs_lr,2,Long a+ ext.,7,0.907407407,3720
+hr_vs_lr,3,Long a+ ext.,7,0.724137931,3720
+hr_vs_lr,4,Long a+ ext.,7,0.533333333,3720
+hr_vs_lr,5,Long a+ ext.,7,0.808888889,3720
+hr_vs_lr,1,Long a+ ext.,8,0.801242236,3720
+hr_vs_lr,2,Long a+ ext.,8,0.801169591,3720
+hr_vs_lr,3,Long a+ ext.,8,0.733333333,3720
+hr_vs_lr,4,Long a+ ext.,8,0.629090909,3720
+hr_vs_lr,5,Long a+ ext.,8,0.738351254,3720
+hr_vs_lr,1,Long a+ ext.,9,0.798913043,3720
+hr_vs_lr,2,Long a+ ext.,9,0.653333333,3720
+hr_vs_lr,3,Long a+ ext.,9,0.667711599,3720
+hr_vs_lr,4,Long a+ ext.,9,0.764705882,3720
+hr_vs_lr,5,Long a+ ext.,9,0.749103943,3720
+hr_vs_lr,1,Med. a+ ext.,0,0.654545455,3720
+hr_vs_lr,2,Med. a+ ext.,0,0.819354839,3720
+hr_vs_lr,3,Med. a+ ext.,0,0.75,3720
+hr_vs_lr,4,Med. a+ ext.,0,0.692810458,3720
+hr_vs_lr,5,Med. a+ ext.,0,0.760942761,3720
+hr_vs_lr,1,Med. a+ ext.,1,0.529761905,3720
+hr_vs_lr,2,Med. a+ ext.,1,0.73015873,3720
+hr_vs_lr,3,Med. a+ ext.,1,0.848958333,3720
+hr_vs_lr,4,Med. a+ ext.,1,0.571428571,3720
+hr_vs_lr,5,Med. a+ ext.,1,0.796536797,3720
+hr_vs_lr,1,Med. a+ ext.,2,0.740740741,3720
+hr_vs_lr,2,Med. a+ ext.,2,0.768,3720
+hr_vs_lr,3,Med. a+ ext.,2,0.572043011,3720
+hr_vs_lr,4,Med. a+ ext.,2,0.639751553,3720
+hr_vs_lr,5,Med. a+ ext.,2,0.771929825,3720
+hr_vs_lr,1,Med. a+ ext.,3,0.693877551,3720
+hr_vs_lr,2,Med. a+ ext.,3,0.821428571,3720
+hr_vs_lr,3,Med. a+ ext.,3,0.489711934,3720
+hr_vs_lr,4,Med. a+ ext.,3,0.726666667,3720
+hr_vs_lr,5,Med. a+ ext.,3,0.675,3720
+hr_vs_lr,1,Med. a+ ext.,4,0.618055556,3720
+hr_vs_lr,2,Med. a+ ext.,4,0.838095238,3720
+hr_vs_lr,3,Med. a+ ext.,4,0.853333333,3720
+hr_vs_lr,4,Med. a+ ext.,4,0.697142857,3720
+hr_vs_lr,5,Med. a+ ext.,4,0.76,3720
+hr_vs_lr,1,Med. a+ ext.,5,0.777777778,3720
+hr_vs_lr,2,Med. a+ ext.,5,0.646153846,3720
+hr_vs_lr,3,Med. a+ ext.,5,0.734693878,3720
+hr_vs_lr,4,Med. a+ ext.,5,0.575757576,3720
+hr_vs_lr,5,Med. a+ ext.,5,0.658653846,3720
+hr_vs_lr,1,Med. a+ ext.,6,0.640804598,3720
+hr_vs_lr,2,Med. a+ ext.,6,0.802197802,3720
+hr_vs_lr,3,Med. a+ ext.,6,0.930555556,3720
+hr_vs_lr,4,Med. a+ ext.,6,0.753623188,3720
+hr_vs_lr,5,Med. a+ ext.,6,0.67826087,3720
+hr_vs_lr,1,Med. a+ ext.,7,0.708695652,3720
+hr_vs_lr,2,Med. a+ ext.,7,0.898148148,3720
+hr_vs_lr,3,Med. a+ ext.,7,0.816091954,3720
+hr_vs_lr,4,Med. a+ ext.,7,0.576666667,3720
+hr_vs_lr,5,Med. a+ ext.,7,0.626666667,3720
+hr_vs_lr,1,Med. a+ ext.,8,0.726708075,3720
+hr_vs_lr,2,Med. a+ ext.,8,0.812865497,3720
+hr_vs_lr,3,Med. a+ ext.,8,0.762962963,3720
+hr_vs_lr,4,Med. a+ ext.,8,0.636363636,3720
+hr_vs_lr,5,Med. a+ ext.,8,0.749103943,3720
+hr_vs_lr,1,Med. a+ ext.,9,0.89673913,3720
+hr_vs_lr,2,Med. a+ ext.,9,0.726666667,3720
+hr_vs_lr,3,Med. a+ ext.,9,0.68338558,3720
+hr_vs_lr,4,Med. a+ ext.,9,0.613445378,3720
+hr_vs_lr,5,Med. a+ ext.,9,0.756272401,3720
+hr_vs_lr,1,Skip1 close,0,0.606060606,11160
+hr_vs_lr,2,Skip1 close,0,0.8,11160
+hr_vs_lr,3,Skip1 close,0,0.66,11160
+hr_vs_lr,4,Skip1 close,0,0.732026144,11160
+hr_vs_lr,5,Skip1 close,0,0.797979798,11160
+hr_vs_lr,1,Skip1 close,1,0.720238095,11160
+hr_vs_lr,2,Skip1 close,1,0.746031746,11160
+hr_vs_lr,3,Skip1 close,1,0.59375,11160
+hr_vs_lr,4,Skip1 close,1,0.583333333,11160
+hr_vs_lr,5,Skip1 close,1,0.826839827,11160
+hr_vs_lr,1,Skip1 close,2,0.718518519,11160
+hr_vs_lr,2,Skip1 close,2,0.824,11160
+hr_vs_lr,3,Skip1 close,2,0.615053763,11160
+hr_vs_lr,4,Skip1 close,2,0.652173913,11160
+hr_vs_lr,5,Skip1 close,2,0.707602339,11160
+hr_vs_lr,1,Skip1 close,3,0.62755102,11160
+hr_vs_lr,2,Skip1 close,3,0.821428571,11160
+hr_vs_lr,3,Skip1 close,3,0.687242798,11160
+hr_vs_lr,4,Skip1 close,3,0.733333333,11160
+hr_vs_lr,5,Skip1 close,3,0.775,11160
+hr_vs_lr,1,Skip1 close,4,0.652777778,11160
+hr_vs_lr,2,Skip1 close,4,0.766666667,11160
+hr_vs_lr,3,Skip1 close,4,0.846666667,11160
+hr_vs_lr,4,Skip1 close,4,0.76,11160
+hr_vs_lr,5,Skip1 close,4,0.633333333,11160
+hr_vs_lr,1,Skip1 close,5,0.877777778,11160
+hr_vs_lr,2,Skip1 close,5,0.607692308,11160
+hr_vs_lr,3,Skip1 close,5,0.602040816,11160
+hr_vs_lr,4,Skip1 close,5,0.454545455,11160
+hr_vs_lr,5,Skip1 close,5,0.612980769,11160
+hr_vs_lr,1,Skip1 close,6,0.617816092,11160
+hr_vs_lr,2,Skip1 close,6,0.730769231,11160
+hr_vs_lr,3,Skip1 close,6,0.791666667,11160
+hr_vs_lr,4,Skip1 close,6,0.801932367,11160
+hr_vs_lr,5,Skip1 close,6,0.613043478,11160
+hr_vs_lr,1,Skip1 close,7,0.691304348,11160
+hr_vs_lr,2,Skip1 close,7,0.842592593,11160
+hr_vs_lr,3,Skip1 close,7,0.724137931,11160
+hr_vs_lr,4,Skip1 close,7,0.653333333,11160
+hr_vs_lr,5,Skip1 close,7,0.76,11160
+hr_vs_lr,1,Skip1 close,8,0.875776398,11160
+hr_vs_lr,2,Skip1 close,8,0.67251462,11160
+hr_vs_lr,3,Skip1 close,8,0.644444444,11160
+hr_vs_lr,4,Skip1 close,8,0.683636364,11160
+hr_vs_lr,5,Skip1 close,8,0.788530466,11160
+hr_vs_lr,1,Skip1 close,9,0.717391304,11160
+hr_vs_lr,2,Skip1 close,9,0.686666667,11160
+hr_vs_lr,3,Skip1 close,9,0.648902821,11160
+hr_vs_lr,4,Skip1 close,9,0.806722689,11160
+hr_vs_lr,5,Skip1 close,9,0.734767025,11160
+hr_vs_lr,1,Adj. close,0,0.633333333,9052
+hr_vs_lr,2,Adj. close,0,0.761290323,9052
+hr_vs_lr,3,Adj. close,0,0.69,9052
+hr_vs_lr,4,Adj. close,0,0.77124183,9052
+hr_vs_lr,5,Adj. close,0,0.791245791,9052
+hr_vs_lr,1,Adj. close,1,0.714285714,9052
+hr_vs_lr,2,Adj. close,1,0.742063492,9052
+hr_vs_lr,3,Adj. close,1,0.6875,9052
+hr_vs_lr,4,Adj. close,1,0.619047619,9052
+hr_vs_lr,5,Adj. close,1,0.774891775,9052
+hr_vs_lr,1,Adj. close,2,0.762962963,9052
+hr_vs_lr,2,Adj. close,2,0.832,9052
+hr_vs_lr,3,Adj. close,2,0.647311828,9052
+hr_vs_lr,4,Adj. close,2,0.714285714,9052
+hr_vs_lr,5,Adj. close,2,0.695906433,9052
+hr_vs_lr,1,Adj. close,3,0.602040816,9052
+hr_vs_lr,2,Adj. close,3,0.792857143,9052
+hr_vs_lr,3,Adj. close,3,0.728395062,9052
+hr_vs_lr,4,Adj. close,3,0.72,9052
+hr_vs_lr,5,Adj. close,3,0.84375,9052
+hr_vs_lr,1,Adj. close,4,0.6875,9052
+hr_vs_lr,2,Adj. close,4,0.785714286,9052
+hr_vs_lr,3,Adj. close,4,0.813333333,9052
+hr_vs_lr,4,Adj. close,4,0.722857143,9052
+hr_vs_lr,5,Adj. close,4,0.746666667,9052
+hr_vs_lr,1,Adj. close,5,0.9,9052
+hr_vs_lr,2,Adj. close,5,0.576923077,9052
+hr_vs_lr,3,Adj. close,5,0.68707483,9052
+hr_vs_lr,4,Adj. close,5,0.454545455,9052
+hr_vs_lr,5,Adj. close,5,0.677884615,9052
+hr_vs_lr,1,Adj. close,6,0.646551724,9052
+hr_vs_lr,2,Adj. close,6,0.675824176,9052
+hr_vs_lr,3,Adj. close,6,0.791666667,9052
+hr_vs_lr,4,Adj. close,6,0.811594203,9052
+hr_vs_lr,5,Adj. close,6,0.660869565,9052
+hr_vs_lr,1,Adj. close,7,0.682608696,9052
+hr_vs_lr,2,Adj. close,7,0.759259259,9052
+hr_vs_lr,3,Adj. close,7,0.655172414,9052
+hr_vs_lr,4,Adj. close,7,0.733333333,9052
+hr_vs_lr,5,Adj. close,7,0.746666667,9052
+hr_vs_lr,1,Adj. close,8,0.757763975,9052
+hr_vs_lr,2,Adj. close,8,0.596491228,9052
+hr_vs_lr,3,Adj. close,8,0.666666667,9052
+hr_vs_lr,4,Adj. close,8,0.665454545,9052
+hr_vs_lr,5,Adj. close,8,0.713261649,9052
+hr_vs_lr,1,Adj. close,9,0.798913043,9052
+hr_vs_lr,2,Adj. close,9,0.766666667,9052
+hr_vs_lr,3,Adj. close,9,0.636363636,9052
+hr_vs_lr,4,Adj. close,9,0.74789916,9052
+hr_vs_lr,5,Adj. close,9,0.741935484,9052
+hr_vs_lr,1,Med. adj.,0,0.645454545,11997
+hr_vs_lr,2,Med. adj.,0,0.748387097,11997
+hr_vs_lr,3,Med. adj.,0,0.72,11997
+hr_vs_lr,4,Med. adj.,0,0.705882353,11997
+hr_vs_lr,5,Med. adj.,0,0.804713805,11997
+hr_vs_lr,1,Med. adj.,1,0.607142857,11997
+hr_vs_lr,2,Med. adj.,1,0.765873016,11997
+hr_vs_lr,3,Med. adj.,1,0.536458333,11997
+hr_vs_lr,4,Med. adj.,1,0.672619048,11997
+hr_vs_lr,5,Med. adj.,1,0.848484848,11997
+hr_vs_lr,1,Med. adj.,2,0.696296296,11997
+hr_vs_lr,2,Med. adj.,2,0.84,11997
+hr_vs_lr,3,Med. adj.,2,0.556989247,11997
+hr_vs_lr,4,Med. adj.,2,0.652173913,11997
+hr_vs_lr,5,Med. adj.,2,0.730994152,11997
+hr_vs_lr,1,Med. adj.,3,0.673469388,11997
+hr_vs_lr,2,Med. adj.,3,0.764285714,11997
+hr_vs_lr,3,Med. adj.,3,0.695473251,11997
+hr_vs_lr,4,Med. adj.,3,0.68,11997
+hr_vs_lr,5,Med. adj.,3,0.83125,11997
+hr_vs_lr,1,Med. adj.,4,0.638888889,11997
+hr_vs_lr,2,Med. adj.,4,0.742857143,11997
+hr_vs_lr,3,Med. adj.,4,0.78,11997
+hr_vs_lr,4,Med. adj.,4,0.734285714,11997
+hr_vs_lr,5,Med. adj.,4,0.68,11997
+hr_vs_lr,1,Med. adj.,5,0.888888889,11997
+hr_vs_lr,2,Med. adj.,5,0.576923077,11997
+hr_vs_lr,3,Med. adj.,5,0.602040816,11997
+hr_vs_lr,4,Med. adj.,5,0.621212121,11997
+hr_vs_lr,5,Med. adj.,5,0.564903846,11997
+hr_vs_lr,1,Med. adj.,6,0.568965517,11997
+hr_vs_lr,2,Med. adj.,6,0.791208791,11997
+hr_vs_lr,3,Med. adj.,6,0.805555556,11997
+hr_vs_lr,4,Med. adj.,6,0.739130435,11997
+hr_vs_lr,5,Med. adj.,6,0.647826087,11997
+hr_vs_lr,1,Med. adj.,7,0.639130435,11997
+hr_vs_lr,2,Med. adj.,7,0.925925926,11997
+hr_vs_lr,3,Med. adj.,7,0.747126437,11997
+hr_vs_lr,4,Med. adj.,7,0.64,11997
+hr_vs_lr,5,Med. adj.,7,0.76,11997
+hr_vs_lr,1,Med. adj.,8,0.695652174,11997
+hr_vs_lr,2,Med. adj.,8,0.65497076,11997
+hr_vs_lr,3,Med. adj.,8,0.681481481,11997
+hr_vs_lr,4,Med. adj.,8,0.701818182,11997
+hr_vs_lr,5,Med. adj.,8,0.741935484,11997
+hr_vs_lr,1,Med. adj.,9,0.826086957,11997
+hr_vs_lr,2,Med. adj.,9,0.633333333,11997
+hr_vs_lr,3,Med. adj.,9,0.677115987,11997
+hr_vs_lr,4,Med. adj.,9,0.74789916,11997
+hr_vs_lr,5,Med. adj.,9,0.681003584,11997
+hr_vs_lr,1,Adj. far,0,0.66969697,20460
+hr_vs_lr,2,Adj. far,0,0.75483871,20460
+hr_vs_lr,3,Adj. far,0,0.65,20460
+hr_vs_lr,4,Adj. far,0,0.633986928,20460
+hr_vs_lr,5,Adj. far,0,0.69023569,20460
+hr_vs_lr,1,Adj. far,1,0.476190476,20460
+hr_vs_lr,2,Adj. far,1,0.674603175,20460
+hr_vs_lr,3,Adj. far,1,0.65625,20460
+hr_vs_lr,4,Adj. far,1,0.535714286,20460
+hr_vs_lr,5,Adj. far,1,0.80952381,20460
+hr_vs_lr,1,Adj. far,2,0.733333333,20460
+hr_vs_lr,2,Adj. far,2,0.72,20460
+hr_vs_lr,3,Adj. far,2,0.550537634,20460
+hr_vs_lr,4,Adj. far,2,0.627329193,20460
+hr_vs_lr,5,Adj. far,2,0.69005848,20460
+hr_vs_lr,1,Adj. far,3,0.678571429,20460
+hr_vs_lr,2,Adj. far,3,0.728571429,20460
+hr_vs_lr,3,Adj. far,3,0.674897119,20460
+hr_vs_lr,4,Adj. far,3,0.71,20460
+hr_vs_lr,5,Adj. far,3,0.69375,20460
+hr_vs_lr,1,Adj. far,4,0.548611111,20460
+hr_vs_lr,2,Adj. far,4,0.733333333,20460
+hr_vs_lr,3,Adj. far,4,0.72,20460
+hr_vs_lr,4,Adj. far,4,0.728571429,20460
+hr_vs_lr,5,Adj. far,4,0.66,20460
+hr_vs_lr,1,Adj. far,5,0.744444444,20460
+hr_vs_lr,2,Adj. far,5,0.523076923,20460
+hr_vs_lr,3,Adj. far,5,0.353741497,20460
+hr_vs_lr,4,Adj. far,5,0.606060606,20460
+hr_vs_lr,5,Adj. far,5,0.600961538,20460
+hr_vs_lr,1,Adj. far,6,0.591954023,20460
+hr_vs_lr,2,Adj. far,6,0.763736264,20460
+hr_vs_lr,3,Adj. far,6,0.833333333,20460
+hr_vs_lr,4,Adj. far,6,0.652173913,20460
+hr_vs_lr,5,Adj. far,6,0.643478261,20460
+hr_vs_lr,1,Adj. far,7,0.617391304,20460
+hr_vs_lr,2,Adj. far,7,0.861111111,20460
+hr_vs_lr,3,Adj. far,7,0.810344828,20460
+hr_vs_lr,4,Adj. far,7,0.61,20460
+hr_vs_lr,5,Adj. far,7,0.657777778,20460
+hr_vs_lr,1,Adj. far,8,0.645962733,20460
+hr_vs_lr,2,Adj. far,8,0.713450292,20460
+hr_vs_lr,3,Adj. far,8,0.762962963,20460
+hr_vs_lr,4,Adj. far,8,0.592727273,20460
+hr_vs_lr,5,Adj. far,8,0.713261649,20460
+hr_vs_lr,1,Adj. far,9,0.842391304,20460
+hr_vs_lr,2,Adj. far,9,0.646666667,20460
+hr_vs_lr,3,Adj. far,9,0.614420063,20460
+hr_vs_lr,4,Adj. far,9,0.638655462,20460
+hr_vs_lr,5,Adj. far,9,0.684587814,20460
+hr_vs_lr,1,Skip1 medium,0,0.681818182,13640
+hr_vs_lr,2,Skip1 medium,0,0.767741935,13640
+hr_vs_lr,3,Skip1 medium,0,0.7,13640
+hr_vs_lr,4,Skip1 medium,0,0.68627451,13640
+hr_vs_lr,5,Skip1 medium,0,0.740740741,13640
+hr_vs_lr,1,Skip1 medium,1,0.523809524,13640
+hr_vs_lr,2,Skip1 medium,1,0.773809524,13640
+hr_vs_lr,3,Skip1 medium,1,0.708333333,13640
+hr_vs_lr,4,Skip1 medium,1,0.601190476,13640
+hr_vs_lr,5,Skip1 medium,1,0.80952381,13640
+hr_vs_lr,1,Skip1 medium,2,0.785185185,13640
+hr_vs_lr,2,Skip1 medium,2,0.816,13640
+hr_vs_lr,3,Skip1 medium,2,0.533333333,13640
+hr_vs_lr,4,Skip1 medium,2,0.621118012,13640
+hr_vs_lr,5,Skip1 medium,2,0.824561404,13640
+hr_vs_lr,1,Skip1 medium,3,0.698979592,13640
+hr_vs_lr,2,Skip1 medium,3,0.778571429,13640
+hr_vs_lr,3,Skip1 medium,3,0.604938272,13640
+hr_vs_lr,4,Skip1 medium,3,0.723333333,13640
+hr_vs_lr,5,Skip1 medium,3,0.75,13640
+hr_vs_lr,1,Skip1 medium,4,0.631944444,13640
+hr_vs_lr,2,Skip1 medium,4,0.823809524,13640
+hr_vs_lr,3,Skip1 medium,4,0.8,13640
+hr_vs_lr,4,Skip1 medium,4,0.708571429,13640
+hr_vs_lr,5,Skip1 medium,4,0.713333333,13640
+hr_vs_lr,1,Skip1 medium,5,0.8,13640
+hr_vs_lr,2,Skip1 medium,5,0.638461538,13640
+hr_vs_lr,3,Skip1 medium,5,0.707482993,13640
+hr_vs_lr,4,Skip1 medium,5,0.606060606,13640
+hr_vs_lr,5,Skip1 medium,5,0.605769231,13640
+hr_vs_lr,1,Skip1 medium,6,0.606321839,13640
+hr_vs_lr,2,Skip1 medium,6,0.747252747,13640
+hr_vs_lr,3,Skip1 medium,6,0.833333333,13640
+hr_vs_lr,4,Skip1 medium,6,0.777777778,13640
+hr_vs_lr,5,Skip1 medium,6,0.669565217,13640
+hr_vs_lr,1,Skip1 medium,7,0.67826087,13640
+hr_vs_lr,2,Skip1 medium,7,0.962962963,13640
+hr_vs_lr,3,Skip1 medium,7,0.83908046,13640
+hr_vs_lr,4,Skip1 medium,7,0.643333333,13640
+hr_vs_lr,5,Skip1 medium,7,0.697777778,13640
+hr_vs_lr,1,Skip1 medium,8,0.720496894,13640
+hr_vs_lr,2,Skip1 medium,8,0.725146199,13640
+hr_vs_lr,3,Skip1 medium,8,0.762962963,13640
+hr_vs_lr,4,Skip1 medium,8,0.694545455,13640
+hr_vs_lr,5,Skip1 medium,8,0.770609319,13640
+hr_vs_lr,1,Skip1 medium,9,0.918478261,13640
+hr_vs_lr,2,Skip1 medium,9,0.726666667,13640
+hr_vs_lr,3,Skip1 medium,9,0.68338558,13640
+hr_vs_lr,4,Skip1 medium,9,0.697478992,13640
+hr_vs_lr,5,Skip1 medium,9,0.695340502,13640
+hr_vs_lr,1,Skip1 far,0,0.657575758,6944
+hr_vs_lr,2,Skip1 far,0,0.748387097,6944
+hr_vs_lr,3,Skip1 far,0,0.63,6944
+hr_vs_lr,4,Skip1 far,0,0.699346405,6944
+hr_vs_lr,5,Skip1 far,0,0.767676768,6944
+hr_vs_lr,1,Skip1 far,1,0.55952381,6944
+hr_vs_lr,2,Skip1 far,1,0.714285714,6944
+hr_vs_lr,3,Skip1 far,1,0.807291667,6944
+hr_vs_lr,4,Skip1 far,1,0.607142857,6944
+hr_vs_lr,5,Skip1 far,1,0.826839827,6944
+hr_vs_lr,1,Skip1 far,2,0.814814815,6944
+hr_vs_lr,2,Skip1 far,2,0.856,6944
+hr_vs_lr,3,Skip1 far,2,0.541935484,6944
+hr_vs_lr,4,Skip1 far,2,0.683229814,6944
+hr_vs_lr,5,Skip1 far,2,0.771929825,6944
+hr_vs_lr,1,Skip1 far,3,0.780612245,6944
+hr_vs_lr,2,Skip1 far,3,0.678571429,6944
+hr_vs_lr,3,Skip1 far,3,0.711934156,6944
+hr_vs_lr,4,Skip1 far,3,0.72,6944
+hr_vs_lr,5,Skip1 far,3,0.63125,6944
+hr_vs_lr,1,Skip1 far,4,0.576388889,6944
+hr_vs_lr,2,Skip1 far,4,0.8,6944
+hr_vs_lr,3,Skip1 far,4,0.773333333,6944
+hr_vs_lr,4,Skip1 far,4,0.702857143,6944
+hr_vs_lr,5,Skip1 far,4,0.786666667,6944
+hr_vs_lr,1,Skip1 far,5,0.755555556,6944
+hr_vs_lr,2,Skip1 far,5,0.623076923,6944
+hr_vs_lr,3,Skip1 far,5,0.710884354,6944
+hr_vs_lr,4,Skip1 far,5,0.53030303,6944
+hr_vs_lr,5,Skip1 far,5,0.574519231,6944
+hr_vs_lr,1,Skip1 far,6,0.689655172,6944
+hr_vs_lr,2,Skip1 far,6,0.747252747,6944
+hr_vs_lr,3,Skip1 far,6,0.902777778,6944
+hr_vs_lr,4,Skip1 far,6,0.666666667,6944
+hr_vs_lr,5,Skip1 far,6,0.713043478,6944
+hr_vs_lr,1,Skip1 far,7,0.582608696,6944
+hr_vs_lr,2,Skip1 far,7,0.842592593,6944
+hr_vs_lr,3,Skip1 far,7,0.902298851,6944
+hr_vs_lr,4,Skip1 far,7,0.623333333,6944
+hr_vs_lr,5,Skip1 far,7,0.777777778,6944
+hr_vs_lr,1,Skip1 far,8,0.708074534,6944
+hr_vs_lr,2,Skip1 far,8,0.801169591,6944
+hr_vs_lr,3,Skip1 far,8,0.762962963,6944
+hr_vs_lr,4,Skip1 far,8,0.669090909,6944
+hr_vs_lr,5,Skip1 far,8,0.698924731,6944
+hr_vs_lr,1,Skip1 far,9,0.891304348,6944
+hr_vs_lr,2,Skip1 far,9,0.766666667,6944
+hr_vs_lr,3,Skip1 far,9,0.655172414,6944
+hr_vs_lr,4,Skip1 far,9,0.714285714,6944
+hr_vs_lr,5,Skip1 far,9,0.688172043,6944
+hr_vs_lr,1,Opp. close,0,0.6,8184
+hr_vs_lr,2,Opp. close,0,0.748387097,8184
+hr_vs_lr,3,Opp. close,0,0.73,8184
+hr_vs_lr,4,Opp. close,0,0.725490196,8184
+hr_vs_lr,5,Opp. close,0,0.787878788,8184
+hr_vs_lr,1,Opp. close,1,0.619047619,8184
+hr_vs_lr,2,Opp. close,1,0.623015873,8184
+hr_vs_lr,3,Opp. close,1,0.682291667,8184
+hr_vs_lr,4,Opp. close,1,0.494047619,8184
+hr_vs_lr,5,Opp. close,1,0.757575758,8184
+hr_vs_lr,1,Opp. close,2,0.533333333,8184
+hr_vs_lr,2,Opp. close,2,0.688,8184
+hr_vs_lr,3,Opp. close,2,0.651612903,8184
+hr_vs_lr,4,Opp. close,2,0.633540373,8184
+hr_vs_lr,5,Opp. close,2,0.754385965,8184
+hr_vs_lr,1,Opp. close,3,0.632653061,8184
+hr_vs_lr,2,Opp. close,3,0.857142857,8184
+hr_vs_lr,3,Opp. close,3,0.534979424,8184
+hr_vs_lr,4,Opp. close,3,0.676666667,8184
+hr_vs_lr,5,Opp. close,3,0.70625,8184
+hr_vs_lr,1,Opp. close,4,0.5625,8184
+hr_vs_lr,2,Opp. close,4,0.733333333,8184
+hr_vs_lr,3,Opp. close,4,0.846666667,8184
+hr_vs_lr,4,Opp. close,4,0.591428571,8184
+hr_vs_lr,5,Opp. close,4,0.706666667,8184
+hr_vs_lr,1,Opp. close,5,0.722222222,8184
+hr_vs_lr,2,Opp. close,5,0.569230769,8184
+hr_vs_lr,3,Opp. close,5,0.319727891,8184
+hr_vs_lr,4,Opp. close,5,0.393939394,8184
+hr_vs_lr,5,Opp. close,5,0.617788462,8184
+hr_vs_lr,1,Opp. close,6,0.643678161,8184
+hr_vs_lr,2,Opp. close,6,0.736263736,8184
+hr_vs_lr,3,Opp. close,6,0.833333333,8184
+hr_vs_lr,4,Opp. close,6,0.777777778,8184
+hr_vs_lr,5,Opp. close,6,0.591304348,8184
+hr_vs_lr,1,Opp. close,7,0.704347826,8184
+hr_vs_lr,2,Opp. close,7,0.861111111,8184
+hr_vs_lr,3,Opp. close,7,0.729885057,8184
+hr_vs_lr,4,Opp. close,7,0.566666667,8184
+hr_vs_lr,5,Opp. close,7,0.782222222,8184
+hr_vs_lr,1,Opp. close,8,0.844720497,8184
+hr_vs_lr,2,Opp. close,8,0.754385965,8184
+hr_vs_lr,3,Opp. close,8,0.607407407,8184
+hr_vs_lr,4,Opp. close,8,0.621818182,8184
+hr_vs_lr,5,Opp. close,8,0.741935484,8184
+hr_vs_lr,1,Opp. close,9,0.793478261,8184
+hr_vs_lr,2,Opp. close,9,0.68,8184
+hr_vs_lr,3,Opp. close,9,0.626959248,8184
+hr_vs_lr,4,Opp. close,9,0.705882353,8184
+hr_vs_lr,5,Opp. close,9,0.716845878,8184
+hr_vs_lr,1,Opp. medium,0,0.593939394,8184
+hr_vs_lr,2,Opp. medium,0,0.767741935,8184
+hr_vs_lr,3,Opp. medium,0,0.66,8184
+hr_vs_lr,4,Opp. medium,0,0.633986928,8184
+hr_vs_lr,5,Opp. medium,0,0.734006734,8184
+hr_vs_lr,1,Opp. medium,1,0.511904762,8184
+hr_vs_lr,2,Opp. medium,1,0.738095238,8184
+hr_vs_lr,3,Opp. medium,1,0.744791667,8184
+hr_vs_lr,4,Opp. medium,1,0.553571429,8184
+hr_vs_lr,5,Opp. medium,1,0.80952381,8184
+hr_vs_lr,1,Opp. medium,2,0.733333333,8184
+hr_vs_lr,2,Opp. medium,2,0.704,8184
+hr_vs_lr,3,Opp. medium,2,0.52688172,8184
+hr_vs_lr,4,Opp. medium,2,0.627329193,8184
+hr_vs_lr,5,Opp. medium,2,0.748538012,8184
+hr_vs_lr,1,Opp. medium,3,0.75,8184
+hr_vs_lr,2,Opp. medium,3,0.664285714,8184
+hr_vs_lr,3,Opp. medium,3,0.674897119,8184
+hr_vs_lr,4,Opp. medium,3,0.736666667,8184
+hr_vs_lr,5,Opp. medium,3,0.59375,8184
+hr_vs_lr,1,Opp. medium,4,0.513888889,8184
+hr_vs_lr,2,Opp. medium,4,0.785714286,8184
+hr_vs_lr,3,Opp. medium,4,0.746666667,8184
+hr_vs_lr,4,Opp. medium,4,0.694285714,8184
+hr_vs_lr,5,Opp. medium,4,0.713333333,8184
+hr_vs_lr,1,Opp. medium,5,0.722222222,8184
+hr_vs_lr,2,Opp. medium,5,0.584615385,8184
+hr_vs_lr,3,Opp. medium,5,0.578231293,8184
+hr_vs_lr,4,Opp. medium,5,0.621212121,8184
+hr_vs_lr,5,Opp. medium,5,0.560096154,8184
+hr_vs_lr,1,Opp. medium,6,0.637931034,8184
+hr_vs_lr,2,Opp. medium,6,0.725274725,8184
+hr_vs_lr,3,Opp. medium,6,0.888888889,8184
+hr_vs_lr,4,Opp. medium,6,0.719806763,8184
+hr_vs_lr,5,Opp. medium,6,0.652173913,8184
+hr_vs_lr,1,Opp. medium,7,0.534782609,8184
+hr_vs_lr,2,Opp. medium,7,0.768518519,8184
+hr_vs_lr,3,Opp. medium,7,0.833333333,8184
+hr_vs_lr,4,Opp. medium,7,0.55,8184
+hr_vs_lr,5,Opp. medium,7,0.697777778,8184
+hr_vs_lr,1,Opp. medium,8,0.701863354,8184
+hr_vs_lr,2,Opp. medium,8,0.666666667,8184
+hr_vs_lr,3,Opp. medium,8,0.725925926,8184
+hr_vs_lr,4,Opp. medium,8,0.596363636,8184
+hr_vs_lr,5,Opp. medium,8,0.716845878,8184
+hr_vs_lr,1,Opp. medium,9,0.885869565,8184
+hr_vs_lr,2,Opp. medium,9,0.7,8184
+hr_vs_lr,3,Opp. medium,9,0.642633229,8184
+hr_vs_lr,4,Opp. medium,9,0.74789916,8184
+hr_vs_lr,5,Opp. medium,9,0.695340502,8184
+hr_vs_lr,1,Opp. far,0,0.590909091,8184
+hr_vs_lr,2,Opp. far,0,0.748387097,8184
+hr_vs_lr,3,Opp. far,0,0.66,8184
+hr_vs_lr,4,Opp. far,0,0.666666667,8184
+hr_vs_lr,5,Opp. far,0,0.740740741,8184
+hr_vs_lr,1,Opp. far,1,0.494047619,8184
+hr_vs_lr,2,Opp. far,1,0.698412698,8184
+hr_vs_lr,3,Opp. far,1,0.71875,8184
+hr_vs_lr,4,Opp. far,1,0.529761905,8184
+hr_vs_lr,5,Opp. far,1,0.80952381,8184
+hr_vs_lr,1,Opp. far,2,0.755555556,8184
+hr_vs_lr,2,Opp. far,2,0.688,8184
+hr_vs_lr,3,Opp. far,2,0.51827957,8184
+hr_vs_lr,4,Opp. far,2,0.608695652,8184
+hr_vs_lr,5,Opp. far,2,0.742690058,8184
+hr_vs_lr,1,Opp. far,3,0.678571429,8184
+hr_vs_lr,2,Opp. far,3,0.671428571,8184
+hr_vs_lr,3,Opp. far,3,0.687242798,8184
+hr_vs_lr,4,Opp. far,3,0.723333333,8184
+hr_vs_lr,5,Opp. far,3,0.65625,8184
+hr_vs_lr,1,Opp. far,4,0.506944444,8184
+hr_vs_lr,2,Opp. far,4,0.70952381,8184
+hr_vs_lr,3,Opp. far,4,0.76,8184
+hr_vs_lr,4,Opp. far,4,0.7,8184
+hr_vs_lr,5,Opp. far,4,0.653333333,8184
+hr_vs_lr,1,Opp. far,5,0.7,8184
+hr_vs_lr,2,Opp. far,5,0.561538462,8184
+hr_vs_lr,3,Opp. far,5,0.469387755,8184
+hr_vs_lr,4,Opp. far,5,0.606060606,8184
+hr_vs_lr,5,Opp. far,5,0.536057692,8184
+hr_vs_lr,1,Opp. far,6,0.623563218,8184
+hr_vs_lr,2,Opp. far,6,0.752747253,8184
+hr_vs_lr,3,Opp. far,6,0.847222222,8184
+hr_vs_lr,4,Opp. far,6,0.700483092,8184
+hr_vs_lr,5,Opp. far,6,0.673913043,8184
+hr_vs_lr,1,Opp. far,7,0.569565217,8184
+hr_vs_lr,2,Opp. far,7,0.759259259,8184
+hr_vs_lr,3,Opp. far,7,0.816091954,8184
+hr_vs_lr,4,Opp. far,7,0.58,8184
+hr_vs_lr,5,Opp. far,7,0.733333333,8184
+hr_vs_lr,1,Opp. far,8,0.683229814,8184
+hr_vs_lr,2,Opp. far,8,0.666666667,8184
+hr_vs_lr,3,Opp. far,8,0.755555556,8184
+hr_vs_lr,4,Opp. far,8,0.610909091,8184
+hr_vs_lr,5,Opp. far,8,0.677419355,8184
+hr_vs_lr,1,Opp. far,9,0.858695652,8184
+hr_vs_lr,2,Opp. far,9,0.666666667,8184
+hr_vs_lr,3,Opp. far,9,0.623824451,8184
+hr_vs_lr,4,Opp. far,9,0.705882353,8184
+hr_vs_lr,5,Opp. far,9,0.691756272,8184
+hr_vs_lr,1,z_threshold: 105,0,0.612121212,890
+hr_vs_lr,2,z_threshold: 105,0,0.716129032,890
+hr_vs_lr,3,z_threshold: 105,0,0.73,890
+hr_vs_lr,4,z_threshold: 105,0,0.68627451,890
+hr_vs_lr,5,z_threshold: 105,0,0.804713805,890
+hr_vs_lr,1,z_threshold: 105,1,0.696428571,890
+hr_vs_lr,2,z_threshold: 105,1,0.813492063,890
+hr_vs_lr,3,z_threshold: 105,1,0.677083333,890
+hr_vs_lr,4,z_threshold: 105,1,0.535714286,890
+hr_vs_lr,5,z_threshold: 105,1,0.852813853,890
+hr_vs_lr,1,z_threshold: 105,2,0.859259259,890
+hr_vs_lr,2,z_threshold: 105,2,0.952,890
+hr_vs_lr,3,z_threshold: 105,2,0.552688172,890
+hr_vs_lr,4,z_threshold: 105,2,0.776397516,890
+hr_vs_lr,5,z_threshold: 105,2,0.83625731,890
+hr_vs_lr,1,z_threshold: 105,3,0.739795918,890
+hr_vs_lr,2,z_threshold: 105,3,0.785714286,890
+hr_vs_lr,3,z_threshold: 105,3,0.802469136,890
+hr_vs_lr,4,z_threshold: 105,3,0.696666667,890
+hr_vs_lr,5,z_threshold: 105,3,0.76875,890
+hr_vs_lr,1,z_threshold: 105,4,0.652777778,890
+hr_vs_lr,2,z_threshold: 105,4,0.847619048,890
+hr_vs_lr,3,z_threshold: 105,4,0.74,890
+hr_vs_lr,4,z_threshold: 105,4,0.76,890
+hr_vs_lr,5,z_threshold: 105,4,0.693333333,890
+hr_vs_lr,1,z_threshold: 105,5,0.788888889,890
+hr_vs_lr,2,z_threshold: 105,5,0.692307692,890
+hr_vs_lr,3,z_threshold: 105,5,0.581632653,890
+hr_vs_lr,4,z_threshold: 105,5,0.621212121,890
+hr_vs_lr,5,z_threshold: 105,5,0.639423077,890
+hr_vs_lr,1,z_threshold: 105,6,0.643678161,890
+hr_vs_lr,2,z_threshold: 105,6,0.615384615,890
+hr_vs_lr,3,z_threshold: 105,6,0.819444444,890
+hr_vs_lr,4,z_threshold: 105,6,0.859903382,890
+hr_vs_lr,5,z_threshold: 105,6,0.660869565,890
+hr_vs_lr,1,z_threshold: 105,7,0.582608696,890
+hr_vs_lr,2,z_threshold: 105,7,0.814814815,890
+hr_vs_lr,3,z_threshold: 105,7,0.83908046,890
+hr_vs_lr,4,z_threshold: 105,7,0.7,890
+hr_vs_lr,5,z_threshold: 105,7,0.826666667,890
+hr_vs_lr,1,z_threshold: 105,8,0.708074534,890
+hr_vs_lr,2,z_threshold: 105,8,0.83625731,890
+hr_vs_lr,3,z_threshold: 105,8,0.740740741,890
+hr_vs_lr,4,z_threshold: 105,8,0.654545455,890
+hr_vs_lr,5,z_threshold: 105,8,0.795698925,890
+hr_vs_lr,1,z_threshold: 105,9,0.864130435,890
+hr_vs_lr,2,z_threshold: 105,9,0.78,890
+hr_vs_lr,3,z_threshold: 105,9,0.598746082,890
+hr_vs_lr,4,z_threshold: 105,9,0.773109244,890
+hr_vs_lr,5,z_threshold: 105,9,0.795698925,890
+healthy_vs_cancer,1,z_threshold: 424,0,0.834615385,2994
+healthy_vs_cancer,2,z_threshold: 424,0,0.896358543,2994
+healthy_vs_cancer,3,z_threshold: 424,0,0.951557093,2994
+healthy_vs_cancer,4,z_threshold: 424,0,0.919298246,2994
+healthy_vs_cancer,5,z_threshold: 424,0,0.92733564,2994
+healthy_vs_cancer,1,z_threshold: 424,1,0.937799043,2994
+healthy_vs_cancer,2,z_threshold: 424,1,1,2994
+healthy_vs_cancer,3,z_threshold: 424,1,0.811145511,2994
+healthy_vs_cancer,4,z_threshold: 424,1,0.793650794,2994
+healthy_vs_cancer,5,z_threshold: 424,1,0.921875,2994
+healthy_vs_cancer,1,z_threshold: 424,2,0.861111111,2994
+healthy_vs_cancer,2,z_threshold: 424,2,0.923611111,2994
+healthy_vs_cancer,3,z_threshold: 424,2,0.838383838,2994
+healthy_vs_cancer,4,z_threshold: 424,2,0.882716049,2994
+healthy_vs_cancer,5,z_threshold: 424,2,0.972222222,2994
+healthy_vs_cancer,1,z_threshold: 424,3,0.784375,2994
+healthy_vs_cancer,2,z_threshold: 424,3,0.871710526,2994
+healthy_vs_cancer,3,z_threshold: 424,3,0.961805556,2994
+healthy_vs_cancer,4,z_threshold: 424,3,0.912972085,2994
+healthy_vs_cancer,5,z_threshold: 424,3,0.8625,2994
+healthy_vs_cancer,1,z_threshold: 424,4,0.9,2994
+healthy_vs_cancer,2,z_threshold: 424,4,0.965944272,2994
+healthy_vs_cancer,3,z_threshold: 424,4,0.886426593,2994
+healthy_vs_cancer,4,z_threshold: 424,4,0.853185596,2994
+healthy_vs_cancer,5,z_threshold: 424,4,0.928571429,2994
+healthy_vs_cancer,1,z_threshold: 424,5,0.977124183,2994
+healthy_vs_cancer,2,z_threshold: 424,5,0.910034602,2994
+healthy_vs_cancer,3,z_threshold: 424,5,0.819548872,2994
+healthy_vs_cancer,4,z_threshold: 424,5,0.878116343,2994
+healthy_vs_cancer,5,z_threshold: 424,5,0.877005348,2994
+healthy_vs_cancer,1,z_threshold: 424,6,0.963888889,2994
+healthy_vs_cancer,2,z_threshold: 424,6,0.916666667,2994
+healthy_vs_cancer,3,z_threshold: 424,6,0.879551821,2994
+healthy_vs_cancer,4,z_threshold: 424,6,0.931578947,2994
+healthy_vs_cancer,5,z_threshold: 424,6,0.859477124,2994
+healthy_vs_cancer,1,z_threshold: 424,7,0.891966759,2994
+healthy_vs_cancer,2,z_threshold: 424,7,0.910714286,2994
+healthy_vs_cancer,3,z_threshold: 424,7,0.94017094,2994
+healthy_vs_cancer,4,z_threshold: 424,7,0.852941176,2994
+healthy_vs_cancer,5,z_threshold: 424,7,0.885294118,2994
+healthy_vs_cancer,1,z_threshold: 424,8,0.929166667,2994
+healthy_vs_cancer,2,z_threshold: 424,8,0.979166667,2994
+healthy_vs_cancer,3,z_threshold: 424,8,0.836419753,2994
+healthy_vs_cancer,4,z_threshold: 424,8,0.894736842,2994
+healthy_vs_cancer,5,z_threshold: 424,8,0.874331551,2994
+healthy_vs_cancer,1,z_threshold: 424,9,0.8125,2994
+healthy_vs_cancer,2,z_threshold: 424,9,0.891975309,2994
+healthy_vs_cancer,3,z_threshold: 424,9,0.958333333,2994
+healthy_vs_cancer,4,z_threshold: 424,9,0.931174089,2994
+healthy_vs_cancer,5,z_threshold: 424,9,0.877192982,2994
+healthy_vs_cancer,1,All,0,0.801923077,239568
+healthy_vs_cancer,2,All,0,0.87394958,239568
+healthy_vs_cancer,3,All,0,0.930795848,239568
+healthy_vs_cancer,4,All,0,0.915789474,239568
+healthy_vs_cancer,5,All,0,0.916955017,239568
+healthy_vs_cancer,1,All,1,0.940191388,239568
+healthy_vs_cancer,2,All,1,0.988888889,239568
+healthy_vs_cancer,3,All,1,0.792569659,239568
+healthy_vs_cancer,4,All,1,0.761904762,239568
+healthy_vs_cancer,5,All,1,0.8984375,239568
+healthy_vs_cancer,1,All,2,0.885802469,239568
+healthy_vs_cancer,2,All,2,0.881944444,239568
+healthy_vs_cancer,3,All,2,0.835858586,239568
+healthy_vs_cancer,4,All,2,0.858024691,239568
+healthy_vs_cancer,5,All,2,0.956349206,239568
+healthy_vs_cancer,1,All,3,0.746875,239568
+healthy_vs_cancer,2,All,3,0.881578947,239568
+healthy_vs_cancer,3,All,3,0.986111111,239568
+healthy_vs_cancer,4,All,3,0.888341544,239568
+healthy_vs_cancer,5,All,3,0.829166667,239568
+healthy_vs_cancer,1,All,4,0.844444444,239568
+healthy_vs_cancer,2,All,4,0.962848297,239568
+healthy_vs_cancer,3,All,4,0.886426593,239568
+healthy_vs_cancer,4,All,4,0.853185596,239568
+healthy_vs_cancer,5,All,4,0.890756303,239568
+healthy_vs_cancer,1,All,5,0.960784314,239568
+healthy_vs_cancer,2,All,5,0.858131488,239568
+healthy_vs_cancer,3,All,5,0.824561404,239568
+healthy_vs_cancer,4,All,5,0.867036011,239568
+healthy_vs_cancer,5,All,5,0.901069519,239568
+healthy_vs_cancer,1,All,6,0.919444444,239568
+healthy_vs_cancer,2,All,6,0.87962963,239568
+healthy_vs_cancer,3,All,6,0.837535014,239568
+healthy_vs_cancer,4,All,6,0.926315789,239568
+healthy_vs_cancer,5,All,6,0.846405229,239568
+healthy_vs_cancer,1,All,7,0.869806094,239568
+healthy_vs_cancer,2,All,7,0.910714286,239568
+healthy_vs_cancer,3,All,7,0.927350427,239568
+healthy_vs_cancer,4,All,7,0.805147059,239568
+healthy_vs_cancer,5,All,7,0.852941176,239568
+healthy_vs_cancer,1,All,8,0.875,239568
+healthy_vs_cancer,2,All,8,0.976190476,239568
+healthy_vs_cancer,3,All,8,0.867283951,239568
+healthy_vs_cancer,4,All,8,0.862700229,239568
+healthy_vs_cancer,5,All,8,0.855614973,239568
+healthy_vs_cancer,1,All,9,0.809375,239568
+healthy_vs_cancer,2,All,9,0.867283951,239568
+healthy_vs_cancer,3,All,9,0.956018519,239568
+healthy_vs_cancer,4,All,9,0.906882591,239568
+healthy_vs_cancer,5,All,9,0.839598997,239568
+hr_vs_lr,1,All,0,0.606060606,239568
+hr_vs_lr,2,All,0,0.787096774,239568
+hr_vs_lr,3,All,0,0.68,239568
+hr_vs_lr,4,All,0,0.712418301,239568
+hr_vs_lr,5,All,0,0.804713805,239568
+hr_vs_lr,1,All,1,0.613095238,239568
+hr_vs_lr,2,All,1,0.722222222,239568
+hr_vs_lr,3,All,1,0.640625,239568
+hr_vs_lr,4,All,1,0.553571429,239568
+hr_vs_lr,5,All,1,0.787878788,239568
+hr_vs_lr,1,All,2,0.651851852,239568
+hr_vs_lr,2,All,2,0.824,239568
+hr_vs_lr,3,All,2,0.56344086,239568
+hr_vs_lr,4,All,2,0.639751553,239568
+hr_vs_lr,5,All,2,0.736842105,239568
+hr_vs_lr,1,All,3,0.642857143,239568
+hr_vs_lr,2,All,3,0.814285714,239568
+hr_vs_lr,3,All,3,0.617283951,239568
+hr_vs_lr,4,All,3,0.723333333,239568
+hr_vs_lr,5,All,3,0.76875,239568
+hr_vs_lr,1,All,4,0.631944444,239568
+hr_vs_lr,2,All,4,0.719047619,239568
+hr_vs_lr,3,All,4,0.8,239568
+hr_vs_lr,4,All,4,0.728571429,239568
+hr_vs_lr,5,All,4,0.7,239568
+hr_vs_lr,1,All,5,0.8,239568
+hr_vs_lr,2,All,5,0.584615385,239568
+hr_vs_lr,3,All,5,0.387755102,239568
+hr_vs_lr,4,All,5,0.439393939,239568
+hr_vs_lr,5,All,5,0.617788462,239568
+hr_vs_lr,1,All,6,0.614942529,239568
+hr_vs_lr,2,All,6,0.769230769,239568
+hr_vs_lr,3,All,6,0.819444444,239568
+hr_vs_lr,4,All,6,0.826086957,239568
+hr_vs_lr,5,All,6,0.656521739,239568
+hr_vs_lr,1,All,7,0.660869565,239568
+hr_vs_lr,2,All,7,0.916666667,239568
+hr_vs_lr,3,All,7,0.701149425,239568
+hr_vs_lr,4,All,7,0.623333333,239568
+hr_vs_lr,5,All,7,0.764444444,239568
+hr_vs_lr,1,All,8,0.776397516,239568
+hr_vs_lr,2,All,8,0.701754386,239568
+hr_vs_lr,3,All,8,0.644444444,239568
+hr_vs_lr,4,All,8,0.650909091,239568
+hr_vs_lr,5,All,8,0.727598566,239568
+hr_vs_lr,1,All,9,0.793478261,239568
+hr_vs_lr,2,All,9,0.686666667,239568
+hr_vs_lr,3,All,9,0.680250784,239568
+hr_vs_lr,4,All,9,0.773109244,239568
+hr_vs_lr,5,All,9,0.702508961,239568
+MC,1,All,0,0.832014438,239568
+MC,2,All,0,0.785123967,239568
+MC,3,All,0,0.779583333,239568
+MC,4,All,0,0.642011834,239568
+MC,5,All,0,0.705122865,239568
+MC,1,All,1,0.757272844,239568
+MC,2,All,1,0.691016276,239568
+MC,3,All,1,0.773676791,239568
+MC,4,All,1,0.680700231,239568
+MC,5,All,1,0.819834711,239568
+MC,1,All,2,0.761972275,239568
+MC,2,All,2,0.750228624,239568
+MC,3,All,2,0.741645121,239568
+MC,4,All,2,0.77759267,239568
+MC,5,All,2,0.687065972,239568
+MC,1,All,3,0.718167794,239568
+MC,2,All,3,0.790251999,239568
+MC,3,All,3,0.667222222,239568
+MC,4,All,3,0.742884909,239568
+MC,5,All,3,0.830692621,239568
+MC,1,All,4,0.770666667,239568
+MC,2,All,4,0.746672454,239568
+MC,3,All,4,0.739331027,239568
+MC,4,All,4,0.785436671,239568
+MC,5,All,4,0.693010561,239568
+MC,1,All,5,0.646990741,239568
+MC,2,All,5,0.772459244,239568
+MC,3,All,5,0.820443483,239568
+MC,4,All,5,0.750344353,239568
+MC,5,All,5,0.694723738,239568
+MC,1,All,6,0.7376,239568
+MC,2,All,6,0.757037037,239568
+MC,3,All,6,0.866735537,239568
+MC,4,All,6,0.670138889,239568
+MC,5,All,6,0.802011888,239568
+MC,1,All,7,0.715255772,239568
+MC,2,All,7,0.790704693,239568
+MC,3,All,7,0.7708,239568
+MC,4,All,7,0.715304077,239568
+MC,5,All,7,0.757037037,239568
+MC,1,All,8,0.74201864,239568
+MC,2,All,8,0.786477856,239568
+MC,3,All,8,0.765457788,239568
+MC,4,All,8,0.747922438,239568
+MC,5,All,8,0.720492118,239568
+MC,1,All,9,0.765466667,239568
+MC,2,All,9,0.796768707,239568
+MC,3,All,9,0.629696695,239568
+MC,4,All,9,0.744573003,239568
+MC,5,All,9,0.807002315,239568
+MC,1,z_threshold: 212,0,0.828682493,1528
+MC,2,z_threshold: 212,0,0.765381084,1528
+MC,3,z_threshold: 212,0,0.778125,1528
+MC,4,z_threshold: 212,0,0.656311637,1528
+MC,5,z_threshold: 212,0,0.756906844,1528
+MC,1,z_threshold: 212,1,0.780853518,1528
+MC,2,z_threshold: 212,1,0.669229783,1528
+MC,3,z_threshold: 212,1,0.764705882,1528
+MC,4,z_threshold: 212,1,0.71875,1528
+MC,5,z_threshold: 212,1,0.84584022,1528
+MC,1,z_threshold: 212,2,0.77236925,1528
+MC,2,z_threshold: 212,2,0.752514861,1528
+MC,3,z_threshold: 212,2,0.734559035,1528
+MC,4,z_threshold: 212,2,0.795501874,1528
+MC,5,z_threshold: 212,2,0.715856481,1528
+MC,1,z_threshold: 212,3,0.726949092,1528
+MC,2,z_threshold: 212,3,0.816508224,1528
+MC,3,z_threshold: 212,3,0.647222222,1528
+MC,4,z_threshold: 212,3,0.806747189,1528
+MC,5,z_threshold: 212,3,0.830239928,1528
+MC,1,z_threshold: 212,4,0.780666667,1528
+MC,2,z_threshold: 212,4,0.704861111,1528
+MC,3,z_threshold: 212,4,0.787645777,1528
+MC,4,z_threshold: 212,4,0.790695016,1528
+MC,5,z_threshold: 212,4,0.710929156,1528
+MC,1,z_threshold: 212,5,0.670283565,1528
+MC,2,z_threshold: 212,5,0.83775581,1528
+MC,3,z_threshold: 212,5,0.807643771,1528
+MC,4,z_threshold: 212,5,0.741563361,1528
+MC,5,z_threshold: 212,5,0.713492291,1528
+MC,1,z_threshold: 212,6,0.7404,1528
+MC,2,z_threshold: 212,6,0.776481481,1528
+MC,3,z_threshold: 212,6,0.847796143,1528
+MC,4,z_threshold: 212,6,0.717303241,1528
+MC,5,z_threshold: 212,6,0.779035208,1528
+MC,1,z_threshold: 212,7,0.73079825,1528
+MC,2,z_threshold: 212,7,0.808812434,1528
+MC,3,z_threshold: 212,7,0.783466667,1528
+MC,4,z_threshold: 212,7,0.756515928,1528
+MC,5,z_threshold: 212,7,0.731851852,1528
+MC,1,z_threshold: 212,8,0.745984533,1528
+MC,2,z_threshold: 212,8,0.816743024,1528
+MC,3,z_threshold: 212,8,0.800336901,1528
+MC,4,z_threshold: 212,8,0.705037447,1528
+MC,5,z_threshold: 212,8,0.68102012,1528
+MC,1,z_threshold: 212,9,0.839733333,1528
+MC,2,z_threshold: 212,9,0.712266156,1528
+MC,3,z_threshold: 212,9,0.658216388,1528
+MC,4,z_threshold: 212,9,0.763746556,1528
+MC,5,z_threshold: 212,9,0.78515625,1528

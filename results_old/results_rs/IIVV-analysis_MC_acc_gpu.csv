@@ -1,0 +1,351 @@
+Task,Fold,IIVV,rs,metric,score,n_params,need_proba
+MC,1,All,0,accuracy,0.673469387755102,239568,False
+MC,2,All,0,accuracy,0.6060606060606061,239568,False
+MC,3,All,0,accuracy,0.7,239568,False
+MC,4,All,0,accuracy,0.4423076923076923,239568,False
+MC,5,All,0,accuracy,0.5918367346938775,239568,False
+MC,1,All,1,accuracy,0.5882352941176471,239568,False
+MC,2,All,1,accuracy,0.5686274509803921,239568,False
+MC,3,All,1,accuracy,0.5490196078431373,239568,False
+MC,4,All,1,accuracy,0.5416666666666666,239568,False
+MC,5,All,1,accuracy,0.6545454545454545,239568,False
+MC,1,All,2,accuracy,0.6304347826086957,239568,False
+MC,2,All,2,accuracy,0.6296296296296297,239568,False
+MC,3,All,2,accuracy,0.576271186440678,239568,False
+MC,4,All,2,accuracy,0.6122448979591837,239568,False
+MC,5,All,2,accuracy,0.5416666666666666,239568,False
+MC,1,All,3,accuracy,0.5660377358490566,239568,False
+MC,2,All,3,accuracy,0.6382978723404256,239568,False
+MC,3,All,3,accuracy,0.5166666666666667,239568,False
+MC,4,All,3,accuracy,0.673469387755102,239568,False
+MC,5,All,3,accuracy,0.6808510638297872,239568,False
+MC,1,All,4,accuracy,0.66,239568,False
+MC,2,All,4,accuracy,0.5625,239568,False
+MC,3,All,4,accuracy,0.5686274509803921,239568,False
+MC,4,All,4,accuracy,0.6111111111111112,239568,False
+MC,5,All,4,accuracy,0.5660377358490566,239568,False
+MC,1,Z-threshold,0,accuracy,0.6326530612244898,47368,False
+MC,2,Z-threshold,0,accuracy,0.5757575757575758,47368,False
+MC,3,Z-threshold,0,accuracy,0.675,47368,False
+MC,4,Z-threshold,0,accuracy,0.4423076923076923,47368,False
+MC,5,Z-threshold,0,accuracy,0.5306122448979592,47368,False
+MC,1,Z-threshold,1,accuracy,0.5686274509803921,47368,False
+MC,2,Z-threshold,1,accuracy,0.5490196078431373,47368,False
+MC,3,Z-threshold,1,accuracy,0.5686274509803921,47368,False
+MC,4,Z-threshold,1,accuracy,0.5416666666666666,47368,False
+MC,5,Z-threshold,1,accuracy,0.6181818181818182,47368,False
+MC,1,Z-threshold,2,accuracy,0.6086956521739131,47368,False
+MC,2,Z-threshold,2,accuracy,0.5925925925925926,47368,False
+MC,3,Z-threshold,2,accuracy,0.5423728813559322,47368,False
+MC,4,Z-threshold,2,accuracy,0.6122448979591837,47368,False
+MC,5,Z-threshold,2,accuracy,0.4791666666666667,47368,False
+MC,1,Z-threshold,3,accuracy,0.5471698113207547,47368,False
+MC,2,Z-threshold,3,accuracy,0.574468085106383,47368,False
+MC,3,Z-threshold,3,accuracy,0.48333333333333334,47368,False
+MC,4,Z-threshold,3,accuracy,0.6122448979591837,47368,False
+MC,5,Z-threshold,3,accuracy,0.6595744680851063,47368,False
+MC,1,Z-threshold,4,accuracy,0.6,47368,False
+MC,2,Z-threshold,4,accuracy,0.5416666666666666,47368,False
+MC,3,Z-threshold,4,accuracy,0.5294117647058824,47368,False
+MC,4,Z-threshold,4,accuracy,0.6111111111111112,47368,False
+MC,5,Z-threshold,4,accuracy,0.5849056603773585,47368,False
+MC,1,Long a+,0,accuracy,0.6938775510204082,496,False
+MC,2,Long a+,0,accuracy,0.5909090909090909,496,False
+MC,3,Long a+,0,accuracy,0.7,496,False
+MC,4,Long a+,0,accuracy,0.46153846153846156,496,False
+MC,5,Long a+,0,accuracy,0.5714285714285714,496,False
+MC,1,Long a+,1,accuracy,0.6078431372549019,496,False
+MC,2,Long a+,1,accuracy,0.5882352941176471,496,False
+MC,3,Long a+,1,accuracy,0.5490196078431373,496,False
+MC,4,Long a+,1,accuracy,0.5,496,False
+MC,5,Long a+,1,accuracy,0.6909090909090909,496,False
+MC,1,Long a+,2,accuracy,0.6739130434782609,496,False
+MC,2,Long a+,2,accuracy,0.6111111111111112,496,False
+MC,3,Long a+,2,accuracy,0.5423728813559322,496,False
+MC,4,Long a+,2,accuracy,0.6530612244897959,496,False
+MC,5,Long a+,2,accuracy,0.5208333333333334,496,False
+MC,1,Long a+,3,accuracy,0.5094339622641509,496,False
+MC,2,Long a+,3,accuracy,0.6382978723404256,496,False
+MC,3,Long a+,3,accuracy,0.5,496,False
+MC,4,Long a+,3,accuracy,0.6530612244897959,496,False
+MC,5,Long a+,3,accuracy,0.6595744680851063,496,False
+MC,1,Long a+,4,accuracy,0.6,496,False
+MC,2,Long a+,4,accuracy,0.5833333333333334,496,False
+MC,3,Long a+,4,accuracy,0.6078431372549019,496,False
+MC,4,Long a+,4,accuracy,0.5925925925925926,496,False
+MC,5,Long a+,4,accuracy,0.5849056603773585,496,False
+MC,1,Long a+ ext.,0,accuracy,0.673469387755102,3720,False
+MC,2,Long a+ ext.,0,accuracy,0.6060606060606061,3720,False
+MC,3,Long a+ ext.,0,accuracy,0.7,3720,False
+MC,4,Long a+ ext.,0,accuracy,0.46153846153846156,3720,False
+MC,5,Long a+ ext.,0,accuracy,0.5714285714285714,3720,False
+MC,1,Long a+ ext.,1,accuracy,0.5882352941176471,3720,False
+MC,2,Long a+ ext.,1,accuracy,0.5882352941176471,3720,False
+MC,3,Long a+ ext.,1,accuracy,0.6078431372549019,3720,False
+MC,4,Long a+ ext.,1,accuracy,0.5,3720,False
+MC,5,Long a+ ext.,1,accuracy,0.6545454545454545,3720,False
+MC,1,Long a+ ext.,2,accuracy,0.6521739130434783,3720,False
+MC,2,Long a+ ext.,2,accuracy,0.6111111111111112,3720,False
+MC,3,Long a+ ext.,2,accuracy,0.5932203389830508,3720,False
+MC,4,Long a+ ext.,2,accuracy,0.6530612244897959,3720,False
+MC,5,Long a+ ext.,2,accuracy,0.5416666666666666,3720,False
+MC,1,Long a+ ext.,3,accuracy,0.5283018867924528,3720,False
+MC,2,Long a+ ext.,3,accuracy,0.6382978723404256,3720,False
+MC,3,Long a+ ext.,3,accuracy,0.5,3720,False
+MC,4,Long a+ ext.,3,accuracy,0.6530612244897959,3720,False
+MC,5,Long a+ ext.,3,accuracy,0.7021276595744681,3720,False
+MC,1,Long a+ ext.,4,accuracy,0.62,3720,False
+MC,2,Long a+ ext.,4,accuracy,0.5833333333333334,3720,False
+MC,3,Long a+ ext.,4,accuracy,0.5882352941176471,3720,False
+MC,4,Long a+ ext.,4,accuracy,0.6296296296296297,3720,False
+MC,5,Long a+ ext.,4,accuracy,0.5471698113207547,3720,False
+MC,1,Med. a+ ext.,0,accuracy,0.6530612244897959,3720,False
+MC,2,Med. a+ ext.,0,accuracy,0.6212121212121212,3720,False
+MC,3,Med. a+ ext.,0,accuracy,0.675,3720,False
+MC,4,Med. a+ ext.,0,accuracy,0.4423076923076923,3720,False
+MC,5,Med. a+ ext.,0,accuracy,0.5918367346938775,3720,False
+MC,1,Med. a+ ext.,1,accuracy,0.5882352941176471,3720,False
+MC,2,Med. a+ ext.,1,accuracy,0.5686274509803921,3720,False
+MC,3,Med. a+ ext.,1,accuracy,0.5686274509803921,3720,False
+MC,4,Med. a+ ext.,1,accuracy,0.5625,3720,False
+MC,5,Med. a+ ext.,1,accuracy,0.6545454545454545,3720,False
+MC,1,Med. a+ ext.,2,accuracy,0.6521739130434783,3720,False
+MC,2,Med. a+ ext.,2,accuracy,0.6111111111111112,3720,False
+MC,3,Med. a+ ext.,2,accuracy,0.559322033898305,3720,False
+MC,4,Med. a+ ext.,2,accuracy,0.6326530612244898,3720,False
+MC,5,Med. a+ ext.,2,accuracy,0.5,3720,False
+MC,1,Med. a+ ext.,3,accuracy,0.5660377358490566,3720,False
+MC,2,Med. a+ ext.,3,accuracy,0.6170212765957447,3720,False
+MC,3,Med. a+ ext.,3,accuracy,0.5,3720,False
+MC,4,Med. a+ ext.,3,accuracy,0.6326530612244898,3720,False
+MC,5,Med. a+ ext.,3,accuracy,0.6595744680851063,3720,False
+MC,1,Med. a+ ext.,4,accuracy,0.64,3720,False
+MC,2,Med. a+ ext.,4,accuracy,0.5625,3720,False
+MC,3,Med. a+ ext.,4,accuracy,0.5490196078431373,3720,False
+MC,4,Med. a+ ext.,4,accuracy,0.5925925925925926,3720,False
+MC,5,Med. a+ ext.,4,accuracy,0.5660377358490566,3720,False
+MC,1,Skip1 close,0,accuracy,0.673469387755102,11160,False
+MC,2,Skip1 close,0,accuracy,0.5757575757575758,11160,False
+MC,3,Skip1 close,0,accuracy,0.725,11160,False
+MC,4,Skip1 close,0,accuracy,0.46153846153846156,11160,False
+MC,5,Skip1 close,0,accuracy,0.5714285714285714,11160,False
+MC,1,Skip1 close,1,accuracy,0.5686274509803921,11160,False
+MC,2,Skip1 close,1,accuracy,0.5882352941176471,11160,False
+MC,3,Skip1 close,1,accuracy,0.5882352941176471,11160,False
+MC,4,Skip1 close,1,accuracy,0.5208333333333334,11160,False
+MC,5,Skip1 close,1,accuracy,0.6727272727272727,11160,False
+MC,1,Skip1 close,2,accuracy,0.6521739130434783,11160,False
+MC,2,Skip1 close,2,accuracy,0.6111111111111112,11160,False
+MC,3,Skip1 close,2,accuracy,0.576271186440678,11160,False
+MC,4,Skip1 close,2,accuracy,0.6530612244897959,11160,False
+MC,5,Skip1 close,2,accuracy,0.5416666666666666,11160,False
+MC,1,Skip1 close,3,accuracy,0.5283018867924528,11160,False
+MC,2,Skip1 close,3,accuracy,0.6382978723404256,11160,False
+MC,3,Skip1 close,3,accuracy,0.5166666666666667,11160,False
+MC,4,Skip1 close,3,accuracy,0.6530612244897959,11160,False
+MC,5,Skip1 close,3,accuracy,0.6808510638297872,11160,False
+MC,1,Skip1 close,4,accuracy,0.6,11160,False
+MC,2,Skip1 close,4,accuracy,0.5833333333333334,11160,False
+MC,3,Skip1 close,4,accuracy,0.5882352941176471,11160,False
+MC,4,Skip1 close,4,accuracy,0.5925925925925926,11160,False
+MC,5,Skip1 close,4,accuracy,0.5471698113207547,11160,False
+MC,1,Adj. close,0,accuracy,0.673469387755102,9052,False
+MC,2,Adj. close,0,accuracy,0.5757575757575758,9052,False
+MC,3,Adj. close,0,accuracy,0.725,9052,False
+MC,4,Adj. close,0,accuracy,0.4230769230769231,9052,False
+MC,5,Adj. close,0,accuracy,0.5306122448979592,9052,False
+MC,1,Adj. close,1,accuracy,0.5686274509803921,9052,False
+MC,2,Adj. close,1,accuracy,0.5686274509803921,9052,False
+MC,3,Adj. close,1,accuracy,0.5686274509803921,9052,False
+MC,4,Adj. close,1,accuracy,0.5,9052,False
+MC,5,Adj. close,1,accuracy,0.6363636363636364,9052,False
+MC,1,Adj. close,2,accuracy,0.6521739130434783,9052,False
+MC,2,Adj. close,2,accuracy,0.6111111111111112,9052,False
+MC,3,Adj. close,2,accuracy,0.576271186440678,9052,False
+MC,4,Adj. close,2,accuracy,0.6326530612244898,9052,False
+MC,5,Adj. close,2,accuracy,0.5208333333333334,9052,False
+MC,1,Adj. close,3,accuracy,0.5471698113207547,9052,False
+MC,2,Adj. close,3,accuracy,0.5957446808510638,9052,False
+MC,3,Adj. close,3,accuracy,0.5,9052,False
+MC,4,Adj. close,3,accuracy,0.6530612244897959,9052,False
+MC,5,Adj. close,3,accuracy,0.6595744680851063,9052,False
+MC,1,Adj. close,4,accuracy,0.64,9052,False
+MC,2,Adj. close,4,accuracy,0.5625,9052,False
+MC,3,Adj. close,4,accuracy,0.5882352941176471,9052,False
+MC,4,Adj. close,4,accuracy,0.5555555555555556,9052,False
+MC,5,Adj. close,4,accuracy,0.5471698113207547,9052,False
+MC,1,Med. adj.,0,accuracy,0.6530612244897959,11997,False
+MC,2,Med. adj.,0,accuracy,0.5909090909090909,11997,False
+MC,3,Med. adj.,0,accuracy,0.675,11997,False
+MC,4,Med. adj.,0,accuracy,0.46153846153846156,11997,False
+MC,5,Med. adj.,0,accuracy,0.6122448979591837,11997,False
+MC,1,Med. adj.,1,accuracy,0.5882352941176471,11997,False
+MC,2,Med. adj.,1,accuracy,0.5686274509803921,11997,False
+MC,3,Med. adj.,1,accuracy,0.5686274509803921,11997,False
+MC,4,Med. adj.,1,accuracy,0.5208333333333334,11997,False
+MC,5,Med. adj.,1,accuracy,0.6363636363636364,11997,False
+MC,1,Med. adj.,2,accuracy,0.6521739130434783,11997,False
+MC,2,Med. adj.,2,accuracy,0.6111111111111112,11997,False
+MC,3,Med. adj.,2,accuracy,0.5932203389830508,11997,False
+MC,4,Med. adj.,2,accuracy,0.5918367346938775,11997,False
+MC,5,Med. adj.,2,accuracy,0.5,11997,False
+MC,1,Med. adj.,3,accuracy,0.5471698113207547,11997,False
+MC,2,Med. adj.,3,accuracy,0.6382978723404256,11997,False
+MC,3,Med. adj.,3,accuracy,0.48333333333333334,11997,False
+MC,4,Med. adj.,3,accuracy,0.6326530612244898,11997,False
+MC,5,Med. adj.,3,accuracy,0.6595744680851063,11997,False
+MC,1,Med. adj.,4,accuracy,0.66,11997,False
+MC,2,Med. adj.,4,accuracy,0.5625,11997,False
+MC,3,Med. adj.,4,accuracy,0.5882352941176471,11997,False
+MC,4,Med. adj.,4,accuracy,0.6111111111111112,11997,False
+MC,5,Med. adj.,4,accuracy,0.5660377358490566,11997,False
+MC,1,Adj. far,0,accuracy,0.673469387755102,20460,False
+MC,2,Adj. far,0,accuracy,0.5909090909090909,20460,False
+MC,3,Adj. far,0,accuracy,0.7,20460,False
+MC,4,Adj. far,0,accuracy,0.4423076923076923,20460,False
+MC,5,Adj. far,0,accuracy,0.5918367346938775,20460,False
+MC,1,Adj. far,1,accuracy,0.5882352941176471,20460,False
+MC,2,Adj. far,1,accuracy,0.5686274509803921,20460,False
+MC,3,Adj. far,1,accuracy,0.5294117647058824,20460,False
+MC,4,Adj. far,1,accuracy,0.5208333333333334,20460,False
+MC,5,Adj. far,1,accuracy,0.6181818181818182,20460,False
+MC,1,Adj. far,2,accuracy,0.5652173913043478,20460,False
+MC,2,Adj. far,2,accuracy,0.6111111111111112,20460,False
+MC,3,Adj. far,2,accuracy,0.5932203389830508,20460,False
+MC,4,Adj. far,2,accuracy,0.5918367346938775,20460,False
+MC,5,Adj. far,2,accuracy,0.5,20460,False
+MC,1,Adj. far,3,accuracy,0.5283018867924528,20460,False
+MC,2,Adj. far,3,accuracy,0.6382978723404256,20460,False
+MC,3,Adj. far,3,accuracy,0.45,20460,False
+MC,4,Adj. far,3,accuracy,0.673469387755102,20460,False
+MC,5,Adj. far,3,accuracy,0.6170212765957447,20460,False
+MC,1,Adj. far,4,accuracy,0.66,20460,False
+MC,2,Adj. far,4,accuracy,0.5208333333333334,20460,False
+MC,3,Adj. far,4,accuracy,0.5686274509803921,20460,False
+MC,4,Adj. far,4,accuracy,0.5925925925925926,20460,False
+MC,5,Adj. far,4,accuracy,0.5660377358490566,20460,False
+MC,1,Skip1 medium,0,accuracy,0.6530612244897959,13640,False
+MC,2,Skip1 medium,0,accuracy,0.6363636363636364,13640,False
+MC,3,Skip1 medium,0,accuracy,0.675,13640,False
+MC,4,Skip1 medium,0,accuracy,0.4423076923076923,13640,False
+MC,5,Skip1 medium,0,accuracy,0.5918367346938775,13640,False
+MC,1,Skip1 medium,1,accuracy,0.5882352941176471,13640,False
+MC,2,Skip1 medium,1,accuracy,0.5490196078431373,13640,False
+MC,3,Skip1 medium,1,accuracy,0.5490196078431373,13640,False
+MC,4,Skip1 medium,1,accuracy,0.5416666666666666,13640,False
+MC,5,Skip1 medium,1,accuracy,0.6363636363636364,13640,False
+MC,1,Skip1 medium,2,accuracy,0.6304347826086957,13640,False
+MC,2,Skip1 medium,2,accuracy,0.6111111111111112,13640,False
+MC,3,Skip1 medium,2,accuracy,0.559322033898305,13640,False
+MC,4,Skip1 medium,2,accuracy,0.6122448979591837,13640,False
+MC,5,Skip1 medium,2,accuracy,0.5,13640,False
+MC,1,Skip1 medium,3,accuracy,0.5660377358490566,13640,False
+MC,2,Skip1 medium,3,accuracy,0.6170212765957447,13640,False
+MC,3,Skip1 medium,3,accuracy,0.5,13640,False
+MC,4,Skip1 medium,3,accuracy,0.6326530612244898,13640,False
+MC,5,Skip1 medium,3,accuracy,0.6595744680851063,13640,False
+MC,1,Skip1 medium,4,accuracy,0.66,13640,False
+MC,2,Skip1 medium,4,accuracy,0.5625,13640,False
+MC,3,Skip1 medium,4,accuracy,0.5686274509803921,13640,False
+MC,4,Skip1 medium,4,accuracy,0.5925925925925926,13640,False
+MC,5,Skip1 medium,4,accuracy,0.5660377358490566,13640,False
+MC,1,Skip1 far,0,accuracy,0.6122448979591837,6944,False
+MC,2,Skip1 far,0,accuracy,0.5909090909090909,6944,False
+MC,3,Skip1 far,0,accuracy,0.675,6944,False
+MC,4,Skip1 far,0,accuracy,0.4230769230769231,6944,False
+MC,5,Skip1 far,0,accuracy,0.5306122448979592,6944,False
+MC,1,Skip1 far,1,accuracy,0.6078431372549019,6944,False
+MC,2,Skip1 far,1,accuracy,0.5490196078431373,6944,False
+MC,3,Skip1 far,1,accuracy,0.5490196078431373,6944,False
+MC,4,Skip1 far,1,accuracy,0.5416666666666666,6944,False
+MC,5,Skip1 far,1,accuracy,0.6363636363636364,6944,False
+MC,1,Skip1 far,2,accuracy,0.5869565217391305,6944,False
+MC,2,Skip1 far,2,accuracy,0.5925925925925926,6944,False
+MC,3,Skip1 far,2,accuracy,0.559322033898305,6944,False
+MC,4,Skip1 far,2,accuracy,0.6122448979591837,6944,False
+MC,5,Skip1 far,2,accuracy,0.4791666666666667,6944,False
+MC,1,Skip1 far,3,accuracy,0.5471698113207547,6944,False
+MC,2,Skip1 far,3,accuracy,0.6170212765957447,6944,False
+MC,3,Skip1 far,3,accuracy,0.48333333333333334,6944,False
+MC,4,Skip1 far,3,accuracy,0.6326530612244898,6944,False
+MC,5,Skip1 far,3,accuracy,0.5957446808510638,6944,False
+MC,1,Skip1 far,4,accuracy,0.64,6944,False
+MC,2,Skip1 far,4,accuracy,0.5416666666666666,6944,False
+MC,3,Skip1 far,4,accuracy,0.5294117647058824,6944,False
+MC,4,Skip1 far,4,accuracy,0.6111111111111112,6944,False
+MC,5,Skip1 far,4,accuracy,0.5660377358490566,6944,False
+MC,1,Opp. close,0,accuracy,0.673469387755102,8184,False
+MC,2,Opp. close,0,accuracy,0.6060606060606061,8184,False
+MC,3,Opp. close,0,accuracy,0.7,8184,False
+MC,4,Opp. close,0,accuracy,0.46153846153846156,8184,False
+MC,5,Opp. close,0,accuracy,0.5918367346938775,8184,False
+MC,1,Opp. close,1,accuracy,0.6078431372549019,8184,False
+MC,2,Opp. close,1,accuracy,0.5686274509803921,8184,False
+MC,3,Opp. close,1,accuracy,0.5686274509803921,8184,False
+MC,4,Opp. close,1,accuracy,0.5416666666666666,8184,False
+MC,5,Opp. close,1,accuracy,0.6545454545454545,8184,False
+MC,1,Opp. close,2,accuracy,0.6304347826086957,8184,False
+MC,2,Opp. close,2,accuracy,0.6111111111111112,8184,False
+MC,3,Opp. close,2,accuracy,0.576271186440678,8184,False
+MC,4,Opp. close,2,accuracy,0.6530612244897959,8184,False
+MC,5,Opp. close,2,accuracy,0.5208333333333334,8184,False
+MC,1,Opp. close,3,accuracy,0.5660377358490566,8184,False
+MC,2,Opp. close,3,accuracy,0.6595744680851063,8184,False
+MC,3,Opp. close,3,accuracy,0.5166666666666667,8184,False
+MC,4,Opp. close,3,accuracy,0.6530612244897959,8184,False
+MC,5,Opp. close,3,accuracy,0.7021276595744681,8184,False
+MC,1,Opp. close,4,accuracy,0.62,8184,False
+MC,2,Opp. close,4,accuracy,0.5833333333333334,8184,False
+MC,3,Opp. close,4,accuracy,0.5882352941176471,8184,False
+MC,4,Opp. close,4,accuracy,0.6481481481481481,8184,False
+MC,5,Opp. close,4,accuracy,0.5660377358490566,8184,False
+MC,1,Opp. medium,0,accuracy,0.6326530612244898,8184,False
+MC,2,Opp. medium,0,accuracy,0.5909090909090909,8184,False
+MC,3,Opp. medium,0,accuracy,0.675,8184,False
+MC,4,Opp. medium,0,accuracy,0.4423076923076923,8184,False
+MC,5,Opp. medium,0,accuracy,0.5714285714285714,8184,False
+MC,1,Opp. medium,1,accuracy,0.5882352941176471,8184,False
+MC,2,Opp. medium,1,accuracy,0.5490196078431373,8184,False
+MC,3,Opp. medium,1,accuracy,0.5294117647058824,8184,False
+MC,4,Opp. medium,1,accuracy,0.5625,8184,False
+MC,5,Opp. medium,1,accuracy,0.6363636363636364,8184,False
+MC,1,Opp. medium,2,accuracy,0.6304347826086957,8184,False
+MC,2,Opp. medium,2,accuracy,0.6111111111111112,8184,False
+MC,3,Opp. medium,2,accuracy,0.559322033898305,8184,False
+MC,4,Opp. medium,2,accuracy,0.6326530612244898,8184,False
+MC,5,Opp. medium,2,accuracy,0.5,8184,False
+MC,1,Opp. medium,3,accuracy,0.5660377358490566,8184,False
+MC,2,Opp. medium,3,accuracy,0.5957446808510638,8184,False
+MC,3,Opp. medium,3,accuracy,0.5,8184,False
+MC,4,Opp. medium,3,accuracy,0.6326530612244898,8184,False
+MC,5,Opp. medium,3,accuracy,0.6382978723404256,8184,False
+MC,1,Opp. medium,4,accuracy,0.66,8184,False
+MC,2,Opp. medium,4,accuracy,0.5416666666666666,8184,False
+MC,3,Opp. medium,4,accuracy,0.5490196078431373,8184,False
+MC,4,Opp. medium,4,accuracy,0.6111111111111112,8184,False
+MC,5,Opp. medium,4,accuracy,0.5849056603773585,8184,False
+MC,1,Opp. far,0,accuracy,0.6326530612244898,8184,False
+MC,2,Opp. far,0,accuracy,0.5909090909090909,8184,False
+MC,3,Opp. far,0,accuracy,0.7,8184,False
+MC,4,Opp. far,0,accuracy,0.4423076923076923,8184,False
+MC,5,Opp. far,0,accuracy,0.5510204081632653,8184,False
+MC,1,Opp. far,1,accuracy,0.5686274509803921,8184,False
+MC,2,Opp. far,1,accuracy,0.5490196078431373,8184,False
+MC,3,Opp. far,1,accuracy,0.5490196078431373,8184,False
+MC,4,Opp. far,1,accuracy,0.5416666666666666,8184,False
+MC,5,Opp. far,1,accuracy,0.6363636363636364,8184,False
+MC,1,Opp. far,2,accuracy,0.6086956521739131,8184,False
+MC,2,Opp. far,2,accuracy,0.6111111111111112,8184,False
+MC,3,Opp. far,2,accuracy,0.559322033898305,8184,False
+MC,4,Opp. far,2,accuracy,0.5918367346938775,8184,False
+MC,5,Opp. far,2,accuracy,0.5,8184,False
+MC,1,Opp. far,3,accuracy,0.5660377358490566,8184,False
+MC,2,Opp. far,3,accuracy,0.5957446808510638,8184,False
+MC,3,Opp. far,3,accuracy,0.48333333333333334,8184,False
+MC,4,Opp. far,3,accuracy,0.6326530612244898,8184,False
+MC,5,Opp. far,3,accuracy,0.6382978723404256,8184,False
+MC,1,Opp. far,4,accuracy,0.66,8184,False
+MC,2,Opp. far,4,accuracy,0.5416666666666666,8184,False
+MC,3,Opp. far,4,accuracy,0.5490196078431373,8184,False
+MC,4,Opp. far,4,accuracy,0.6296296296296297,8184,False
+MC,5,Opp. far,4,accuracy,0.5660377358490566,8184,False

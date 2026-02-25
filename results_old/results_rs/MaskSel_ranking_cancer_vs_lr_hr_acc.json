@@ -1,0 +1,120 @@
+{
+  "task": "cancer_vs_lr_hr",
+  "metric": "accuracy",
+  "order_good_to_bad": [
+    "Long a+",
+    "Skip1 far",
+    "Skip1 medium",
+    "Skip1 close",
+    "Adj. close",
+    "Med. a+ ext.",
+    "Long a+ ext.",
+    "Med. adj.",
+    "All",
+    "Opp. medium",
+    "Adj. far",
+    "Opp. far",
+    "Z-threshold",
+    "Opp. close"
+  ],
+  "ranking_table": [
+    {
+      "IIVV": "Long a+",
+      "mean_score": 0.6116483767109989,
+      "std_score": 0.08123601009266318,
+      "n_runs": 25,
+      "n_params": 496
+    },
+    {
+      "IIVV": "Skip1 far",
+      "mean_score": 0.6104981080970171,
+      "std_score": 0.07740263600358542,
+      "n_runs": 25,
+      "n_params": 6944
+    },
+    {
+      "IIVV": "Skip1 medium",
+      "mean_score": 0.6091110248203129,
+      "std_score": 0.08467308632335228,
+      "n_runs": 25,
+      "n_params": 13640
+    },
+    {
+      "IIVV": "Skip1 close",
+      "mean_score": 0.6036218415883539,
+      "std_score": 0.07074269635009058,
+      "n_runs": 25,
+      "n_params": 11160
+    },
+    {
+      "IIVV": "Adj. close",
+      "mean_score": 0.5948364524342417,
+      "std_score": 0.0649774484486694,
+      "n_runs": 25,
+      "n_params": 9052
+    },
+    {
+      "IIVV": "Med. a+ ext.",
+      "mean_score": 0.5926195913300866,
+      "std_score": 0.09072131009965827,
+      "n_runs": 25,
+      "n_params": 3720
+    },
+    {
+      "IIVV": "Long a+ ext.",
+      "mean_score": 0.5901901558749504,
+      "std_score": 0.08400070098042328,
+      "n_runs": 25,
+      "n_params": 3720
+    },
+    {
+      "IIVV": "Med. adj.",
+      "mean_score": 0.5896407113092217,
+      "std_score": 0.067547876974174,
+      "n_runs": 25,
+      "n_params": 11997
+    },
+    {
+      "IIVV": "All",
+      "mean_score": 0.5848038492024249,
+      "std_score": 0.07095916625048825,
+      "n_runs": 25,
+      "n_params": 239568
+    },
+    {
+      "IIVV": "Opp. medium",
+      "mean_score": 0.583158433917896,
+      "std_score": 0.09287119645496561,
+      "n_runs": 25,
+      "n_params": 8184
+    },
+    {
+      "IIVV": "Adj. far",
+      "mean_score": 0.5826010653532875,
+      "std_score": 0.0814875272989855,
+      "n_runs": 25,
+      "n_params": 20460
+    },
+    {
+      "IIVV": "Opp. far",
+      "mean_score": 0.5823377465116917,
+      "std_score": 0.08519652969012939,
+      "n_runs": 25,
+      "n_params": 8184
+    },
+    {
+      "IIVV": "Z-threshold",
+      "mean_score": 0.5818128871896028,
+      "std_score": 0.08100628986444883,
+      "n_runs": 25,
+      "n_params": 67177
+    },
+    {
+      "IIVV": "Opp. close",
+      "mean_score": 0.5740635652698886,
+      "std_score": 0.07755550250421261,
+      "n_runs": 25,
+      "n_params": 8184
+    }
+  ]
+}

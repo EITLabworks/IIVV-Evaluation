@@ -1,0 +1,91 @@
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\columnwidth]{figures/IIVVmasks/IIVV_pattern_all.pdf}
+    \caption{IIVV mask \textit{All}}
+    \label{appendix:fig:IIVV:all}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\columnwidth]{figures/IIVVmasks/IIVV_pattern_vv_long_across.pdf}
+    \caption{IIVV mask \textit{Long a+}}
+    \label{appendix:fig:IIVV:vv_long_across}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\columnwidth]{figures/IIVVmasks/IIVV_pattern_vv_long_across_extended.pdf}
+    \caption{IIVV mask \textit{Long a+ ext.}}
+    \label{appendix:fig:IIVV:vv_long_across_extended}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\columnwidth]{figures/IIVVmasks/IIVV_pattern_vv_medium_across_extended.pdf}
+    \caption{IIVV mask \textit{Med. a+ ext.}}
+    \label{appendix:fig:IIVV:vv_medium_across_extended}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\columnwidth]{figures/IIVVmasks/IIVV_pattern_vv_distance_close_skip_1.pdf}
+    \caption{IIVV mask \textit{Skip1 far}}
+    \label{appendix:fig:IIVV:vv_distance_close_skip_1}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\columnwidth]{figures/IIVVmasks/IIVV_pattern_adjacent_close.pdf}
+    \caption{IIVV mask \textit{Opp. close}}
+    \label{appendix:fig:IIVV:adjacent_close}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\columnwidth]{figures/IIVVmasks/IIVV_pattern_vv_distance_medium_adj.pdf}
+    \caption{IIVV mask \textit{Opp. medium}}
+    \label{appendix:fig:IIVV:vv_distance_medium_adj}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\columnwidth]{figures/IIVVmasks/IIVV_pattern_adjacent_far.pdf}
+    \caption{IIVV mask \textit{Opp. far}}
+    \label{appendix:fig:IIVV:adjacent_far}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\columnwidth]{figures/IIVVmasks/IIVV_pattern_skip1_medium.pdf}
+    \caption{IIVV mask \textit{Adj. close}}
+    \label{appendix:fig:IIVV:skip1_medium}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\columnwidth]{figures/IIVVmasks/IIVV_pattern_skip1_far.pdf}
+    \caption{IIVV mask \textit{Skip1 close}}
+    \label{appendix:fig:IIVV:skip1_far}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\columnwidth]{figures/IIVVmasks/IIVV_pattern_opposite_close.pdf}
+    \caption{IIVV mask \textit{Med. adj.}}
+    \label{appendix:fig:IIVV:opposite_close}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\columnwidth]{figures/IIVVmasks/IIVV_pattern_opposite_medium.pdf}
+    \caption{IIVV mask \textit{Skip1 medium} }
+    \label{appendix:fig:IIVV:opposite_medium}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\columnwidth]{figures/IIVVmasks/IIVV_pattern_opposite_far.pdf}
+    \caption{IIVV mask \textit{Adj. far}}
+    \label{appendix:fig:IIVV:opposite_far}
+\end{figure}
+

@@ -1,0 +1,351 @@
+Task,Fold,IIVV,rs,metric,score,n_params,need_proba
+cancer_vs_lr_hr,1,All,0,f1,0.2971257932064203,239568,False
+cancer_vs_lr_hr,2,All,0,f1,0.4304388422035481,239568,False
+cancer_vs_lr_hr,3,All,0,f1,0.33511586452762926,239568,False
+cancer_vs_lr_hr,4,All,0,f1,0.38000000000000006,239568,False
+cancer_vs_lr_hr,5,All,0,f1,0.35000000000000003,239568,False
+cancer_vs_lr_hr,1,All,1,f1,0.36526610644257707,239568,False
+cancer_vs_lr_hr,2,All,1,f1,0.43891402714932126,239568,False
+cancer_vs_lr_hr,3,All,1,f1,0.35498575498575496,239568,False
+cancer_vs_lr_hr,4,All,1,f1,0.3348115299334811,239568,False
+cancer_vs_lr_hr,5,All,1,f1,0.34161490683229817,239568,False
+cancer_vs_lr_hr,1,All,2,f1,0.3985042735042735,239568,False
+cancer_vs_lr_hr,2,All,2,f1,0.35555555555555557,239568,False
+cancer_vs_lr_hr,3,All,2,f1,0.34722222222222215,239568,False
+cancer_vs_lr_hr,4,All,2,f1,0.39834881320949433,239568,False
+cancer_vs_lr_hr,5,All,2,f1,0.3408521303258145,239568,False
+cancer_vs_lr_hr,1,All,3,f1,0.3816859221223791,239568,False
+cancer_vs_lr_hr,2,All,3,f1,0.3976348854397635,239568,False
+cancer_vs_lr_hr,3,All,3,f1,0.4223817118553961,239568,False
+cancer_vs_lr_hr,4,All,3,f1,0.4340136054421769,239568,False
+cancer_vs_lr_hr,5,All,3,f1,0.3611111111111111,239568,False
+cancer_vs_lr_hr,1,All,4,f1,0.34114114114114114,239568,False
+cancer_vs_lr_hr,2,All,4,f1,0.3157181571815718,239568,False
+cancer_vs_lr_hr,3,All,4,f1,0.40326340326340326,239568,False
+cancer_vs_lr_hr,4,All,4,f1,0.40113475177304964,239568,False
+cancer_vs_lr_hr,5,All,4,f1,0.38791732909379967,239568,False
+cancer_vs_lr_hr,1,Z-threshold,0,f1,0.48291497975708503,67177,False
+cancer_vs_lr_hr,2,Z-threshold,0,f1,0.44351073762838467,67177,False
+cancer_vs_lr_hr,3,Z-threshold,0,f1,0.3333333333333333,67177,False
+cancer_vs_lr_hr,4,Z-threshold,0,f1,0.2942528735632184,67177,False
+cancer_vs_lr_hr,5,Z-threshold,0,f1,0.3639846743295019,67177,False
+cancer_vs_lr_hr,1,Z-threshold,1,f1,0.27568922305764415,67177,False
+cancer_vs_lr_hr,2,Z-threshold,1,f1,0.5316239316239316,67177,False
+cancer_vs_lr_hr,3,Z-threshold,1,f1,0.3803418803418803,67177,False
+cancer_vs_lr_hr,4,Z-threshold,1,f1,0.3391405342624855,67177,False
+cancer_vs_lr_hr,5,Z-threshold,1,f1,0.36944444444444446,67177,False
+cancer_vs_lr_hr,1,Z-threshold,2,f1,0.37467700258397935,67177,False
+cancer_vs_lr_hr,2,Z-threshold,2,f1,0.2777777777777778,67177,False
+cancer_vs_lr_hr,3,Z-threshold,2,f1,0.36799620132953464,67177,False
+cancer_vs_lr_hr,4,Z-threshold,2,f1,0.4166666666666667,67177,False
+cancer_vs_lr_hr,5,Z-threshold,2,f1,0.2222222222222222,67177,False
+cancer_vs_lr_hr,1,Z-threshold,3,f1,0.3066012002182215,67177,False
+cancer_vs_lr_hr,2,Z-threshold,3,f1,0.328042328042328,67177,False
+cancer_vs_lr_hr,3,Z-threshold,3,f1,0.4148148148148148,67177,False
+cancer_vs_lr_hr,4,Z-threshold,3,f1,0.5165732959850606,67177,False
+cancer_vs_lr_hr,5,Z-threshold,3,f1,0.38137472283813745,67177,False
+cancer_vs_lr_hr,1,Z-threshold,4,f1,0.30450849963045085,67177,False
+cancer_vs_lr_hr,2,Z-threshold,4,f1,0.3095238095238095,67177,False
+cancer_vs_lr_hr,3,Z-threshold,4,f1,0.3856209150326797,67177,False
+cancer_vs_lr_hr,4,Z-threshold,4,f1,0.29743589743589743,67177,False
+cancer_vs_lr_hr,5,Z-threshold,4,f1,0.39527027027027034,67177,False
+cancer_vs_lr_hr,1,Long a+,0,f1,0.3691414968010713,496,False
+cancer_vs_lr_hr,2,Long a+,0,f1,0.46855345911949686,496,False
+cancer_vs_lr_hr,3,Long a+,0,f1,0.3523809523809524,496,False
+cancer_vs_lr_hr,4,Long a+,0,f1,0.4222222222222222,496,False
+cancer_vs_lr_hr,5,Long a+,0,f1,0.47450980392156855,496,False
+cancer_vs_lr_hr,1,Long a+,1,f1,0.3675675675675676,496,False
+cancer_vs_lr_hr,2,Long a+,1,f1,0.5042483660130719,496,False
+cancer_vs_lr_hr,3,Long a+,1,f1,0.38730158730158726,496,False
+cancer_vs_lr_hr,4,Long a+,1,f1,0.34390243902439027,496,False
+cancer_vs_lr_hr,5,Long a+,1,f1,0.34074074074074073,496,False
+cancer_vs_lr_hr,1,Long a+,2,f1,0.4611111111111111,496,False
+cancer_vs_lr_hr,2,Long a+,2,f1,0.4945736434108527,496,False
+cancer_vs_lr_hr,3,Long a+,2,f1,0.47809523809523813,496,False
+cancer_vs_lr_hr,4,Long a+,2,f1,0.49066293183940246,496,False
+cancer_vs_lr_hr,5,Long a+,2,f1,0.38425925925925924,496,False
+cancer_vs_lr_hr,1,Long a+,3,f1,0.40051347881899874,496,False
+cancer_vs_lr_hr,2,Long a+,3,f1,0.46515151515151515,496,False
+cancer_vs_lr_hr,3,Long a+,3,f1,0.3716931216931217,496,False
+cancer_vs_lr_hr,4,Long a+,3,f1,0.43271490414347563,496,False
+cancer_vs_lr_hr,5,Long a+,3,f1,0.4060984060984061,496,False
+cancer_vs_lr_hr,1,Long a+,4,f1,0.34114114114114114,496,False
+cancer_vs_lr_hr,2,Long a+,4,f1,0.4004004004004004,496,False
+cancer_vs_lr_hr,3,Long a+,4,f1,0.42264150943396234,496,False
+cancer_vs_lr_hr,4,Long a+,4,f1,0.5682539682539682,496,False
+cancer_vs_lr_hr,5,Long a+,4,f1,0.4057017543859649,496,False
+cancer_vs_lr_hr,1,Long a+ ext.,0,f1,0.2779973649538867,3720,False
+cancer_vs_lr_hr,2,Long a+ ext.,0,f1,0.44,3720,False
+cancer_vs_lr_hr,3,Long a+ ext.,0,f1,0.41532976827094475,3720,False
+cancer_vs_lr_hr,4,Long a+ ext.,0,f1,0.4137022397891963,3720,False
+cancer_vs_lr_hr,5,Long a+ ext.,0,f1,0.3752620545073375,3720,False
+cancer_vs_lr_hr,1,Long a+ ext.,1,f1,0.36574074074074076,3720,False
+cancer_vs_lr_hr,2,Long a+ ext.,1,f1,0.43891402714932126,3720,False
+cancer_vs_lr_hr,3,Long a+ ext.,1,f1,0.3686274509803922,3720,False
+cancer_vs_lr_hr,4,Long a+ ext.,1,f1,0.32028985507246377,3720,False
+cancer_vs_lr_hr,5,Long a+ ext.,1,f1,0.38257575757575757,3720,False
+cancer_vs_lr_hr,1,Long a+ ext.,2,f1,0.4166666666666667,3720,False
+cancer_vs_lr_hr,2,Long a+ ext.,2,f1,0.38095238095238093,3720,False
+cancer_vs_lr_hr,3,Long a+ ext.,2,f1,0.3602941176470589,3720,False
+cancer_vs_lr_hr,4,Long a+ ext.,2,f1,0.4364364364364364,3720,False
+cancer_vs_lr_hr,5,Long a+ ext.,2,f1,0.38558558558558564,3720,False
+cancer_vs_lr_hr,1,Long a+ ext.,3,f1,0.36542575952075307,3720,False
+cancer_vs_lr_hr,2,Long a+ ext.,3,f1,0.3365079365079365,3720,False
+cancer_vs_lr_hr,3,Long a+ ext.,3,f1,0.37867867867867866,3720,False
+cancer_vs_lr_hr,4,Long a+ ext.,3,f1,0.4466666666666666,3720,False
+cancer_vs_lr_hr,5,Long a+ ext.,3,f1,0.3408521303258145,3720,False
+cancer_vs_lr_hr,1,Long a+ ext.,4,f1,0.32407407407407407,3720,False
+cancer_vs_lr_hr,2,Long a+ ext.,4,f1,0.3516483516483517,3720,False
+cancer_vs_lr_hr,3,Long a+ ext.,4,f1,0.4160839160839161,3720,False
+cancer_vs_lr_hr,4,Long a+ ext.,4,f1,0.5052447552447553,3720,False
+cancer_vs_lr_hr,5,Long a+ ext.,4,f1,0.4444444444444444,3720,False
+cancer_vs_lr_hr,1,Med. a+ ext.,0,f1,0.29249011857707513,3720,False
+cancer_vs_lr_hr,2,Med. a+ ext.,0,f1,0.44351073762838467,3720,False
+cancer_vs_lr_hr,3,Med. a+ ext.,0,f1,0.3333333333333333,3720,False
+cancer_vs_lr_hr,4,Med. a+ ext.,0,f1,0.35327635327635326,3720,False
+cancer_vs_lr_hr,5,Med. a+ ext.,0,f1,0.33769063180827885,3720,False
+cancer_vs_lr_hr,1,Med. a+ ext.,1,f1,0.32407407407407407,3720,False
+cancer_vs_lr_hr,2,Med. a+ ext.,1,f1,0.4976415094339623,3720,False
+cancer_vs_lr_hr,3,Med. a+ ext.,1,f1,0.4791144527986633,3720,False
+cancer_vs_lr_hr,4,Med. a+ ext.,1,f1,0.32028985507246377,3720,False
+cancer_vs_lr_hr,5,Med. a+ ext.,1,f1,0.24637681159420288,3720,False
+cancer_vs_lr_hr,1,Med. a+ ext.,2,f1,0.4236874236874237,3720,False
+cancer_vs_lr_hr,2,Med. a+ ext.,2,f1,0.43800322061191627,3720,False
+cancer_vs_lr_hr,3,Med. a+ ext.,2,f1,0.34640522875817,3720,False
+cancer_vs_lr_hr,4,Med. a+ ext.,2,f1,0.4364364364364364,3720,False
+cancer_vs_lr_hr,5,Med. a+ ext.,2,f1,0.3408521303258145,3720,False
+cancer_vs_lr_hr,1,Med. a+ ext.,3,f1,0.4167736414206247,3720,False
+cancer_vs_lr_hr,2,Med. a+ ext.,3,f1,0.33763996554694226,3720,False
+cancer_vs_lr_hr,3,Med. a+ ext.,3,f1,0.3578347578347578,3720,False
+cancer_vs_lr_hr,4,Med. a+ ext.,3,f1,0.4793650793650794,3720,False
+cancer_vs_lr_hr,5,Med. a+ ext.,3,f1,0.4300300300300301,3720,False
+cancer_vs_lr_hr,1,Med. a+ ext.,4,f1,0.28888888888888886,3720,False
+cancer_vs_lr_hr,2,Med. a+ ext.,4,f1,0.3481781376518218,3720,False
+cancer_vs_lr_hr,3,Med. a+ ext.,4,f1,0.3986928104575163,3720,False
+cancer_vs_lr_hr,4,Med. a+ ext.,4,f1,0.4208695652173913,3720,False
+cancer_vs_lr_hr,5,Med. a+ ext.,4,f1,0.46115288220551376,3720,False
+cancer_vs_lr_hr,1,Skip1 close,0,f1,0.3738801791713326,11160,False
+cancer_vs_lr_hr,2,Skip1 close,0,f1,0.4304388422035481,11160,False
+cancer_vs_lr_hr,3,Skip1 close,0,f1,0.35185185185185186,11160,False
+cancer_vs_lr_hr,4,Skip1 close,0,f1,0.5055555555555555,11160,False
+cancer_vs_lr_hr,5,Skip1 close,0,f1,0.3892519970951343,11160,False
+cancer_vs_lr_hr,1,Skip1 close,1,f1,0.4044817927170869,11160,False
+cancer_vs_lr_hr,2,Skip1 close,1,f1,0.45543859649122803,11160,False
+cancer_vs_lr_hr,3,Skip1 close,1,f1,0.35225225225225226,11160,False
+cancer_vs_lr_hr,4,Skip1 close,1,f1,0.3348115299334811,11160,False
+cancer_vs_lr_hr,5,Skip1 close,1,f1,0.38257575757575757,11160,False
+cancer_vs_lr_hr,1,Skip1 close,2,f1,0.4166666666666667,11160,False
+cancer_vs_lr_hr,2,Skip1 close,2,f1,0.36481481481481487,11160,False
+cancer_vs_lr_hr,3,Skip1 close,2,f1,0.3478787878787879,11160,False
+cancer_vs_lr_hr,4,Skip1 close,2,f1,0.4717348927875243,11160,False
+cancer_vs_lr_hr,5,Skip1 close,2,f1,0.3408521303258145,11160,False
+cancer_vs_lr_hr,1,Skip1 close,3,f1,0.38095238095238093,11160,False
+cancer_vs_lr_hr,2,Skip1 close,3,f1,0.45824094604582405,11160,False
+cancer_vs_lr_hr,3,Skip1 close,3,f1,0.3945868945868946,11160,False
+cancer_vs_lr_hr,4,Skip1 close,3,f1,0.4694107062528115,11160,False
+cancer_vs_lr_hr,5,Skip1 close,3,f1,0.38847117794486213,11160,False
+cancer_vs_lr_hr,1,Skip1 close,4,f1,0.34114114114114114,11160,False
+cancer_vs_lr_hr,2,Skip1 close,4,f1,0.4205128205128205,11160,False
+cancer_vs_lr_hr,3,Skip1 close,4,f1,0.3856209150326797,11160,False
+cancer_vs_lr_hr,4,Skip1 close,4,f1,0.5183164983164983,11160,False
+cancer_vs_lr_hr,5,Skip1 close,4,f1,0.3703703703703704,11160,False
+cancer_vs_lr_hr,1,Adj. close,0,f1,0.3221884498480243,9052,False
+cancer_vs_lr_hr,2,Adj. close,0,f1,0.41071428571428575,9052,False
+cancer_vs_lr_hr,3,Adj. close,0,f1,0.35185185185185186,9052,False
+cancer_vs_lr_hr,4,Adj. close,0,f1,0.38271604938271603,9052,False
+cancer_vs_lr_hr,5,Adj. close,0,f1,0.3892519970951343,9052,False
+cancer_vs_lr_hr,1,Adj. close,1,f1,0.40297713981924504,9052,False
+cancer_vs_lr_hr,2,Adj. close,1,f1,0.42609351432880843,9052,False
+cancer_vs_lr_hr,3,Adj. close,1,f1,0.40211640211640215,9052,False
+cancer_vs_lr_hr,4,Adj. close,1,f1,0.34920634920634913,9052,False
+cancer_vs_lr_hr,5,Adj. close,1,f1,0.34074074074074073,9052,False
+cancer_vs_lr_hr,1,Adj. close,2,f1,0.44017094017094016,9052,False
+cancer_vs_lr_hr,2,Adj. close,2,f1,0.35000000000000003,9052,False
+cancer_vs_lr_hr,3,Adj. close,2,f1,0.34893957583033214,9052,False
+cancer_vs_lr_hr,4,Adj. close,2,f1,0.4364364364364364,9052,False
+cancer_vs_lr_hr,5,Adj. close,2,f1,0.2905982905982906,9052,False
+cancer_vs_lr_hr,1,Adj. close,3,f1,0.3968253968253968,9052,False
+cancer_vs_lr_hr,2,Adj. close,3,f1,0.40317460317460324,9052,False
+cancer_vs_lr_hr,3,Adj. close,3,f1,0.4317394317394318,9052,False
+cancer_vs_lr_hr,4,Adj. close,3,f1,0.40277777777777773,9052,False
+cancer_vs_lr_hr,5,Adj. close,3,f1,0.4300300300300301,9052,False
+cancer_vs_lr_hr,1,Adj. close,4,f1,0.34114114114114114,9052,False
+cancer_vs_lr_hr,2,Adj. close,4,f1,0.3525641025641026,9052,False
+cancer_vs_lr_hr,3,Adj. close,4,f1,0.4338461538461538,9052,False
+cancer_vs_lr_hr,4,Adj. close,4,f1,0.39627039627039623,9052,False
+cancer_vs_lr_hr,5,Adj. close,4,f1,0.4059353471118177,9052,False
+cancer_vs_lr_hr,1,Med. adj.,0,f1,0.39361702127659576,11997,False
+cancer_vs_lr_hr,2,Med. adj.,0,f1,0.41071428571428575,11997,False
+cancer_vs_lr_hr,3,Med. adj.,0,f1,0.3333333333333333,11997,False
+cancer_vs_lr_hr,4,Med. adj.,0,f1,0.3473389355742296,11997,False
+cancer_vs_lr_hr,5,Med. adj.,0,f1,0.3549382716049383,11997,False
+cancer_vs_lr_hr,1,Med. adj.,1,f1,0.36526610644257707,11997,False
+cancer_vs_lr_hr,2,Med. adj.,1,f1,0.4049382716049383,11997,False
+cancer_vs_lr_hr,3,Med. adj.,1,f1,0.33968253968253964,11997,False
+cancer_vs_lr_hr,4,Med. adj.,1,f1,0.3348115299334811,11997,False
+cancer_vs_lr_hr,5,Med. adj.,1,f1,0.34161490683229817,11997,False
+cancer_vs_lr_hr,1,Med. adj.,2,f1,0.4236874236874237,11997,False
+cancer_vs_lr_hr,2,Med. adj.,2,f1,0.37060041407867494,11997,False
+cancer_vs_lr_hr,3,Med. adj.,2,f1,0.38222222222222224,11997,False
+cancer_vs_lr_hr,4,Med. adj.,2,f1,0.3985042735042735,11997,False
+cancer_vs_lr_hr,5,Med. adj.,2,f1,0.2905982905982906,11997,False
+cancer_vs_lr_hr,1,Med. adj.,3,f1,0.30848861283643897,11997,False
+cancer_vs_lr_hr,2,Med. adj.,3,f1,0.40317460317460324,11997,False
+cancer_vs_lr_hr,3,Med. adj.,3,f1,0.4900129110655427,11997,False
+cancer_vs_lr_hr,4,Med. adj.,3,f1,0.4340136054421769,11997,False
+cancer_vs_lr_hr,5,Med. adj.,3,f1,0.4166666666666667,11997,False
+cancer_vs_lr_hr,1,Med. adj.,4,f1,0.34188034188034183,11997,False
+cancer_vs_lr_hr,2,Med. adj.,4,f1,0.39926739926739924,11997,False
+cancer_vs_lr_hr,3,Med. adj.,4,f1,0.4338461538461538,11997,False
+cancer_vs_lr_hr,4,Med. adj.,4,f1,0.46939562133826707,11997,False
+cancer_vs_lr_hr,5,Med. adj.,4,f1,0.4140087554721701,11997,False
+cancer_vs_lr_hr,1,Adj. far,0,f1,0.39641311069882496,20460,False
+cancer_vs_lr_hr,2,Adj. far,0,f1,0.4266666666666667,20460,False
+cancer_vs_lr_hr,3,Adj. far,0,f1,0.3155080213903743,20460,False
+cancer_vs_lr_hr,4,Adj. far,0,f1,0.3333333333333333,20460,False
+cancer_vs_lr_hr,5,Adj. far,0,f1,0.3063492063492063,20460,False
+cancer_vs_lr_hr,1,Adj. far,1,f1,0.2786786786786787,20460,False
+cancer_vs_lr_hr,2,Adj. far,1,f1,0.38687782805429866,20460,False
+cancer_vs_lr_hr,3,Adj. far,1,f1,0.39882339882339884,20460,False
+cancer_vs_lr_hr,4,Adj. far,1,f1,0.32028985507246377,20460,False
+cancer_vs_lr_hr,5,Adj. far,1,f1,0.23611111111111113,20460,False
+cancer_vs_lr_hr,1,Adj. far,2,f1,0.3391405342624855,20460,False
+cancer_vs_lr_hr,2,Adj. far,2,f1,0.46005291005291005,20460,False
+cancer_vs_lr_hr,3,Adj. far,2,f1,0.4109195402298851,20460,False
+cancer_vs_lr_hr,4,Adj. far,2,f1,0.4236874236874237,20460,False
+cancer_vs_lr_hr,5,Adj. far,2,f1,0.2333333333333333,20460,False
+cancer_vs_lr_hr,1,Adj. far,3,f1,0.35606060606060613,20460,False
+cancer_vs_lr_hr,2,Adj. far,3,f1,0.4097560975609756,20460,False
+cancer_vs_lr_hr,3,Adj. far,3,f1,0.40679217423403474,20460,False
+cancer_vs_lr_hr,4,Adj. far,3,f1,0.41135190918472647,20460,False
+cancer_vs_lr_hr,5,Adj. far,3,f1,0.42735042735042733,20460,False
+cancer_vs_lr_hr,1,Adj. far,4,f1,0.2932330827067669,20460,False
+cancer_vs_lr_hr,2,Adj. far,4,f1,0.367965367965368,20460,False
+cancer_vs_lr_hr,3,Adj. far,4,f1,0.3825641025641026,20460,False
+cancer_vs_lr_hr,4,Adj. far,4,f1,0.2617543859649123,20460,False
+cancer_vs_lr_hr,5,Adj. far,4,f1,0.42063492063492064,20460,False
+cancer_vs_lr_hr,1,Skip1 medium,0,f1,0.4267558528428093,13640,False
+cancer_vs_lr_hr,2,Skip1 medium,0,f1,0.48444444444444446,13640,False
+cancer_vs_lr_hr,3,Skip1 medium,0,f1,0.3333333333333333,13640,False
+cancer_vs_lr_hr,4,Skip1 medium,0,f1,0.38000000000000006,13640,False
+cancer_vs_lr_hr,5,Skip1 medium,0,f1,0.40958164642375167,13640,False
+cancer_vs_lr_hr,1,Skip1 medium,1,f1,0.32605042016806723,13640,False
+cancer_vs_lr_hr,2,Skip1 medium,1,f1,0.4909502262443439,13640,False
+cancer_vs_lr_hr,3,Skip1 medium,1,f1,0.36917136917136917,13640,False
+cancer_vs_lr_hr,4,Skip1 medium,1,f1,0.3055555555555555,13640,False
+cancer_vs_lr_hr,5,Skip1 medium,1,f1,0.3464646464646464,13640,False
+cancer_vs_lr_hr,1,Skip1 medium,2,f1,0.4236874236874237,13640,False
+cancer_vs_lr_hr,2,Skip1 medium,2,f1,0.43800322061191627,13640,False
+cancer_vs_lr_hr,3,Skip1 medium,2,f1,0.3769230769230769,13640,False
+cancer_vs_lr_hr,4,Skip1 medium,2,f1,0.4364364364364364,13640,False
+cancer_vs_lr_hr,5,Skip1 medium,2,f1,0.29689608636977055,13640,False
+cancer_vs_lr_hr,1,Skip1 medium,3,f1,0.4338624338624338,13640,False
+cancer_vs_lr_hr,2,Skip1 medium,3,f1,0.40317460317460324,13640,False
+cancer_vs_lr_hr,3,Skip1 medium,3,f1,0.35049683830171635,13640,False
+cancer_vs_lr_hr,4,Skip1 medium,3,f1,0.4466666666666667,13640,False
+cancer_vs_lr_hr,5,Skip1 medium,3,f1,0.45363408521303256,13640,False
+cancer_vs_lr_hr,1,Skip1 medium,4,f1,0.30450849963045085,13640,False
+cancer_vs_lr_hr,2,Skip1 medium,4,f1,0.3516483516483517,13640,False
+cancer_vs_lr_hr,3,Skip1 medium,4,f1,0.3986928104575163,13640,False
+cancer_vs_lr_hr,4,Skip1 medium,4,f1,0.4641975308641975,13640,False
+cancer_vs_lr_hr,5,Skip1 medium,4,f1,0.46115288220551376,13640,False
+cancer_vs_lr_hr,1,Skip1 far,0,f1,0.43008314436885864,6944,False
+cancer_vs_lr_hr,2,Skip1 far,0,f1,0.5042016806722689,6944,False
+cancer_vs_lr_hr,3,Skip1 far,0,f1,0.3333333333333333,6944,False
+cancer_vs_lr_hr,4,Skip1 far,0,f1,0.516078431372549,6944,False
+cancer_vs_lr_hr,5,Skip1 far,0,f1,0.4647402820777433,6944,False
+cancer_vs_lr_hr,1,Skip1 far,1,f1,0.2824074074074074,6944,False
+cancer_vs_lr_hr,2,Skip1 far,1,f1,0.5656184486373165,6944,False
+cancer_vs_lr_hr,3,Skip1 far,1,f1,0.4591591591591591,6944,False
+cancer_vs_lr_hr,4,Skip1 far,1,f1,0.40079365079365076,6944,False
+cancer_vs_lr_hr,5,Skip1 far,1,f1,0.29947089947089944,6944,False
+cancer_vs_lr_hr,1,Skip1 far,2,f1,0.4192799070847851,6944,False
+cancer_vs_lr_hr,2,Skip1 far,2,f1,0.2777777777777778,6944,False
+cancer_vs_lr_hr,3,Skip1 far,2,f1,0.43076923076923074,6944,False
+cancer_vs_lr_hr,4,Skip1 far,2,f1,0.6276556776556776,6944,False
+cancer_vs_lr_hr,5,Skip1 far,2,f1,0.2948717948717949,6944,False
+cancer_vs_lr_hr,1,Skip1 far,3,f1,0.4338624338624338,6944,False
+cancer_vs_lr_hr,2,Skip1 far,3,f1,0.34074074074074073,6944,False
+cancer_vs_lr_hr,3,Skip1 far,3,f1,0.5031746031746032,6944,False
+cancer_vs_lr_hr,4,Skip1 far,3,f1,0.45256410256410257,6944,False
+cancer_vs_lr_hr,5,Skip1 far,3,f1,0.44198078344419806,6944,False
+cancer_vs_lr_hr,1,Skip1 far,4,f1,0.30450849963045085,6944,False
+cancer_vs_lr_hr,2,Skip1 far,4,f1,0.43079922027290446,6944,False
+cancer_vs_lr_hr,3,Skip1 far,4,f1,0.5228937728937729,6944,False
+cancer_vs_lr_hr,4,Skip1 far,4,f1,0.41897203325774757,6944,False
+cancer_vs_lr_hr,5,Skip1 far,4,f1,0.43693693693693697,6944,False
+cancer_vs_lr_hr,1,Opp. close,0,f1,0.2808833678398896,8184,False
+cancer_vs_lr_hr,2,Opp. close,0,f1,0.44,8184,False
+cancer_vs_lr_hr,3,Opp. close,0,f1,0.33511586452762926,8184,False
+cancer_vs_lr_hr,4,Opp. close,0,f1,0.38000000000000006,8184,False
+cancer_vs_lr_hr,5,Opp. close,0,f1,0.3752620545073375,8184,False
+cancer_vs_lr_hr,1,Opp. close,1,f1,0.32407407407407407,8184,False
+cancer_vs_lr_hr,2,Opp. close,1,f1,0.40172955974842767,8184,False
+cancer_vs_lr_hr,3,Opp. close,1,f1,0.36500754147812975,8184,False
+cancer_vs_lr_hr,4,Opp. close,1,f1,0.32028985507246377,8184,False
+cancer_vs_lr_hr,5,Opp. close,1,f1,0.34074074074074073,8184,False
+cancer_vs_lr_hr,1,Opp. close,2,f1,0.4166666666666667,8184,False
+cancer_vs_lr_hr,2,Opp. close,2,f1,0.25757575757575757,8184,False
+cancer_vs_lr_hr,3,Opp. close,2,f1,0.3478787878787879,8184,False
+cancer_vs_lr_hr,4,Opp. close,2,f1,0.4364364364364364,8184,False
+cancer_vs_lr_hr,5,Opp. close,2,f1,0.3408521303258145,8184,False
+cancer_vs_lr_hr,1,Opp. close,3,f1,0.3816859221223791,8184,False
+cancer_vs_lr_hr,2,Opp. close,3,f1,0.3365079365079365,8184,False
+cancer_vs_lr_hr,3,Opp. close,3,f1,0.3953216374269006,8184,False
+cancer_vs_lr_hr,4,Opp. close,3,f1,0.4214646464646465,8184,False
+cancer_vs_lr_hr,5,Opp. close,3,f1,0.3611111111111111,8184,False
+cancer_vs_lr_hr,1,Opp. close,4,f1,0.32407407407407407,8184,False
+cancer_vs_lr_hr,2,Opp. close,4,f1,0.3516483516483517,8184,False
+cancer_vs_lr_hr,3,Opp. close,4,f1,0.3986928104575163,8184,False
+cancer_vs_lr_hr,4,Opp. close,4,f1,0.375,8184,False
+cancer_vs_lr_hr,5,Opp. close,4,f1,0.4059353471118177,8184,False
+cancer_vs_lr_hr,1,Opp. medium,0,f1,0.36394557823129253,8184,False
+cancer_vs_lr_hr,2,Opp. medium,0,f1,0.5042016806722689,8184,False
+cancer_vs_lr_hr,3,Opp. medium,0,f1,0.3523809523809524,8184,False
+cancer_vs_lr_hr,4,Opp. medium,0,f1,0.33481481481481484,8184,False
+cancer_vs_lr_hr,5,Opp. medium,0,f1,0.3616734143049933,8184,False
+cancer_vs_lr_hr,1,Opp. medium,1,f1,0.2786786786786787,8184,False
+cancer_vs_lr_hr,2,Opp. medium,1,f1,0.417283950617284,8184,False
+cancer_vs_lr_hr,3,Opp. medium,1,f1,0.33968253968253964,8184,False
+cancer_vs_lr_hr,4,Opp. medium,1,f1,0.3242424242424242,8184,False
+cancer_vs_lr_hr,5,Opp. medium,1,f1,0.24113475177304966,8184,False
+cancer_vs_lr_hr,1,Opp. medium,2,f1,0.393939393939394,8184,False
+cancer_vs_lr_hr,2,Opp. medium,2,f1,0.43800322061191627,8184,False
+cancer_vs_lr_hr,3,Opp. medium,2,f1,0.43209876543209874,8184,False
+cancer_vs_lr_hr,4,Opp. medium,2,f1,0.3813813813813814,8184,False
+cancer_vs_lr_hr,5,Opp. medium,2,f1,0.23931623931623933,8184,False
+cancer_vs_lr_hr,1,Opp. medium,3,f1,0.4167736414206247,8184,False
+cancer_vs_lr_hr,2,Opp. medium,3,f1,0.39349593495934965,8184,False
+cancer_vs_lr_hr,3,Opp. medium,3,f1,0.3981812760882528,8184,False
+cancer_vs_lr_hr,4,Opp. medium,3,f1,0.4340136054421769,8184,False
+cancer_vs_lr_hr,5,Opp. medium,3,f1,0.43333333333333335,8184,False
+cancer_vs_lr_hr,1,Opp. medium,4,f1,0.28888888888888886,8184,False
+cancer_vs_lr_hr,2,Opp. medium,4,f1,0.3408521303258145,8184,False
+cancer_vs_lr_hr,3,Opp. medium,4,f1,0.3986928104575163,8184,False
+cancer_vs_lr_hr,4,Opp. medium,4,f1,0.40277777777777785,8184,False
+cancer_vs_lr_hr,5,Opp. medium,4,f1,0.4708994708994709,8184,False
+cancer_vs_lr_hr,1,Opp. far,0,f1,0.36394557823129253,8184,False
+cancer_vs_lr_hr,2,Opp. far,0,f1,0.5042016806722689,8184,False
+cancer_vs_lr_hr,3,Opp. far,0,f1,0.3523809523809524,8184,False
+cancer_vs_lr_hr,4,Opp. far,0,f1,0.39031339031339035,8184,False
+cancer_vs_lr_hr,5,Opp. far,0,f1,0.40958164642375167,8184,False
+cancer_vs_lr_hr,1,Opp. far,1,f1,0.2786786786786787,8184,False
+cancer_vs_lr_hr,2,Opp. far,1,f1,0.40172955974842767,8184,False
+cancer_vs_lr_hr,3,Opp. far,1,f1,0.3405677655677655,8184,False
+cancer_vs_lr_hr,4,Opp. far,1,f1,0.32028985507246377,8184,False
+cancer_vs_lr_hr,5,Opp. far,1,f1,0.357487922705314,8184,False
+cancer_vs_lr_hr,1,Opp. far,2,f1,0.37467700258397935,8184,False
+cancer_vs_lr_hr,2,Opp. far,2,f1,0.4148148148148148,8184,False
+cancer_vs_lr_hr,3,Opp. far,2,f1,0.43555555555555553,8184,False
+cancer_vs_lr_hr,4,Opp. far,2,f1,0.3985042735042735,8184,False
+cancer_vs_lr_hr,5,Opp. far,2,f1,0.2333333333333333,8184,False
+cancer_vs_lr_hr,1,Opp. far,3,f1,0.4167736414206247,8184,False
+cancer_vs_lr_hr,2,Opp. far,3,f1,0.4083107497741644,8184,False
+cancer_vs_lr_hr,3,Opp. far,3,f1,0.3975528195774434,8184,False
+cancer_vs_lr_hr,4,Opp. far,3,f1,0.41135190918472647,8184,False
+cancer_vs_lr_hr,5,Opp. far,3,f1,0.38137472283813745,8184,False
+cancer_vs_lr_hr,1,Opp. far,4,f1,0.2735042735042735,8184,False
+cancer_vs_lr_hr,2,Opp. far,4,f1,0.38558558558558564,8184,False
+cancer_vs_lr_hr,3,Opp. far,4,f1,0.3986928104575163,8184,False
+cancer_vs_lr_hr,4,Opp. far,4,f1,0.3817400644468314,8184,False
+cancer_vs_lr_hr,5,Opp. far,4,f1,0.3881578947368421,8184,False

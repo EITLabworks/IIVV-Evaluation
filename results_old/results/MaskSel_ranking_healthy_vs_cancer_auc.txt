@@ -1,0 +1,14 @@
+Z-threshold
+Adj. far
+Opp. medium
+Skip1 far
+Skip1 medium
+Med. adj.
+Opp. far
+All
+Adj. close
+Med. a+ ext.
+Opp. close
+Skip1 close
+Long a+ ext.
+Long a+
