@@ -188,18 +188,18 @@ def compute_metrics(
         )
 
     # multiclass
-    f1 = float(f1_score(y_true, y_pred, average="macro"))
+    f1 = float(f1_score(y_true, y_pred, average="micro"))
     aucv = float(
         roc_auc_score(
             y_true,
             y_score_aligned,
             multi_class="ovr",
-            average="macro",
+            average="micro",
             labels=global_classes,
         )
     )
-    recall = float(recall_score(y_true, y_pred, average="macro"))
-    precision = float(precision_score(y_true, y_pred, average="macro", zero_division=0))
+    recall = float(recall_score(y_true, y_pred, average="micro"))
+    precision = float(precision_score(y_true, y_pred, average="micro", zero_division=0))
 
     return dict(
         accuracy=acc,
@@ -210,6 +210,32 @@ def compute_metrics(
         precision=precision,
         npv=np.nan,
     )
+
+
+def append_final_results(row: Dict[str, Any], final_csv_path: Path) -> None:
+    """
+    Append one row to FinalResults.csv (create with header if missing),
+    enforcing the required column order.
+    """
+    cols = [
+        "Task",
+        "Model",
+        "Tuning metric",
+        "Freq",
+        "IIVV mask",
+        "N_params",
+        "accuracy",
+        "F1",
+        "Auc",
+        "Recall",
+        "Precision",
+    ]
+
+    final_csv_path.parent.mkdir(parents=True, exist_ok=True)
+
+    df_row = pd.DataFrame([row], columns=cols)
+    write_header = not final_csv_path.exists()
+    df_row.to_csv(final_csv_path, mode="a", header=write_header, index=False)
 
 
 # ------------------------------------------------------------
@@ -319,6 +345,29 @@ def run_model(
 
     tag = f"{class_task}_{model_name}_{metric}"
 
+    # ------------------------------------------------------------
+    # Append summary to results/FinalResults.csv
+    # ------------------------------------------------------------
+    final_csv = Path(results_path) / "FinalResults.csv"
+
+    final_row = {
+        "Task": class_task,
+        "Model": model_name,
+        "Tuning metric": metric,
+        "Freq": best["fsel"],  # e.g., "Top-50" / whatever your fsel string is
+        "IIVV mask": best["msel"],  # the selected mask label from tuning CSV
+        "N_params": int(X_tmp.shape[1]),
+        "accuracy": float(m["accuracy"]),
+        "F1": float(m["f1"]),
+        "Auc": float(
+            m["auc"]
+        ),  # using your computed AUC but keeping requested column name "Acc"
+        "Recall": float(m["recall"]),
+        "Precision": float(m["precision"]),
+    }
+
+    append_final_results(final_row, final_csv)
+    print("Final results appended:", final_csv)
     # ROC (requires new ResultsROCAUC signature: score_classes mandatory)
     ResultsROCAUC(
         class_task,

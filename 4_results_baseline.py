@@ -11,7 +11,7 @@ Baseline evaluation (NO masking, NO frequency selection) for default SVM / RF / 
     * recall (sensitivity), specificity, precision
     * (binary only) npv
   Notes:
-    - For multiclass tasks: recall/precision are macro-averaged; specificity/npv are NaN.
+    - For multiclass tasks: recall/precision are micro-averaged; specificity/npv are NaN.
 - Saves into results/:
     * BASELINE_folds_<task>.csv          (fold-wise rows for all models)
     * BASELINE_summary_<task>.json       (task + per-model mean/std for all metrics)
@@ -190,18 +190,18 @@ def compute_all_metrics(
         )
 
     # multiclass
-    f1 = float(f1_score(y_true, y_pred, average="macro"))
+    f1 = float(f1_score(y_true, y_pred, average="micro"))
     aucv = float(
         roc_auc_score(
             y_true,
             y_score_aligned,
             multi_class="ovr",
-            average="macro",
+            average="micro",
             labels=global_classes,
         )
     )
-    recall = float(recall_score(y_true, y_pred, average="macro"))
-    precision = float(precision_score(y_true, y_pred, average="macro", zero_division=0))
+    recall = float(recall_score(y_true, y_pred, average="micro"))
+    precision = float(precision_score(y_true, y_pred, average="micro", zero_division=0))
 
     return dict(
         accuracy=acc,
