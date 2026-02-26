@@ -170,7 +170,8 @@ def ResultsROCAUC(
         cp_l = {1: "healthy", 0: "cancer"}
     elif class_task == "cancer_vs_lr_hr":
         cp = {0: "#FFA600", 1: "#FF6361", 2: "#003F5C"}
-        cp_l = {0: "Cancer", 1: "High risk", 2: "Low risk"}
+        # cp_l = {0: "Cancer", 1: "High risk", 2: "Low risk"}
+        cp_l = {0: "Cancer", 1: "High-grade dysplasia", 2: "Non-malignant"}
     elif class_task == "MC":
         cp = {3: "#58508D", 0: "#FFA600", 1: "#003F5C", 2: "#FF6361"}
         cp_l = {
@@ -319,10 +320,10 @@ def ResultsROCAUC(
                 mean_tpr,
                 color="black",
                 linestyle="--",
-                label=f"Macro-average (AUC = {macro_auc:.2f})",
+                label=f"Micro-average (AUC = {macro_auc:.2f})",
             )
 
-            print("Macro-average AUC =", macro_auc)
+            print("Micro-average AUC =", macro_auc)
 
     # Formatting
     plt.plot([0, 1], [0, 1], "k--", linewidth=1)
