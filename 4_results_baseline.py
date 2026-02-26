@@ -415,6 +415,7 @@ def run_baseline_model(
         score_classes=global_classes,
         eval_classes=global_classes,
         pos_label=pos_label,
+        npz_path=str(plots_dir / f"ROC_meta_{tag}.npz"),
     )
 
     ResultsROCAUC(
@@ -426,6 +427,7 @@ def run_baseline_model(
         score_classes=global_classes,
         eval_classes=global_classes,
         pos_label=pos_label,
+        npz_path=str(plots_dir / f"ROC_meta_{tag}.npz"),
     )
 
     class_names = class_names_for_task(class_task)

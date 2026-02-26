@@ -378,6 +378,7 @@ def run_model(
         score_classes=global_classes,
         eval_classes=global_classes,
         pos_label=pos_label,
+        npz_path=str(outdir_p / f"ROC_meta_{tag}.npz"),
     )
 
     ResultsROCAUC(
@@ -389,6 +390,7 @@ def run_model(
         score_classes=global_classes,
         eval_classes=global_classes,
         pos_label=pos_label,
+        npz_path=str(outdir_p / f"ROC_meta_{tag}.npz"),
     )
 
     # Confusion matrices
