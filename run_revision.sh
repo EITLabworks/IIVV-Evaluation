@@ -8,7 +8,7 @@ cd "$TASK_ROOT"
 export MPLBACKEND=Agg
 export MPLCONFIGDIR="${MPLCONFIGDIR:-${TMPDIR:-/tmp}/iivv-matplotlib}"
 
-export OMP_NUM_THREADS=4
-export OPENBLAS_NUM_THREADS=4
+export OMP_NUM_THREADS=8
+export OPENBLAS_NUM_THREADS=8
 
-exec "${PYTHON:-python}" "$TASK_ROOT/run_revision.py" "$@"
+exec taskset -c "${CPUSET:-0-31}" "${PYTHON:-python}" "$TASK_ROOT/run_revision.py" "$@"
