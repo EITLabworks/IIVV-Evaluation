@@ -16,7 +16,7 @@ from sklearn.metrics import roc_curve, auc
 from sklearn.preprocessing import label_binarize
 
 
-def Results_data_loading(class_task, data_augmentation=True):
+def Results_data_loading(class_task, data_augmentation=False):
     """
     return X, Y_labels, labels, Case, inverse_mapping, Y
     """
@@ -30,7 +30,7 @@ def Results_data_loading(class_task, data_augmentation=True):
         labels_healthy_vs_cancer,
         labels_cancer_vs_lr_hr,
         labels_MC,
-    ) = load_data(path="data", Cutpats_threshold=60, norm="freq")
+    ) = load_data(path="data", Cutpats_threshold=60, norm=None)
     if class_task == "healthy_vs_cancer":
         print("Healthy vs. cancer\n")
         select_idx = find_all_indices(
@@ -103,7 +103,9 @@ def Results_data_loading(class_task, data_augmentation=True):
     print("\nInverse mapping:", inverse_mapping)
     print(X.shape, Y.shape, Case.shape)
 
-    if class_task == "MC" and data_augmentation:
+    if data_augmentation:
+        raise ValueError("Pre-split augmentation is disabled: keep all derivatives with their original patient inside training only.")
+    if False:  # historical augmentation code retained; never used for revision evaluation
         print("\n\t\tBefore augmentation")
         visualize_Category_hist(labels)
         X, Y_labels, labels, Case = augment_patient_and_cat_specific(

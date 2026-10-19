@@ -461,7 +461,7 @@ class Masking:
         if skip == None:
             # ----- NEW ---
             if vv_distance == "all":
-                self.mask = np.ones(7728, dtype=bool)
+                self.mask = np.ones(len(self.IIVV), dtype=bool)
                 if self.prints:
                     print("All set to True.")
                     self.count_true_false()

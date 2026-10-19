@@ -2,7 +2,15 @@
 
 Repository for the IEEE-TBME paper: _A Machine-Learning Approach to Optimize Electrical Impedance Spectroscopy-based Classification of In Vivo Oral Lesions_
 
-# Results overvies
+## Reviewer revision workflow
+
+Run `./run_all.sh --output results/revision-clinical-final` for the nested patient-group analysis, including source verification, the combined referral task, requested metrics, sensitivity analyses, and regenerated figures. Use a fresh output directory for another run.
+
+See [code-revisions.md](code-revisions.md) for prerequisites, input schemas, exact search settings, reviewer-to-code mapping, artifact descriptions, and scientific limitations. Check completion with `python 5_check_results.py --results-dir results/revision-clinical-final`.
+
+The figures below are the **historical exploratory results**. Revised results are written to the selected new output directory. Manuscript changes are in `manuscript/Paper/Revision-1.tex`; build with `make revision response`.
+
+# Historical results overview
 
 <!-- ========= Baseline ========= -->
 ## Baseline
@@ -369,6 +377,20 @@ or of an specific file
 
     ./5_check_results.py
 ___
+
+## Build the manuscript locally
+
+The LaTeX sources are kept in the local-only `manuscript/` directory and are
+ignored by Git. With a TeX Live installation that includes `latexmk`, `biber`,
+and the required packages, build all documents from the repository root with:
+
+    make manuscript
+
+Individual documents can be built with `make paper`, `make revision`, or
+`make response`. Generated PDFs and auxiliary build files remain inside
+`manuscript/` and are ignored by Git. To remove those generated files, run:
+
+    make clean-manuscript
 
 
 **Documentation of the script options**

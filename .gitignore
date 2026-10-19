@@ -1,4 +1,5 @@
 archive
+manuscript/
 .ipynb_checkpoints/
 __pycache__
 results/*
