@@ -1,417 +1,106 @@
-# A Machine-Learning Approach to Optimize Electrical Impedance Spectroscopy-based Classification of In Vivo Oral Lesions
+# IIVV Evaluation — reviewer revision
 
-Repository for the IEEE-JBMI paper: _A Machine-Learning Approach to Optimize Electrical Impedance Spectroscopy-based Classification of In Vivo Oral Lesions_
+Patient-grouped nested evaluation of in vivo oral-lesion EIS. The author-selected
+protocol uses **5 outer × 4 inner folds, 10 repeats**, seed 1729, four diagnostic
+tasks, three classifiers and four selection objectives. All learned preprocessing,
+selection, calibration and thresholds stay inside outer-training patients.
 
-## Reviewer revision workflow
+Follow [SERVER_RUN.md](SERVER_RUN.md) for prerequisites, resources, ordered server
+execution and result handoff. The computational implementation and reviewer mapping
+are documented in [code-revisions.md](code-revisions.md).
 
-The author-selected final protocol uses **5 outer × 4 inner patient folds,
-10 repeats**, all four tasks, and the expanded search in `configs/revision.json`.
-Follow [SERVER_RUN.md](SERVER_RUN.md) for the ordered server schedule, prerequisites,
-input checks, resources and result handoff. Start a fresh output directory:
+## Server run
+
+With Conda installed, create/reuse and activate the Python 3.11 environment
+in your current Bash or Zsh shell:
 
 ```sh
-python -m pip install -r requirements-revision.txt
+source ./setup_environment.sh
+```
+
+The helper uses [environment.yml](environment.yml), which includes scientific,
+test and notebook dependencies. Equivalent manual commands for a new environment:
+
+```sh
+conda env create --file environment.yml
+conda activate iivv-revision
+```
+
+For an existing environment, the helper activates it without changing packages.
+After editing the YAML, update explicitly with
+`conda env update --name iivv-revision --file environment.yml --prune`.
+
+Transfer the private `data/`, `source/` and `manuscript/` trees separately from Git.
+Then run sequentially:
+
+```sh
 make revision-tests
 make revision-preflight
 make revision-evaluation
 make revision-check
 ```
 
-The default result root is `results/revision-expanded`. The workflow includes source verification, all four diagnostic tasks, all three classifiers, requested metrics, matched covariate controls, sensitivity analyses, and regenerated numerical figures. It does not edit the manuscript or response letter. Those updates are deferred until the computation is complete. The older interrupted clinical-profile checkpoints are preserved separately and cannot be reused for the expanded protocol.
-
-See [code-revisions.md](code-revisions.md) for input schemas, reviewer-to-code mapping, artifacts and scientific limitations. `make revision-check` verifies patient partitions, predictions, matched controls, multiplicity correction and input hashes.
-
-The figures below are the **historical exploratory results**. Manuscript changes are in `manuscript/Paper/Revision-1.tex`; `make revision revision-clean response` builds marked and clean papers plus the response letter. The clean entry point suppresses deletions and renders additions normally, preserving both `main.tex` and `Revision-1.tex`. No evaluation, tests or build was executed during this preparation.
-
-# Historical results overview
-
-<!-- ========= Baseline ========= -->
-
-## Baseline
-
-### Healthy vs Cancer
-
-**LR**
-
-<p align="center">
-  <img src="results/plots_healthy_vs_cancer_baseline/CM_baseline_healthy_vs_cancer_lr_norm.png" width="25%"/>
-  <img src="results/plots_healthy_vs_cancer_baseline/ROC_baseline_healthy_vs_cancer_lr.png" width="40%"/>
-</p>
-
-**RF**
-
-<p align="center">
-  <img src="results/plots_healthy_vs_cancer_baseline/CM_baseline_healthy_vs_cancer_rf_norm.png" width="25%"/>
-  <img src="results/plots_healthy_vs_cancer_baseline/ROC_baseline_healthy_vs_cancer_rf.png" width="40%"/>
-</p>
-
-**SVM**
-
-<p align="center">
-  <img src="results/plots_healthy_vs_cancer_baseline/CM_baseline_healthy_vs_cancer_svm_norm.png" width="25%"/>
-  <img src="results/plots_healthy_vs_cancer_baseline/ROC_baseline_healthy_vs_cancer_svm.png" width="40%"/>
-</p>
-
-### Cancer vs. high risk vs. low risk
-
-**LR**
-
-<p align="center">
-  <img src="results/plots_cancer_vs_lr_hr_baseline/CM_baseline_cancer_vs_lr_hr_lr_norm.png" width="25%"/>
-  <img src="results/plots_cancer_vs_lr_hr_baseline/ROC_baseline_cancer_vs_lr_hr_lr.png" width="40%"/>
-</p>
-
-**RF**
-
-<p align="center">
-  <img src="results/plots_cancer_vs_lr_hr_baseline/CM_baseline_cancer_vs_lr_hr_rf_norm.png" width="25%"/>
-  <img src="results/plots_cancer_vs_lr_hr_baseline/ROC_baseline_cancer_vs_lr_hr_rf.png" width="40%"/>
-</p>
-
-**SVM**
-
-<p align="center">
-  <img src="results/plots_cancer_vs_lr_hr_baseline/CM_baseline_cancer_vs_lr_hr_svm_norm.png" width="25%"/>
-  <img src="results/plots_cancer_vs_lr_hr_baseline/ROC_baseline_cancer_vs_lr_hr_svm.png" width="40%"/>
-</p>
-
-### Multiclass
-
-**LR**
-
-<p align="center">
-  <img src="results/plots_MC_baseline/CM_baseline_MC_lr_norm.png" width="25%"/>
-  <img src="results/plots_MC_baseline/ROC_baseline_MC_lr.png" width="40%"/>
-</p>
-
-**RF**
-
-<p align="center">
-  <img src="results/plots_MC_baseline/CM_baseline_MC_rf_norm.png" width="25%"/>
-  <img src="results/plots_MC_baseline/ROC_baseline_MC_rf.png" width="40%"/>
-</p>
-
-**SVM**
-
-<p align="center">
-  <img src="results/plots_MC_baseline/CM_baseline_MC_svm_norm.png" width="25%"/>
-  <img src="results/plots_MC_baseline/ROC_baseline_MC_svm.png" width="40%"/>
-</p>
-
-<!-- ========= AUC ========= -->
-
-## Tuned models with AUC metric
-
-### Healthy vs. cancer
-
-**LR**
-
-<p align="center">
-  <img src="results/plots_healthy_vs_cancer_auc/CM_healthy_vs_cancer_lr_auc_norm.png" width="25%"/>  
-  <img src="results/plots_healthy_vs_cancer_auc/ROC_healthy_vs_cancer_lr_auc.png" width="40%"/>
-</p>
-
-**RF**
-
-<p align="center">
-  <img src="results/plots_healthy_vs_cancer_auc/CM_healthy_vs_cancer_rf_auc_norm.png" width="25%"/>
-  <img src="results/plots_healthy_vs_cancer_auc/ROC_healthy_vs_cancer_rf_auc.png" width="40%"/>
-</p>
-
-**SVM**
-
-<p align="center">
-  <img src="results/plots_healthy_vs_cancer_auc/CM_healthy_vs_cancer_svm_auc_norm.png" width="25%"/>
-  <img src="results/plots_healthy_vs_cancer_auc/ROC_healthy_vs_cancer_svm_auc.png" width="40%"/>
-</p>
-
-### Cancer vs. high risk vs. low risk
-
-**LR**
-
-<p align="center">
-  <img src="results/plots_cancer_vs_lr_hr_auc/CM_cancer_vs_lr_hr_lr_auc_norm.png" width="25%"/>  
-  <img src="results/plots_cancer_vs_lr_hr_auc/ROC_cancer_vs_lr_hr_lr_auc.png" width="40%"/>
-</p>
-
-**RF**
-
-<p align="center">
-  <img src="results/plots_cancer_vs_lr_hr_auc/CM_cancer_vs_lr_hr_rf_auc_norm.png" width="25%"/>
-  <img src="results/plots_cancer_vs_lr_hr_auc/ROC_cancer_vs_lr_hr_rf_auc.png" width="40%"/>
-</p>
-
-**SVM**
-
-<p align="center">
-  <img src="results/plots_cancer_vs_lr_hr_auc/CM_cancer_vs_lr_hr_svm_auc_norm.png" width="25%"/>
-  <img src="results/plots_cancer_vs_lr_hr_auc/ROC_cancer_vs_lr_hr_svm_auc.png" width="40%"/>
-</p>
-
-### Multiclass
-
-**LR**
-
-<p align="center">
-  <img src="results/plots_MC_auc/CM_MC_lr_auc_norm.png" width="25%"/>  
-  <img src="results/plots_MC_auc/ROC_MC_lr_auc.png" width="40%"/>
-</p>
-
-**RF**
-
-<p align="center">
-  <img src="results/plots_MC_auc/CM_MC_rf_auc_norm.png" width="25%"/>
-  <img src="results/plots_MC_auc/ROC_MC_rf_auc.png" width="40%"/>
-</p>
-
-**SVM**
-
-<p align="center">
-  <img src="results/plots_MC_auc/CM_MC_svm_auc_norm.png" width="25%"/>
-  <img src="results/plots_MC_auc/ROC_MC_svm_auc.png" width="40%"/>
-</p>
-
-<!-- ========= F1 ========= -->
-
-## Tuned models with F1 metric
-
-### Healthy vs. cancer
-
-**LR**
-
-<p align="center">
-  <img src="results/plots_healthy_vs_cancer_f1/CM_healthy_vs_cancer_lr_f1_norm.png" width="25%"/>  
-  <img src="results/plots_healthy_vs_cancer_f1/ROC_healthy_vs_cancer_lr_f1.png" width="40%"/>
-</p>
-
-**RF**
-
-<p align="center">
-  <img src="results/plots_healthy_vs_cancer_f1/CM_healthy_vs_cancer_rf_f1_norm.png" width="25%"/>
-  <img src="results/plots_healthy_vs_cancer_f1/ROC_healthy_vs_cancer_rf_f1.png" width="40%"/>
-</p>
-
-**SVM**
-
-<p align="center">
-  <img src="results/plots_healthy_vs_cancer_f1/CM_healthy_vs_cancer_svm_f1_norm.png" width="25%"/>
-  <img src="results/plots_healthy_vs_cancer_f1/ROC_healthy_vs_cancer_svm_f1.png" width="40%"/>
-</p>
-
-### Cancer vs. high risk vs. low risk
-
-**LR**
-
-<p align="center">
-  <img src="results/plots_cancer_vs_lr_hr_f1/CM_cancer_vs_lr_hr_lr_f1_norm.png" width="25%"/>  
-  <img src="results/plots_cancer_vs_lr_hr_f1/ROC_cancer_vs_lr_hr_lr_f1.png" width="40%"/>
-</p>
-
-**RF**
-
-<p align="center">
-  <img src="results/plots_cancer_vs_lr_hr_f1/CM_cancer_vs_lr_hr_rf_f1_norm.png" width="25%"/>
-  <img src="results/plots_cancer_vs_lr_hr_f1/ROC_cancer_vs_lr_hr_rf_f1.png" width="40%"/>
-</p>
-
-**SVM**
-
-<p align="center">
-  <img src="results/plots_cancer_vs_lr_hr_f1/CM_cancer_vs_lr_hr_svm_f1_norm.png" width="25%"/>
-  <img src="results/plots_cancer_vs_lr_hr_f1/ROC_cancer_vs_lr_hr_svm_f1.png" width="40%"/>
-</p>
-
-### Multiclass
-
-**LR**
-
-<p align="center">
-  <img src="results/plots_MC_f1/CM_MC_lr_f1_norm.png" width="25%"/>  
-  <img src="results/plots_MC_f1/ROC_MC_lr_f1.png" width="40%"/>
-</p>
-
-**RF**
-
-<p align="center">
-  <img src="results/plots_MC_f1/CM_MC_rf_f1_norm.png" width="25%"/>
-  <img src="results/plots_MC_f1/ROC_MC_rf_f1.png" width="40%"/>
-</p>
-  
-  **SVM**
-
-<p align="center">
-  <img src="results/plots_MC_f1/CM_MC_svm_f1_norm.png" width="25%"/>
-  <img src="results/plots_MC_f1/ROC_MC_svm_f1.png" width="40%"/>
-</p>
-
-<!-- ========= ACC ========= -->
-
-## Tuned models with ACC metric
-
-### Healthy vs. cancer
-
-**LR**
-
-<p align="center">
-  <img src="results/plots_healthy_vs_cancer_acc/CM_healthy_vs_cancer_lr_acc_norm.png" width="25%"/>  
-  <img src="results/plots_healthy_vs_cancer_acc/ROC_healthy_vs_cancer_lr_acc.png" width="40%"/>
-</p>
-
-**RF**
-
-<p align="center">
-  <img src="results/plots_healthy_vs_cancer_acc/CM_healthy_vs_cancer_rf_acc_norm.png" width="25%"/>
-  <img src="results/plots_healthy_vs_cancer_acc/ROC_healthy_vs_cancer_rf_acc.png" width="40%"/>
-</p>
-
-**SVM**
-
-<p align="center">
-  <img src="results/plots_healthy_vs_cancer_acc/CM_healthy_vs_cancer_svm_acc_norm.png" width="25%"/>
-  <img src="results/plots_healthy_vs_cancer_acc/ROC_healthy_vs_cancer_svm_acc.png" width="40%"/>
-</p>
-
-### Cancer vs. high risk vs. low risk
-
-**LR**
-
-<p align="center">
-  <img src="results/plots_cancer_vs_lr_hr_acc/CM_cancer_vs_lr_hr_lr_acc_norm.png" width="25%"/>  
-  <img src="results/plots_cancer_vs_lr_hr_acc/ROC_cancer_vs_lr_hr_lr_acc.png" width="40%"/>
-</p>
-
-**RF**
-
-<p align="center">
-  <img src="results/plots_cancer_vs_lr_hr_acc/CM_cancer_vs_lr_hr_rf_acc_norm.png" width="25%"/>
-  <img src="results/plots_cancer_vs_lr_hr_acc/ROC_cancer_vs_lr_hr_rf_acc.png" width="40%"/>
-</p>
-
-**SVM**
-
-<p align="center">
-  <img src="results/plots_cancer_vs_lr_hr_acc/CM_cancer_vs_lr_hr_svm_acc_norm.png" width="25%"/>
-  <img src="results/plots_cancer_vs_lr_hr_acc/ROC_cancer_vs_lr_hr_svm_acc.png" width="40%"/>
-</p>
-
-### Multiclass
-
-**LR**
-
-<p align="center">
-  <img src="results/plots_MC_acc/CM_MC_lr_acc_norm.png" width="25%"/>  
-  <img src="results/plots_MC_acc/ROC_MC_lr_acc.png" width="40%"/>
-</p>
-
-**RF**
-
-<p align="center">
-  <img src="results/plots_MC_acc/CM_MC_rf_acc_norm.png" width="25%"/>
-  <img src="results/plots_MC_acc/ROC_MC_rf_acc.png" width="40%"/>
-</p>
- 
-  **SVM**
-
-<p align="center">
-  <img src="results/plots_MC_acc/CM_MC_svm_acc_norm.png" width="25%"/>
-  <img src="results/plots_MC_acc/ROC_MC_svm_acc.png" width="40%"/>
-</p>
-
----
-
-# Results creation
-
-## IIVV selection
-
-Configure the following shell script for the metric and start it to run it for all tasks. F1-score is preferrec in medical applications.
-
-    ./1_1run_tmux_iivv.sh
-
-To see the tuning results, run
-
-    ./print_eval_results.py --only mask
-
-## Frequency and z-threshold rankings
-
-Configure the following shell script for the metric and start it to run it for all tasks. F1-score is preferrec in medical applications.
-
-    ./1_2run_tmux_freq.sh
-
-To see the tuning results, run
-
-    ./print_eval_results.py --only freq
-
-## Model and parameter tuning
-
-Configure the following shell script for the metric and start it to run it for all tasks. F1-score is preferrec in medical applications.
-
-    ./2_run_tmux_model_tuning.sh
-
-To see the tuning results, run
-
-    ./print_tuning_results.py
-
-## Show the best performing models
-
-    ./print_tuning_results.py --top 4
-
-or of an specific file
-
-    ./print_tuning_results.py --pattern "GPU_tuning_*AGG.csv" --top 4
-
-## Create plots and final results
-
-    ./3_final_results.py --task MC --metric f1 --model svm
-
-## Create baseline results and plots
-
-    ./4_results_baseline.py --task healthy_vs_cancer
-    ./4_results_baseline.py --task cancer_vs_lr_hr
-    ./4_results_baseline.py --task MC
-
-## Check the available/created results
-
-    ./5_check_results.py
-
----
-
-## Build the manuscript locally
-
-The LaTeX sources are kept in the local-only `manuscript/` directory and are
-ignored by Git. With a TeX Live installation that includes `latexmk`, `biber`,
-and the required packages, build all documents from the repository root with:
-
-    make manuscript
-
-Individual documents can be built with `make paper`, `make revision`,
-`make revision-clean`, or `make response`. The clean PDF is
-`manuscript/Paper/Revision-1-clean.pdf`. Generated PDFs and auxiliary build files remain inside
-`manuscript/` and are ignored by Git. To remove those generated files, run:
-
-    make clean-manuscript
-
-**Documentation of the script options**
-
-_script.py_ and -h, --help shows help message and exit
-
----
-
-For referencing this work, please cite:
-
-```
-TBD:Citation paper
+Results go to `results/revision-expanded`. An interrupted/failed run with identical
+inputs and settings can use `make revision-resume`. Earlier results and source
+snapshots remain separate. The runner never imports results into manuscripts.
+
+## Notebooks
+
+JupyterLab and ipykernel are included in `iivv-revision`. After activation,
+launch `jupyter lab` and select its Python kernel.
+All committed notebooks have empty outputs and unexecuted cells.
+
+| Notebook | Purpose |
+|---|---|
+| [Revision-Evaluation.ipynb](Revision-Evaluation.ipynb) | Canonical test/preflight/evaluation/check commands, with execution switches disabled by default |
+| [mat-to-npz.ipynb](mat-to-npz.ipynb) | Saved source/export alignment, centralized labels, metadata availability, quality, anatomy and test-mean repeatability audits |
+| [Figures-and-Tables.ipynb](Figures-and-Tables.ipynb) | Completed outer results for all reviewer analyses, clinical metrics, dysplasia errors, ablations, uncertainty, matched controls, identities, timing and figures |
+
+The two reporting notebooks read existing artifacts without fitting models or
+changing result files. Run preflight before the source notebook; run evaluation and
+completion checks before the figure notebook. The historical conversion code and
+notebook outputs remain available in Git history. Patient identifiers may appear
+when notebooks are executed; keep those copies under the study's access conditions.
+
+## Result inspection
+
+```sh
+python -m revision.report_cli check --verify-inputs
+python -m revision.report_cli evaluation
+python -m revision.report_cli tuning --only freq --top 10
 ```
 
-and the repository:
+These commands default to `results/revision-expanded`; override `--results-dir`
+when inspecting a different directory. Inner tuning scores are descriptive.
 
+## Manuscripts
+
+```sh
+make revision revision-clean response
 ```
-@software{IIVV_Evaluation_2025,
-    author = {Thönes, Jacob P., Sophie A. Lloyd},
-    license = {MIT},
-    month = sep,
-    title = {{IIVV Evaluation}},
-    url = {https://github.com/EITLabworks/IIVV-Evaluation},
-    version = {0.1.0},
-    year = {2025}
-}
-```
+
+The clean PDF is `manuscript/Paper/Revision-1-clean.pdf`. Its tracked entry-point
+template is in the local `templates/` directory; both original and marked manuscript sources are
+preserved. Defer numerical manuscript/rebuttal imports until review of the completed
+server outputs. See SERVER_RUN.md for those later commands.
+
+Paper/response sources, templates, `manuscript.mk` and document-generation scripts
+are local-only and ignored by Git. The shared Makefile loads `manuscript.mk` when
+present; copy these local files separately if building documents on another host.
+
+## Repository layout
+
+- `run_all.sh`, `run_revision.sh`, `run_revision.py`: canonical execution.
+- `configs/revision.json`: final expanded protocol.
+- `environment.yml`, `setup_environment.sh`: Conda dependencies and activation.
+- `revision/`: active data, geometry, fitting, metrics, reporting and verification.
+- `scripts/`: source audits and guarded manuscript/rebuttal preparation.
+- `tests/`: scientific regression and integration checks.
+
+Obsolete numbered entry points, compatibility adapters, unused toolbox modules,
+GPU dependency stack and interim profiles were removed. The live geometry module was
+moved unchanged to `revision/geometry.py`. Historical figures/results and private
+inputs were preserved. No evaluation, tests, notebooks or builds were executed
+during cleanup; only static dependency/diff and notebook-file checks were made.
+
+For citation metadata, see [CITATION.cff](CITATION.cff).

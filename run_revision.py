@@ -177,10 +177,10 @@ def runtime_manifest(args, config):
         Path(__file__),
         *sorted((root / "revision").glob("*.py")),
         *sorted((root / "scripts").glob("*.py")),
-        root / "toolbox/masking.py",
         root / "run_all.sh",
         root / "run_revision.sh",
-        root / "requirements-revision.txt",
+        root / "environment.yml",
+        root / "setup_environment.sh",
     ]
     try:
         git_revision = subprocess.check_output(

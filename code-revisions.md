@@ -9,18 +9,18 @@ The authoritative revision workflow is `./run_all.sh`. It replaces cohort-wide p
 See [SERVER_RUN.md](SERVER_RUN.md) for the ordered schedule. No project code,
 tests, evaluation or LaTeX build was executed during this preparation.
 
-Use Python 3.10 or newer and install `requirements-revision.txt` in your analysis environment. The supplied run uses CPU scikit-learn; two independent diagnostic tasks run concurrently on fork-capable systems, sharing immutable raw arrays while keeping all fitted state and outputs separate. Set `task_workers` to 1 for serial execution or platforms without fork. The statistical protocol and seeds do not depend on worker count. `environment-freeze.txt` in each output directory records the actual installed versions. The historical GPU environment in `environment.yml` is not required by this workflow.
+Use `source ./setup_environment.sh` from Bash or Zsh to create/reuse and activate `iivv-revision` from `environment.yml` (Python 3.11, scientific packages, tests and notebooks). The reference uses CPU scikit-learn; two tasks run concurrently on fork-capable systems, keeping fitted state separate. Set `task_workers` to 1 on platforms without fork. `environment-freeze.txt` records installed versions; the environment YAML and activation helper are archived with the run sources.
 
 ```sh
-python -m pip install -r requirements-revision.txt
+source ./setup_environment.sh
 # Verify source alignment, inputs, grouping and all target populations:
 ./run_all.sh --preflight --output results/revision-expanded-preflight
 # Fresh final expanded run; preserve old clinical-profile checkpoints separately:
 ./run_all.sh --output results/revision-expanded
 # Verify partitions, predictions, matched controls, Holm family and inputs:
-python 5_check_results.py --results-dir results/revision-expanded --verify-inputs
+python -m revision.report_cli check --results-dir results/revision-expanded --verify-inputs
 # Numerical summary:
-python print_eval_results.py --results-dir results/revision-expanded
+python -m revision.report_cli evaluation --results-dir results/revision-expanded
 # Unit tests and a separately identified synthetic integration exercise:
 python -m pytest -q tests/test_revision.py
 ./run_revision.sh --synthetic --output results/revision-synthetic-check
@@ -48,11 +48,11 @@ The previous computation is interrupted with its checkpoint files preserved. No 
 
 ## Prespecified configurations and interpretation
 
-The historical compact clinical profile (`configs/revision-clinical.json`) uses five outer folds, three inner folds, one outer partition and seed 1729. It is retained for provenance. Both profiles use 1,000 patient-cluster bootstrap/permutation draws, all 31 frequency counts, 13 geometry masks, six selectors, five representations, three normalization/imputation choices and default/balanced class weights. The compact profile has quantiles 0.25/0.50/0.75 and cutoffs 40/60/80/100.000001%. Cutoffs are strict `<`; the final value permits the full supplied quality-score range with training-fitted imputation. The reference cutoff is 60%.
+The older compact profiles were removed from active configuration; their settings remain in historical result manifests and Git history. The final expanded profile uses 1,000 patient-cluster bootstrap/permutation draws, all 31 frequency counts, 13 geometry masks, six selectors, five representations, three normalization/imputation choices and default/balanced class weights. Cutoffs are strict `<`; 100.000001 permits the full supplied quality-score range with training-fitted imputation. The reference cutoff is 60%.
 
 Search is staged: a fixed SVM screens one factor at a time inside outer-training data. Each objective retains the configured number of frequency counts and geometry masks plus its best impedance-threshold mask, then jointly tunes these with the screened preprocessing, selector and representation. Every candidate, failure and selection is recorded. Outer ablations assess the screened alternatives; incomplete ablation populations are withheld and identified in `unavailable_streams.json`. Results compare pipelines under the configured search budget, not a global optimum.
 
-**Final profile:** `configs/revision.json` has five outer/four inner folds, ten partitions, top-four frequency/mask choices, impedance quantiles 0.10/0.25/0.50/0.75/0.90 and cutoffs 20/40/60/80/100.000001%. SVM uses four kernels and seven C values (0.001 through 1000); LR uses the same C values. RF uses 100/300/800 trees, depth 8/16/unlimited and feature fractions 0.3/0.7/1.0. This is the default of `run_all.sh`. The older All-mask `revision-available-data.json` is an interim profile, not the final protocol.
+**Final profile:** `configs/revision.json` has five outer/four inner folds, ten partitions, top-four frequency/mask choices, impedance quantiles 0.10/0.25/0.50/0.75/0.90 and cutoffs 20/40/60/80/100.000001%. SVM uses four kernels and seven C values (0.001 through 1000); LR uses the same C values. RF uses 100/300/800 trees, depth 8/16/unlimited and feature fractions 0.3/0.7/1.0. This is the default of `run_all.sh` and the sole active profile.
 
 The four objectives are macro AUC, accuracy, macro F1 and sensitivity. The binary sensitivity objective maximizes specificity subject to a **training** sensitivity target of 0.95. Multiclass sensitivity selection targets high-grade dysplasia recall. Specificity operating targets 0.80/0.90/0.95 and projected prevalences 0.10/0.20 are analysis assumptions, not validated clinical requirements. A held-out sensitivity below the training target is possible and must be reported.
 
@@ -62,7 +62,7 @@ Each NPZ contains one site's complex `Zdata` with common frequency/pattern coord
 
 The supplied 276 sites correspond to **100 distinct patients**, using both exported IDs and original cohort/case pairs. The paper's previous 104-patient count cannot be reproduced from these analysis files. All 276 exported complex arrays and cohort/case identifiers were checked against the MATLAB source before extracting metadata/repeats.
 
-Canonical pathology mapping follows the conversion notebook and is checked against stored multiclass labels. Moderate dysplasia belongs to high-grade dysplasia, not the benign/mild group. Raw unmapped diagnoses are excluded and listed in `site_inclusion_audit.csv`; they are never assigned using substring guesses. An explicit alternative adjudicated mapping may be provided using `--label-map`, with a fresh analysis output. Current populations before quality filtering are:
+Canonical pathology mapping is centralized in `revision/data.py`, follows the historical export notebook preserved in Git history, and is checked against stored multiclass labels. The updated source notebook displays this mapping and its audits. Moderate dysplasia belongs to high-grade dysplasia. Unmapped diagnoses are excluded and listed in `site_inclusion_audit.csv`; no substring guesses are used. An explicit adjudicated `--label-map` requires a fresh output. Populations before quality filtering are:
 
 | Task | Explicit class order / probability columns | Sites | Patients |
 |---|---|---:|---:|
@@ -132,7 +132,7 @@ Each output root contains `run_manifest.json`, `resolved_config.json`, `environm
 
 Manifests hash scientific source files and inputs and record actual software versions, resolved settings, timestamps, synthetic flag and completion. Model serialization is optional (`save_models`); default results retain reproducible fits through inputs, settings and partitions. Sharing clinical data or artifacts remains subject to the original access conditions. Neither private source data nor generated patient results are automatically added to Git.
 
-The old numbered analysis entry points now delegate to this single workflow, rather than independently fitting and reusing globally selected artifacts. `--task`, `--metric`, `--model` and fold-count aliases are supported by the compatibility adapter; see `--help` for current flags. Unsupported historical optimization flags are deliberately rejected. The legacy loader rejects requests for cohort-wide normalization and old helpers reject pre-split augmentation. Reporting entry points inspect the new result schema. Historical artifacts remain available separately.
+The obsolete numbered entry points, compatibility adapter and unused toolbox were removed. Use `run_all.sh` with `--tasks`, `--models`, `--objectives` and the current fold flags. Reporting uses `python -m revision.report_cli check|evaluation|tuning`. The sole live toolbox dependency was moved unchanged to `revision/geometry.py`; its exact source hash is preserved across the move. Historical artifacts remain separate.
 
 ## Manuscript, rebuttal and reviewer traceability
 
@@ -155,11 +155,11 @@ Detailed comment-by-comment actions and outstanding evidence are recorded in `ma
 
 Build the marked/clean drafts and response with `make revision revision-clean response`. The clean entry point suppresses deletions, unwraps additions and includes the current marked source; it does not modify either manuscript source. The clean PDF is `manuscript/Paper/Revision-1-clean.pdf`. Generate supplementary screenshots from the marked PDF only after we review and import completed results. Importers require completed non-synthetic evidence and validate result structure; they do not silently replace changed generated manuscript blocks.
 
-The available-covariate comparison includes a matched EIS-only LR control (`covariate_eis_only`) with the same C=1, frozen selected EIS feature/preprocessing rule, quality eligibility and patient folds as `covariate_combined`. This separates covariate addition from changing classifier settings. `run_all.sh` includes this control for new executions. For an older completed run, `python scripts/add_matched_covariate_control.py --results results/revision-clinical-final` adds the frozen-rule control and regenerates reports without changing original primary predictions. The postprocessing manifest records its source/input hashes.
+The available-covariate comparison includes matched EIS-only LR (`covariate_eis_only`) with the same C=1, frozen EIS rule, quality eligibility and patient folds as `covariate_combined`. The canonical runner includes it automatically. The obsolete backfill script for older runs was removed; historical artifacts remain unchanged.
 
 The older interrupted clinical run has a documented legacy input-inventory recovery and archived source history. It is preserved separately; the final expanded run starts afresh. New runs persist input hashes before fitting, verify cached extraction sidecars, and include the original MATLAB source and extraction manifest in the provenance inventory. A missing MATLAB file is an error for `run_all.sh`.
 
-Forest trees are trained on four threads; inference resets to one thread to preserve fixed tree-order probability accumulation. Tests verify identical tree splits/thresholds and bit-identical probabilities against single-thread fitting. Two diagnostic tasks may run concurrently, so software fit timings describe that recorded resource setting. Legacy binary plotting helpers now require an explicit positive label instead of silently selecting the largest encoded label.
+Forest trees train on four threads; inference resets to one for fixed tree-order probability accumulation. Regression checks compare trees and probabilities against single-thread fitting. Two tasks may run concurrently, so fit timings describe that resource setting. All current binary reporting uses explicit positive-class metadata.
 
 Deferred until the user returns with a completed clinical run and matched controls: update the paper and rebuttal using:
 

@@ -1,10 +1,8 @@
 """Train-fitted transforms with explicit saved frequency and IIVV coordinates."""
 
-from dataclasses import asdict, dataclass, replace
+from dataclasses import asdict, dataclass
 from functools import lru_cache
-from pathlib import Path
 import contextlib
-import importlib.util
 import io
 import warnings
 import numpy as np
@@ -14,7 +12,6 @@ from sklearn.feature_selection import RFE, f_classif, mutual_info_classif
 from sklearn.inspection import permutation_importance
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.svm import SVC
 from scipy.special import expit, softmax
 
 MASKS = {
@@ -111,12 +108,10 @@ def _geometry(name, shape, raw):
     patterns = np.frombuffer(raw, dtype=np.int64).reshape(shape)
     if name == "All":
         return np.ones(len(patterns), dtype=bool)
-    # Reuse the reviewed geometric rules without importing toolbox's plotting stack.
-    source = Path(__file__).resolve().parents[1] / "toolbox" / "masking.py"
-    spec = importlib.util.spec_from_file_location("_revision_geometry", source)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    mask = module.Masking(patterns, plot=False, prints=False)
+    # The reviewed geometry implementation was moved unchanged into this package.
+    from .geometry import Masking
+
+    mask = Masking(patterns, plot=False, prints=False)
     with contextlib.redirect_stdout(io.StringIO()):
         mask.IIVV_mask(MASKS[name], plot=False)
     result = np.asarray(mask.mask, dtype=bool)

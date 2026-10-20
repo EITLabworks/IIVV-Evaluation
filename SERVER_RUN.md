@@ -17,16 +17,19 @@ and `manuscript/` to the server. Those three directories are ignored by Git;
 a clone alone does not contain the study inputs or paper. Preserve the complete
 manuscript figure/template/bibliography trees. Keep earlier results separately.
 
-Use Python 3.11 in a fresh environment. From the repository root:
+Create/reuse and activate the Conda Python 3.11 environment from the repository root
+(Bash or Zsh):
 
 ```sh
-python3.11 -m venv .venv-revision
-. .venv-revision/bin/activate
-python -m pip install -r requirements-revision.txt
+source ./setup_environment.sh
 mkdir -p logs
-export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1
-export MPLBACKEND=Agg
 ```
+
+For a fresh environment, the manual equivalent is `conda env create --file
+environment.yml`, then `conda activate iivv-revision`. The YAML includes notebooks
+and tests, sets noninteractive plotting and limits BLAS/OpenMP/MKL to one thread.
+The helper reuses existing environments; update packages explicitly with
+`conda env update --name iivv-revision --file environment.yml --prune` when needed.
 
 The reference workflow uses CPU scikit-learn. The profile runs two tasks
 concurrently, with four threads per RF fit and a 2 GiB feature cache per task.
@@ -77,7 +80,7 @@ fold settings and source history. The runner writes complete-fold checkpoints,
 exact splits, fitted coordinate identities, failed-candidate details, source
 snapshots, input hashes and environment inventory. It generates numerical
 reports and figures automatically, including matched EIS-only/clinical/combined
-controls. Do not run the legacy numbered fitting scripts in sequence.
+controls. Obsolete numbered fitting entry points have been removed.
 
 After an interruption explicitly recorded as `interrupted` or `failed`:
 
@@ -157,8 +160,8 @@ pathology and label encodings; they add no contact or pathology protocol records
 
 `Full_data` contains test-level cells; an inspected cell is 3 × 2, with a
 complex spectrum of shape 31 × 7728 and a rejection percentage per test.
-The conversion notebook explicitly describes these as three tests averaged
-into `Zdata`/`Avg_Cutpats`. It does not supply separate within-test burst arrays.
+The historical conversion notebook, preserved in Git history, describes these as
+three tests averaged into `Zdata`/`Avg_Cutpats`; it supplies no within-test burst arrays.
 Existing extraction handles all available two-to-four test means.
 
 No named source fields document sectioning, footprint registration error,
@@ -168,3 +171,16 @@ limitation. `HPV` and `Tgrade` are present as MATLAB `string` objects backed by
 MCOS serialization; their integer payloads must not be interpreted as text.
 They are not asserted absent or silently used as predictors. A native MATLAB
 export would be needed to inspect their actual clinical values reliably.
+
+## Optional notebooks
+
+Activate `iivv-revision` and use its Python kernel; notebook packages are included
+in `environment.yml`. `Revision-Evaluation.ipynb` exposes the canonical Make stages with
+all execution switches disabled by default. `mat-to-npz.ipynb` reads the preflight
+source/quality/repeatability audits. `Figures-and-Tables.ipynb` reads verified
+completed results for every reviewer analysis. These notebooks contain no saved
+results and do not implement a second fitting pipeline. The reporting notebooks
+do not modify manuscripts or result files.
+
+Reporting commands are now `python -m revision.report_cli check|evaluation|tuning`;
+the numbered/print compatibility scripts and interim configs were removed.

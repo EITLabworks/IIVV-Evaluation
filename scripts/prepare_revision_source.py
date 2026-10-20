@@ -7,7 +7,6 @@ No attempt is made to decode MATLAB's opaque string-object serialization.
 
 import argparse
 from pathlib import Path
-import json
 import numpy as np
 import pandas as pd
 import h5py

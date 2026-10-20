@@ -6,11 +6,12 @@ from pathlib import Path
 import pandas as pd
 
 
-def main(kind):
+def main(argv=None):
     p = argparse.ArgumentParser(
         description="Inspect patient-grouped nested revision outputs"
     )
-    p.add_argument("--results-dir", default="results/revision")
+    p.add_argument("kind", choices=["check", "evaluation", "tuning"])
+    p.add_argument("--results-dir", default="results/revision-expanded")
     p.add_argument("--top", type=int, default=10)
     p.add_argument("--only", choices=["freq", "mask", "metrics"])
     p.add_argument(
@@ -18,7 +19,8 @@ def main(kind):
         action="store_true",
         help="Re-hash source/data inputs when checking completed results",
     )
-    args = p.parse_args()
+    args = p.parse_args(argv)
+    kind = args.kind
     root = Path(args.results_dir)
     manifest = root / "run_manifest.json"
     if not manifest.exists():
@@ -67,3 +69,7 @@ def main(kind):
             return 2
         print(pd.read_csv(path).to_string(index=False))
     return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

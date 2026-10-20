@@ -1,12 +1,10 @@
 """Scientific regression checks: leakage boundaries, labels, missingness and endpoints."""
 
-from dataclasses import replace
-from pathlib import Path
 import json
 import numpy as np
 import pandas as pd
 import pytest
-from revision.data import load_dataset, CLASS_NAMES
+from revision.data import load_dataset
 from revision.features import (
     Candidate,
     FeatureBuilder,
@@ -14,7 +12,7 @@ from revision.features import (
     patient_weights,
     circuit_features,
 )
-from revision.pipeline import group_splits, fit_predict, inner_evaluate
+from revision.pipeline import group_splits, fit_predict
 from revision.metrics import (
     scores,
     threshold_for_sensitivity,
@@ -284,15 +282,18 @@ def test_circuit_fit_retains_physical_frequencies_and_recovers_known_spectrum():
     np.testing.assert_allclose(vals[0, 0, :4, 0], [50, 200, 1e-4, 0.8], rtol=0.02)
 
 
-def test_legacy_entrypoint_uses_nested_workflow_without_gpu_imports():
+def test_revision_reporting_module_exposes_supported_commands():
     import subprocess, sys
 
     completed = subprocess.run(
-        [sys.executable, "1_3freq_eval.py", "--help"], capture_output=True, text=True
+        [sys.executable, "-m", "revision.report_cli", "--help"],
+        capture_output=True,
+        text=True,
     )
     assert completed.returncode == 0
-    assert "nested" in completed.stderr
-    assert "--preflight" in completed.stdout
+    assert "check" in completed.stdout
+    assert "evaluation" in completed.stdout
+    assert "tuning" in completed.stdout
 
 
 @pytest.mark.parametrize(
