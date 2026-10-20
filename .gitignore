@@ -2,6 +2,8 @@ archive
 manuscript/
 .ipynb_checkpoints/
 __pycache__
+.venv-revision/
+logs/
 results/*
 results/**
 !results/plots_*/
@@ -25,3 +27,4 @@ Freq-GPU3.py
 IIVV-GPU*.py
 zthresh-stats-task*.py
 zthresh-task*.py
+templates/

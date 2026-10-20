@@ -8,7 +8,16 @@ cd "$TASK_ROOT"
 export MPLBACKEND=Agg
 export MPLCONFIGDIR="${MPLCONFIGDIR:-${TMPDIR:-/tmp}/iivv-matplotlib}"
 
-export OMP_NUM_THREADS=8
-export OPENBLAS_NUM_THREADS=8
+export OMP_NUM_THREADS="${OMP_NUM_THREADS:-8}"
+export OPENBLAS_NUM_THREADS="${OPENBLAS_NUM_THREADS:-8}"
 
-exec taskset -c "${CPUSET:-0-31}" "${PYTHON:-python}" "$TASK_ROOT/run_revision.py" "$@"
+# Use the operating system's allowed CPUs by default (also works on non-Linux hosts).
+# Set CPUSET explicitly to restrict affinity, e.g. CPUSET=0-7 ./run_all.sh ...
+if [[ -n "${CPUSET:-}" ]]; then
+    if ! command -v taskset >/dev/null 2>&1; then
+        echo 'CPUSET requires the Linux taskset utility; unset CPUSET on this host.' >&2
+        exit 2
+    fi
+    exec taskset -c "$CPUSET" "${PYTHON:-python}" "$TASK_ROOT/run_revision.py" "$@"
+fi
+exec "${PYTHON:-python}" "$TASK_ROOT/run_revision.py" "$@"

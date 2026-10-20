@@ -1,3 +1,5 @@
+"""Legacy result helpers. Use revision/ for evaluation; binary plots require explicit positive labels."""
+
 import numpy as np
 from .loading import load_data
 from .processing import find_all_indices, augment_patient_and_cat_specific
@@ -104,8 +106,12 @@ def Results_data_loading(class_task, data_augmentation=False):
     print(X.shape, Y.shape, Case.shape)
 
     if data_augmentation:
-        raise ValueError("Pre-split augmentation is disabled: keep all derivatives with their original patient inside training only.")
-    if False:  # historical augmentation code retained; never used for revision evaluation
+        raise ValueError(
+            "Pre-split augmentation is disabled: keep all derivatives with their original patient inside training only."
+        )
+    if (
+        False
+    ):  # historical augmentation code retained; never used for revision evaluation
         print("\n\t\tBefore augmentation")
         visualize_Category_hist(labels)
         X, Y_labels, labels, Case = augment_patient_and_cat_specific(
@@ -141,7 +147,7 @@ def ResultsROCAUC(
     Plots ROC/AUC and (optionally) saves a .npz with everything needed to recreate
     the exact plot later.
 
-    - Binary: plots ROC for pos_label (default: largest label in eval_classes).
+    - Binary: plots ROC for the explicitly supplied pos_label; no clinical label is inferred.
     - Multiclass (OvR): plots per-class ROC + ONE average curve:
         * micro-average if plot_micro=True (default)
         * macro-average if plot_micro=False
@@ -218,7 +224,9 @@ def ResultsROCAUC(
     if y_score.ndim == 1:
         # Binary only: treat provided scores as scores for pos_label
         if pos_label is None:
-            pos_label = eval_classes[-1]
+            raise ValueError(
+                "Binary ROC requires an explicit positive label and aligned probability columns; use revision/ for the validated workflow"
+            )
         if pos_label not in eval_classes:
             raise ValueError(
                 f"pos_label={pos_label} not in eval_classes={eval_classes.tolist()}"
@@ -260,7 +268,9 @@ def ResultsROCAUC(
     # ----- Binary -----
     if len(eval_classes) == 2:
         if pos_label is None:
-            pos_label = eval_classes[-1]
+            raise ValueError(
+                "Binary ROC requires an explicit positive label and aligned probability columns; use revision/ for the validated workflow"
+            )
         if pos_label not in eval_classes:
             raise ValueError(
                 f"pos_label={pos_label} not in eval_classes={eval_classes.tolist()}"

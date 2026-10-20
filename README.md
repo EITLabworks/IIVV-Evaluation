@@ -4,11 +4,24 @@ Repository for the IEEE-JBMI paper: _A Machine-Learning Approach to Optimize Ele
 
 ## Reviewer revision workflow
 
-Run `./run_all.sh --output results/revision-clinical-final` for the nested patient-group analysis, including source verification, the combined referral task, requested metrics, sensitivity analyses, and regenerated figures. Use a fresh output directory for another run.
+The author-selected final protocol uses **5 outer × 4 inner patient folds,
+10 repeats**, all four tasks, and the expanded search in `configs/revision.json`.
+Follow [SERVER_RUN.md](SERVER_RUN.md) for the ordered server schedule, prerequisites,
+input checks, resources and result handoff. Start a fresh output directory:
 
-See [code-revisions.md](code-revisions.md) for prerequisites, input schemas, exact search settings, reviewer-to-code mapping, artifact descriptions, and scientific limitations. Check completion with `python 5_check_results.py --results-dir results/revision-clinical-final`.
+```sh
+python -m pip install -r requirements-revision.txt
+make revision-tests
+make revision-preflight
+make revision-evaluation
+make revision-check
+```
 
-The figures below are the **historical exploratory results**. Revised results are written to the selected new output directory. Manuscript changes are in `manuscript/Paper/Revision-1.tex`; build with `make revision response`.
+The default result root is `results/revision-expanded`. The workflow includes source verification, all four diagnostic tasks, all three classifiers, requested metrics, matched covariate controls, sensitivity analyses, and regenerated numerical figures. It does not edit the manuscript or response letter. Those updates are deferred until the computation is complete. The older interrupted clinical-profile checkpoints are preserved separately and cannot be reused for the expanded protocol.
+
+See [code-revisions.md](code-revisions.md) for input schemas, reviewer-to-code mapping, artifacts and scientific limitations. `make revision-check` verifies patient partitions, predictions, matched controls, multiplicity correction and input hashes.
+
+The figures below are the **historical exploratory results**. Manuscript changes are in `manuscript/Paper/Revision-1.tex`; `make revision revision-clean response` builds marked and clean papers plus the response letter. The clean entry point suppresses deletions and renders additions normally, preserving both `main.tex` and `Revision-1.tex`. No evaluation, tests or build was executed during this preparation.
 
 # Historical results overview
 
@@ -370,8 +383,9 @@ and the required packages, build all documents from the repository root with:
 
     make manuscript
 
-Individual documents can be built with `make paper`, `make revision`, or
-`make response`. Generated PDFs and auxiliary build files remain inside
+Individual documents can be built with `make paper`, `make revision`,
+`make revision-clean`, or `make response`. The clean PDF is
+`manuscript/Paper/Revision-1-clean.pdf`. Generated PDFs and auxiliary build files remain inside
 `manuscript/` and are ignored by Git. To remove those generated files, run:
 
     make clean-manuscript

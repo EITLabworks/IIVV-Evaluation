@@ -3,4 +3,4 @@
 set -euo pipefail
 TASK_ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 cd "$TASK_ROOT"
-exec "$TASK_ROOT/run_revision.sh" --config "$TASK_ROOT/configs/revision-clinical.json" --prepare-source "$@"
+exec "$TASK_ROOT/run_revision.sh" --config "$TASK_ROOT/configs/revision.json" --prepare-source "$@"

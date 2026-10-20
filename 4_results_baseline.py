@@ -5,7 +5,8 @@ The former stand-alone cohort-wide optimization has been replaced. Basic --task,
 --metric, --model, --n_trials and --n_folds options remain aliases. See
 code-revisions.md; the recommended command is ./run_revision.sh.
 """
+
 from revision.compat import main
 
-if __name__ == '__main__':
-    raise SystemExit(main('Matched baseline evaluation'))
+if __name__ == "__main__":
+    raise SystemExit(main("Matched baseline evaluation"))

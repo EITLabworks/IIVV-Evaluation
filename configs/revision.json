@@ -162,5 +162,6 @@
   "external_cohort_values": [
     "external"
   ],
-  "task_workers": 2
+  "task_workers": 2,
+  "feature_cache_bytes": 2147483648
 }
