@@ -18,7 +18,11 @@ CLASSIFICATION_METRICS = {
 
 def classification_rows(summary, intervals):
     """Requested reporting metrics, with patient-bootstrap intervals when estimable."""
-    ci = intervals.set_index("metric").to_dict("index")
+    # Class/task identifiers belong to the caller's reporting context. In
+    # particular, per-class interval tables also contain class_name/class_index;
+    # forwarding them would duplicate (or override) that context on assembly.
+    columns = ["metric", "ci_low", "ci_high", "valid_bootstraps", "method"]
+    ci = intervals.reindex(columns=columns).set_index("metric").to_dict("index")
     return [
         dict(
             metric=key,

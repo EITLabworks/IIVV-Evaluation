@@ -212,6 +212,46 @@ def test_requested_multiclass_outputs_are_macro_ovr_with_precision_ppv_alias():
     np.testing.assert_array_equal(perclass.ppv, perclass.precision)
 
 
+@pytest.mark.parametrize("nclasses", [2, 3])
+def test_classification_interval_exports_do_not_duplicate_class_identity(nclasses):
+    from revision.metrics import bootstrap_metrics, classification_rows
+
+    y = np.tile(np.arange(nclasses), 6)
+    probabilities = 0.9 * np.eye(nclasses)[y] + 0.1 / nclasses
+    _, perclass, _ = scores(y, probabilities)
+    _, intervals = bootstrap_metrics(
+        y,
+        probabilities,
+        y,
+        np.repeat(np.arange(6), nclasses),
+        n_boot=4,
+        return_perclass=True,
+    )
+    intervals["class_name"] = intervals.class_index.map(lambda value: f"Class {value}")
+    for class_index in range(nclasses):
+        rows = classification_rows(
+            perclass.iloc[class_index].to_dict(),
+            intervals[intervals.class_index == class_index],
+        )
+        assert len(rows) == 7
+        for row in rows:
+            assert set(row) == {
+                "metric",
+                "display_metric",
+                "estimate",
+                "ci_low",
+                "ci_high",
+                "valid_bootstraps",
+                "method",
+            }
+            assembled = dict(
+                class_name=f"Class {class_index}", class_index=class_index, **row
+            )
+            assert assembled["class_index"] == class_index
+            assert assembled["estimate"] == pytest.approx(1)
+            assert assembled["valid_bootstraps"] == 4
+
+
 def test_corrected_cv_test_uses_overlap_and_patient_split_ratio():
     from scipy.stats import t
     from revision.metrics import corrected_resampled_test
