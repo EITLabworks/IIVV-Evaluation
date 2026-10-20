@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 
 from .data import CLASS_NAMES, digest
-from .metrics import holm
+from .metrics import CLASSIFICATION_METRICS, corrected_resampled_test, holm
 
 
 def require(condition, message):
@@ -21,6 +21,7 @@ def verify_results(root, *, verify_inputs=False):
     manifest = json.loads((root / "run_manifest.json").read_text())
     require(manifest.get("status") == "completed", "Run is not completed")
     cfg = manifest["config"]
+    revised_reports = manifest.get("reporting_protocol_version", 0) >= 1
     checked_folds = 0
     require(manifest.get("input_hashes"), "Missing input inventory")
     if verify_inputs:
@@ -56,6 +57,23 @@ def verify_results(root, *, verify_inputs=False):
             "unavailable_streams.json",
             "location_stratified_metrics.csv",
         ]
+        if revised_reports:
+            required += [
+                "task_label_audit.csv",
+                "classification_outputs.csv",
+                "outer_fold_metrics.csv",
+                "cv_metrics_summary.csv",
+                "outer_fold_per_class_metrics.csv",
+                "cv_comparison_fold_differences.csv",
+                "corrected_resampled_tests.csv",
+                "cv_population_summary.csv",
+                "cv_pathology_breakdown.csv",
+                "cv_demographics_categorical.csv",
+                "cv_demographics_numeric.csv",
+                "cv_demographics_availability.csv",
+                "cv_patient_groups.csv",
+                "cv_demographics_notes.json",
+            ]
         # Location is optional for inputs outside the study's full source profile.
         for name in required:
             if (
@@ -78,6 +96,29 @@ def verify_results(root, *, verify_inputs=False):
             folder / "task_inclusion.csv", dtype={"patient_id": str, "sample_id": str}
         )
         require(inclusion.sample_id.is_unique, f"{task}: duplicate inclusion IDs")
+        if revised_reports:
+            outputs = pd.read_csv(folder / "classification_outputs.csv")
+            require(
+                set(outputs.metric) == set(CLASSIFICATION_METRICS),
+                f"{task}: incomplete classification outputs",
+            )
+            require(
+                (
+                    outputs.method
+                    == "patient-cluster percentile; conditional on frozen outer predictions"
+                ).all(),
+                f"{task}: classification intervals are not patient bootstrap intervals",
+            )
+            if task == "highrisk_vs_lowrisk":
+                from .data import RISK_CLASS
+
+                actual = inclusion.pathology.map(RISK_CLASS).map(
+                    {name: j for j, name in enumerate(CLASS_NAMES[task])}
+                )
+                require(
+                    np.array_equal(actual.to_numpy(), inclusion.class_index.to_numpy()),
+                    "High-/low-risk labels disagree with the confirmed pathology groups",
+                )
         lookup = inclusion.set_index("sample_id")
         splits = json.loads((folder / "splits.json").read_text())
         selections = json.loads((folder / "selections.json").read_text())
@@ -141,6 +182,19 @@ def verify_results(root, *, verify_inputs=False):
                     not a & b and a | b == train and not (a | b) & test,
                     f"{task}: invalid inner patient partition",
                 )
+                if revised_reports:
+                    inner_train = set(inner["train_sample_ids"])
+                    inner_test = set(inner["validation_sample_ids"])
+                    require(
+                        not inner_train & inner_test
+                        and inner_train | inner_test == set(split["train_sample_ids"]),
+                        f"{task}: invalid inner site partition",
+                    )
+                    require(
+                        set(lookup.loc[list(inner_train)].patient_id) == a
+                        and set(lookup.loc[list(inner_test)].patient_id) == b,
+                        f"{task}: inner site/patient identifiers disagree",
+                    )
             require(
                 set(lookup.loc[split["train_sample_ids"]].patient_id) == train,
                 f"{task}: training ID mismatch",
@@ -203,6 +257,32 @@ def verify_results(root, *, verify_inputs=False):
                     and set(selected.test_patients) == test,
                     f"{task}: fitted patient IDs disagree with split",
                 )
+                if revised_reports:
+                    fitted_ids = set(selected.postprocessing_fit_sample_ids)
+                    require(
+                        bool(fitted_ids)
+                        and fitted_ids <= set(split["train_sample_ids"]),
+                        f"{task}: calibration/threshold training includes test sites",
+                    )
+                    require(
+                        set(selected.postprocessing_fit_patient_ids)
+                        == set(lookup.loc[list(fitted_ids)].patient_id)
+                        and not set(selected.postprocessing_fit_patient_ids) & test,
+                        f"{task}: calibration/threshold patient provenance disagrees",
+                    )
+                    require(
+                        len(selected.inner_fit_provenance) == len(split["inner"]),
+                        f"{task}: missing inner fit provenance",
+                    )
+                    for fit, inner in zip(
+                        selected.inner_fit_provenance, split["inner"]
+                    ):
+                        require(
+                            set(fit["train_patients"]) <= set(inner["train_patients"])
+                            and set(fit["test_patients"])
+                            == set(inner["validation_patients"]),
+                            f"{task}: fitted preprocessing/model crosses inner training boundary",
+                        )
             checked_folds += 1
         if "covariate_combined" in set(predictions.stream):
             control = json.loads(
@@ -260,6 +340,33 @@ def verify_results(root, *, verify_inputs=False):
         "environment-freeze.txt",
     ]:
         require((root / name).is_file(), f"Missing {name}")
+    if revised_reports:
+        require(
+            (root / "classification_outputs.csv").is_file(),
+            "Missing classification_outputs.csv",
+        )
+        verify_corrected_statistics(root, cfg)
+    if cfg.get("fold_workers", 0) > 0:
+        from .parallel import _check_complete, fold_directory
+
+        execution = json.loads((root / "parallel_execution.json").read_text())
+        scheduled = [
+            (row["task"], tuple(row["key"])) for row in execution["fold_order"]
+        ]
+        expected_jobs = []
+        for task in cfg["tasks"]:
+            for split in json.loads((root / task / "splits.json").read_text()):
+                key = (split["repeat"], split["outer_fold"], split["evaluation"])
+                expected_jobs.append((task, key))
+                require(
+                    _check_complete(fold_directory(root, task, key), task, key),
+                    f"{task}: missing completed parallel checkpoint",
+                )
+        require(
+            len(scheduled) == len(set(scheduled)) == execution["fold_jobs"]
+            and set(scheduled) == set(expected_jobs),
+            "Incorrect parallel fold inventory",
+        )
     return dict(
         status="verified",
         synthetic=bool(manifest.get("synthetic")),
@@ -267,3 +374,97 @@ def verify_results(root, *, verify_inputs=False):
         comparison_family=len(expected),
         input_hashes_checked=verify_inputs,
     )
+
+
+def verify_corrected_statistics(root, cfg):
+    """Audit corrected statistics, scheduled fold counts and both Holm families."""
+    frame = pd.read_csv(root / "corrected_resampled_tests_holm.csv")
+    keys = ["task", "model", "objective", "metric"]
+    expected = set(
+        itertools.product(
+            cfg["tasks"], cfg["models"], cfg["objectives"], CLASSIFICATION_METRICS
+        )
+    )
+    require(
+        not frame.duplicated(keys).any()
+        and set(map(tuple, frame[keys].to_numpy())) == expected,
+        "Incomplete corrected-test family",
+    )
+    nfolds = cfg["outer_folds"] * cfg["outer_repeats"]
+    for task in cfg["tasks"]:
+        differences = pd.read_csv(root / task / "cv_comparison_fold_differences.csv")
+        splits = json.loads((root / task / "splits.json").read_text())
+        counts = {
+            (s["repeat"], s["outer_fold"]): (
+                len(s["train_patients"]),
+                len(s["test_patients"]),
+            )
+            for s in splits
+            if s["evaluation"] == "nested_cv"
+        }
+        for (model, objective, metric), group in differences.groupby(
+            ["model", "objective", "metric"]
+        ):
+            require(
+                len(group) == nfolds
+                and set(zip(group["repeat"], group.outer_fold)) == set(counts),
+                f"{task}: missing/duplicate corrected-test folds",
+            )
+            for row in group.itertuples():
+                require(
+                    (row.n_train_patients, row.n_test_patients)
+                    == counts[(row.repeat, row.outer_fold)],
+                    f"{task}: corrected-test sizes must be scheduled patient counts",
+                )
+            result = corrected_resampled_test(
+                group.difference, group.n_train_patients, group.n_test_patients
+            )
+            saved = frame[
+                (frame.task == task)
+                & (frame.model == model)
+                & (frame.objective == objective)
+                & (frame.metric == metric)
+            ].iloc[0]
+            for key in (
+                "p_value",
+                "corrected_se",
+                "mean_difference",
+                "degrees_of_freedom",
+            ):
+                require(
+                    np.isclose(saved[key], result[key], equal_nan=True),
+                    f"{task}: incorrect corrected-test {key}",
+                )
+    unique = frame.metric != "ppv"
+    require(
+        np.allclose(
+            frame.loc[unique, "p_holm_all_unique_metrics"],
+            holm(frame.loc[unique, "p_value"]),
+            equal_nan=True,
+        ),
+        "Incorrect Holm correction across unique diagnostic metrics",
+    )
+    for _, group in frame.loc[unique].groupby("metric"):
+        require(
+            np.allclose(
+                group.p_holm_within_metric, holm(group.p_value), equal_nan=True
+            ),
+            "Incorrect within-metric Holm adjustment",
+        )
+    for row in frame[~unique].itertuples():
+        source = frame[
+            (frame.task == row.task)
+            & (frame.model == row.model)
+            & (frame.objective == row.objective)
+            & (frame.metric == "precision")
+        ].iloc[0]
+        require(
+            np.allclose(
+                [row.p_value, row.p_holm_all_unique_metrics, row.p_holm_within_metric],
+                source[
+                    ["p_value", "p_holm_all_unique_metrics", "p_holm_within_metric"]
+                ].to_numpy(float),
+                equal_nan=True,
+            ),
+            "PPV must alias precision in the statistical family",
+        )

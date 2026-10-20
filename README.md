@@ -1,9 +1,15 @@
 # IIVV Evaluation — reviewer revision
 
 Patient-grouped nested evaluation of in vivo oral-lesion EIS. The author-selected
-protocol uses **5 outer × 4 inner folds, 10 repeats**, seed 1729, four diagnostic
+protocol uses **5 outer × 4 inner folds, one outer partition**, seed 1729, four diagnostic
 tasks, three classifiers and four selection objectives. All learned preprocessing,
 selection, calibration and thresholds stay inside outer-training patients.
+
+Classification outputs report **AUC, F1, precision, SN, SP, PPV and NPV**, with
+whole-patient bootstrap confidence intervals. Binary summaries use the positive
+class; multiclass summaries use macro one-versus-rest metrics and separate class
+tables. Precision equals PPV. Corrected paired outer-CV tests and detailed
+patient/pathology/demographic split reports accompany the outputs.
 
 Follow [SERVER_RUN.md](SERVER_RUN.md) for prerequisites, resources, ordered server
 execution and result handoff. The computational implementation and reviewer mapping
@@ -43,6 +49,20 @@ make revision-check
 Results go to `results/revision-expanded`. An interrupted/failed run with identical
 inputs and settings can use `make revision-resume`. Earlier results and source
 snapshots remain separate. The runner never imports results into manuscripts.
+
+The server profile runs up to **20 independent outer folds**, each with four RF
+threads, then assembles task reports. CPU affinity, scheduler allocations and
+cgroup CPU quotas limit concurrency automatically. Each fold has an 8 GiB feature
+cache and an isolated, hash-verified checkpoint under `fold-checkpoints/`.
+Use a fresh output after updating from the earlier task-only execution:
+
+```sh
+make revision-evaluation REVISION_OUTPUT=results/revision-parallel > logs/revision-parallel.log 2>&1
+make revision-check REVISION_OUTPUT=results/revision-parallel
+```
+
+Run the check after evaluation succeeds. Set `IIVV_RESULTS=results/revision-parallel`
+for reporting notebooks. Include `fold-checkpoints/` when copying results.
 
 ## Notebooks
 

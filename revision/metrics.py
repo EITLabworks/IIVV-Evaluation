@@ -4,6 +4,102 @@ import numpy as np
 import pandas as pd
 from .features import patient_weights
 
+# Precision and PPV are deliberately both exported, but represent the same statistic.
+CLASSIFICATION_METRICS = {
+    "auc": "AUC",
+    "f1": "F1",
+    "precision": "precision",
+    "sensitivity": "SN",
+    "specificity": "SP",
+    "ppv": "PPV",
+    "npv": "NPV",
+}
+
+
+def classification_rows(summary, intervals):
+    """Requested reporting metrics, with patient-bootstrap intervals when estimable."""
+    ci = intervals.set_index("metric").to_dict("index")
+    return [
+        dict(
+            metric=key,
+            display_metric=label,
+            estimate=summary.get(key, np.nan),
+            **ci.get(key, {})
+        )
+        for key, label in CLASSIFICATION_METRICS.items()
+    ]
+
+
+def corrected_resampled_test(differences, train_patients, test_patients):
+    """Nadeau--Bengio correction applied to paired patient-grouped outer CV folds.
+
+    SE² = (1/n + mean(n_test_patients/n_train_patients)) * sample_variance(d).
+    Student t reference uses n-1 degrees of freedom. This is an approximation
+    (especially for a single k-fold partition and nonlinear diagnostic metrics),
+    not an exact independent-fold test. All scheduled pairs must be estimable.
+    References: Bouckaert & Frank (2004), sections 3.2--3.3,
+    https://ml.cms.waikato.ac.nz/publications/2004/bouckaert-frank.pdf
+    """
+    from scipy.stats import t as student_t
+
+    d, tr, te = [
+        np.asarray(v, float) for v in (differences, train_patients, test_patients)
+    ]
+    if not (d.ndim == tr.ndim == te.ndim == 1 and len(d) == len(tr) == len(te)):
+        raise ValueError("Paired differences and split patient counts must align")
+    result = dict(
+        n_scheduled_folds=len(d),
+        n_valid_folds=int(np.isfinite(d).sum()),
+        mean_difference=np.nan,
+        sample_variance=np.nan,
+        corrected_se=np.nan,
+        mean_test_train_patient_ratio=np.nan,
+        t_statistic=np.nan,
+        degrees_of_freedom=len(d) - 1,
+        p_value=np.nan,
+        method="Nadeau-Bengio corrected resampled t approximation on paired outer folds",
+        correction_unit="patients; mean scheduled test/train patient ratio",
+        status="unavailable_incomplete_or_undefined_fold_pairs",
+    )
+    if (
+        len(d) < 2
+        or not np.isfinite(d).all()
+        or not np.isfinite(tr).all()
+        or not np.isfinite(te).all()
+        or (tr <= 0).any()
+        or (te <= 0).any()
+    ):
+        return result
+    variance = float(np.var(d, ddof=1))
+    correction = float(np.mean(te / tr))
+    se = float(np.sqrt((1 / len(d) + correction) * variance))
+    result.update(
+        mean_difference=float(d.mean()),
+        sample_variance=variance,
+        corrected_se=se,
+        mean_test_train_patient_ratio=correction,
+    )
+    if np.ptp(d) == 0:
+        # Identical algorithms are a known null. Constant nonzero differences
+        # provide no empirical variance estimate; do not invent significance.
+        result.update(
+            status=(
+                "identical_fold_scores"
+                if np.all(d == 0)
+                else "unavailable_zero_between_fold_variance"
+            ),
+            t_statistic=0.0 if np.all(d == 0) else np.nan,
+            p_value=1.0 if np.all(d == 0) else np.nan,
+        )
+        return result
+    statistic = float(d.mean() / se)
+    result.update(
+        t_statistic=statistic,
+        p_value=float(2 * student_t.sf(abs(statistic), len(d) - 1)),
+        status="estimated_approximate",
+    )
+    return result
+
 
 def ratio(a, b):
     return float(a / b) if b else float("nan")
@@ -57,6 +153,7 @@ def score_arrays(y, p, pred=None, weights=None):
                 sensitivity=ratio(tp, tp + fn),
                 specificity=ratio(tn, tn + fp),
                 precision=ratio(tp, tp + fp),
+                ppv=ratio(tp, tp + fp),
                 npv=ratio(tn, tn + fn),
                 f1=ratio(2 * tp, 2 * tp + fp + fn),
                 accuracy=ratio(tp + tn, total),
@@ -89,6 +186,10 @@ def score_arrays(y, p, pred=None, weights=None):
             )
         ),
     )
+    summary.update(auc=summary["macro_auc"], f1=summary["macro_f1"])
+    for key in ("precision", "sensitivity", "specificity", "ppv", "npv"):
+        summary["macro_" + key] = float(np.mean([row[key] for row in perclass]))
+        summary[key] = summary["macro_" + key]
     if k == 2:
         summary.update(
             {

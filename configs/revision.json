@@ -3,47 +3,21 @@
   "seed": 1729,
   "outer_folds": 5,
   "inner_folds": 4,
-  "outer_repeats": 10,
+  "outer_repeats": 1,
   "tasks": [
     "healthy_vs_cancer",
     "cancer_vs_lr_hr",
     "MC",
     "highrisk_vs_lowrisk"
   ],
-  "models": [
-    "svm",
-    "rf",
-    "lr"
-  ],
-  "objectives": [
-    "auc",
-    "acc",
-    "f1",
-    "sensitivity"
-  ],
+  "models": ["svm", "rf", "lr"],
+  "objectives": ["auc", "acc", "f1", "sensitivity"],
   "top_k": 4,
   "default_cutoff": 60,
-  "cutoffs": [
-    20,
-    40,
-    60,
-    80,
-    100.000001
-  ],
-  "normalizations": [
-    "freq",
-    "global",
-    "none"
-  ],
-  "imputations": [
-    "mean",
-    "median",
-    "zero"
-  ],
-  "class_weights": [
-    null,
-    "balanced"
-  ],
+  "cutoffs": [40, 60, 80, 100.000001],
+  "normalizations": ["freq", "global", "none"],
+  "imputations": ["mean", "median", "zero"],
+  "class_weights": [null, "balanced"],
   "patient_weighted_training": true,
   "masks": [
     "All",
@@ -60,21 +34,8 @@
     "Opp. medium",
     "Opp. far"
   ],
-  "z_quantiles": [
-    0.1,
-    0.25,
-    0.5,
-    0.75,
-    0.9
-  ],
-  "selectors": [
-    "pca",
-    "anova",
-    "mutual_info",
-    "sparse",
-    "rfe",
-    "permutation"
-  ],
+  "z_quantiles": [0.1, 0.25, 0.5, 0.75, 0.9],
+  "selectors": ["pca", "mutual_info", "rfe", "permutation"],
   "comparison_frequencies": 3,
   "representations": [
     "magnitude",
@@ -86,15 +47,8 @@
   "max_pca_rows": 100000,
   "calibration": true,
   "sensitivity_target": 0.95,
-  "specificity_targets": [
-    0.8,
-    0.9,
-    0.95
-  ],
-  "prevalences": [
-    0.1,
-    0.2
-  ],
+  "specificity_targets": [0.8, 0.9, 0.95],
+  "prevalences": [0.1, 0.2],
   "bootstrap_samples": 1000,
   "permutation_samples": 1000,
   "clinical_covariates": [
@@ -112,56 +66,25 @@
   ],
   "model_grids": {
     "svm": {
-      "kernel": [
-        "linear",
-        "rbf",
-        "poly",
-        "sigmoid"
-      ],
-      "C": [
-        0.001,
-        0.01,
-        0.1,
-        1,
-        10,
-        100,
-        1000
-      ]
+      "kernel": ["linear", "rbf", "poly", "sigmoid"],
+      "C": [0.001, 0.01, 0.1, 1, 10, 100, 1000]
     },
     "rf": {
-      "n_estimators": [
-        100,
-        300,
-        800
-      ],
-      "max_depth": [
-        8,
-        16,
-        null
-      ],
-      "max_features": [
-        0.3,
-        0.7,
-        1.0
-      ]
+      "n_estimators": [100, 300, 800],
+      "max_depth": [8, 16, null],
+      "max_features": [0.3, 0.7, 1.0]
     },
     "lr": {
-      "C": [
-        0.001,
-        0.01,
-        0.1,
-        1,
-        10,
-        100,
-        1000
-      ]
+      "C": [0.001, 0.01, 0.1, 1, 10, 100, 1000]
     }
   },
   "save_models": false,
   "external_cohort_column": null,
-  "external_cohort_values": [
-    "external"
-  ],
-  "task_workers": 2,
-  "feature_cache_bytes": 2147483648
+  "external_cohort_values": ["external"],
+  "task_workers": 4,
+  "fold_workers": 20,
+  "rf_jobs": 4,
+  "blas_threads": 1,
+  "verbose_candidates": false,
+  "feature_cache_bytes": 8589934592
 }

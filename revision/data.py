@@ -30,6 +30,20 @@ PATHOLOGY = {
     "invasive carcinoma": "Cancer",
     "oscc": "Cancer",
 }
+RISK_CLASS = {
+    "Healthy": "Low risk",
+    "Non-malignant": "Low risk",
+    "Cancer": "High risk",
+    "High-grade dysplasia": "High risk",
+}
+RISK_DEFINITION = {
+    "High risk": "Moderate dysplasia through high-grade dysplasia/CIS to invasive carcinoma",
+    "Low risk": "Healthy/normal, benign and mild dysplasia",
+    "raw_pathology_to_risk": {
+        raw: RISK_CLASS[label] for raw, label in PATHOLOGY.items()
+    },
+    "other_pathologies": "excluded; no substring-based assignment",
+}
 
 
 def scalar(value):
@@ -67,14 +81,7 @@ class Dataset:
             raise ValueError(f"Unknown task {name}")
         labels = self.table["pathology"].copy()
         if name == "highrisk_vs_lowrisk":
-            labels = labels.map(
-                {
-                    "Healthy": "Low risk",
-                    "Non-malignant": "Low risk",
-                    "Cancer": "High risk",
-                    "High-grade dysplasia": "High risk",
-                }
-            )
+            labels = labels.map(RISK_CLASS)
         keep = labels.isin(CLASS_NAMES[name]).to_numpy()
         indices = np.flatnonzero(keep)
         y = np.array([CLASS_NAMES[name].index(v) for v in labels[keep]], dtype=int)

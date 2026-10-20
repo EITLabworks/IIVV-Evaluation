@@ -1,10 +1,12 @@
 # Revision evaluation on the server
 
 Protocol chosen by the author on 20 October 2026: **5 outer × 4 inner
-patient folds, 10 outer repeats**, seed 1729, four tasks, three classifiers,
-four objectives. Use `configs/revision.json`. This produces **200 outer
-folds** and a prespecified **48-comparison** Holm family. Repeated predictions
-are combined once per site before patient-cluster inference.
+patient folds, one outer partition**, seed 1729, four tasks, three classifiers,
+four objectives. Use `configs/revision.json`. This produces **20 outer
+folds** and 48 tuned-versus-baseline comparisons per metric. Corrected CV tests
+use Holm adjustment over **288 unique hypotheses** (six distinct metrics;
+precision and PPV are aliases). Whole-patient bootstrap intervals are computed
+separately from frozen outer predictions, combined once per site.
 
 No project code, tests, fitting, result imports or LaTeX builds were executed
 during this preparation. Run the following stages yourself, in order. Stop
@@ -31,16 +33,28 @@ and tests, sets noninteractive plotting and limits BLAS/OpenMP/MKL to one thread
 The helper reuses existing environments; update packages explicitly with
 `conda env update --name iivv-revision --file environment.yml --prune` when needed.
 
-The reference workflow uses CPU scikit-learn. The profile runs two tasks
-concurrently, with four threads per RF fit and a 2 GiB feature cache per task.
-Reserve at least 8 CPU cores; 64 GiB RAM is a conservative planning request,
-not a measured peak-memory requirement. The raw repeat array and temporary
-transform matrices also consume memory. No GPU is required.
+The reference workflow uses CPU scikit-learn. `fold_workers=20` runs up to 20
+independent outer folds, with `rf_jobs=4`, `blas_threads=1` and an 8 GiB feature
+cache per fold. This targets the supplied 128-core/2 TiB server: up to 80 RF
+threads and 160 GiB of feature caches, plus raw inputs and temporary arrays.
+A planning reservation is 80 CPU cores and 384 GiB RAM; this is not a measured
+peak. Concurrency is capped by CPU affinity, common scheduler allocations and
+cgroup CPU quotas. On smaller jobs, reduce `fold_workers` and/or
+`feature_cache_bytes` for the allocated RAM. No GPU is required.
+
+Fold workers share immutable raw arrays through fork; fitted state remains
+isolated per fold. After fitting workers exit, `task_workers=4` builds reports.
+No two workers write the same checkpoint. The parent assembles completed folds
+in the original deterministic order. `parallel_execution.json` records the
+actual workers/schedule; `fold-checkpoints/` retains hash-verified complete folds
+for resume. Keep this directory when transferring results or running checks.
+Ctrl-C or a worker exception stops the worker pool; only complete folds are reused.
+For platforms without fork, set both `fold_workers` and `task_workers` to 1.
 
 The expanded search includes all 31 frequency counts, 13 geometry masks,
-five impedance quantiles, six selectors, five representations, five quality
+five impedance quantiles, four selectors, five representations, four quality
 cutoffs, and the full model grids. It retains up to four frequency counts and
-four geometry masks plus an impedance mask for joint tuning. Millions of inner
+four geometry masks plus an impedance mask for joint tuning. Hundreds of thousands of inner
 fits are possible before cache/duplicate reuse. A trustworthy wall-time estimate
 needs server timing; do not reduce the protocol based on observed outer scores.
 
@@ -76,11 +90,31 @@ make revision-evaluation > logs/revision-expanded.log 2>&1
 
 Default output: `results/revision-expanded`. Use a fresh directory for this
 revised protocol; the old `revision-clinical-final` checkpoints have different
-fold settings and source history. The runner writes complete-fold checkpoints,
+fold settings and source history. The earlier ten-repeat `revision-expanded`
+run also has incompatible settings: changing the config does not change an
+already-running process, and its checkpoints cannot be resumed with one repeat.
+For the replacement run, use `REVISION_OUTPUT=results/revision-parallel`
+consistently for evaluation, resume and check. If rerunning preflight, use
+`PREFLIGHT_OUTPUT=results/revision-parallel-preflight` for a fresh audit.
+Reporting notebooks accept `IIVV_RESULTS=results/revision-parallel`.
+Runs made before the training-provenance/statistics changes require a fresh output,
+even with the same fold configuration; older checkpoints cannot be resumed by this code.
+The runner writes complete-fold checkpoints,
 exact splits, fitted coordinate identities, failed-candidate details, source
 snapshots, input hashes and environment inventory. It generates numerical
 reports and figures automatically, including matched EIS-only/clinical/combined
 controls. Obsolete numbered fitting entry points have been removed.
+The optimized profile changes execution settings, so use a fresh directory rather
+than resuming earlier task-only runs. Example:
+
+```sh
+make revision-evaluation REVISION_OUTPUT=results/revision-parallel > logs/revision-parallel.log 2>&1
+```
+
+The log reports fold start/completion and every 250 candidates, rather than two
+lines per candidate. Set `verbose_candidates: true` in the config for detailed
+candidate timings. Every candidate's scores/failures remain archived regardless
+of log verbosity.
 
 After an interruption explicitly recorded as `interrupted` or `failed`:
 
@@ -101,7 +135,7 @@ make revision-check > logs/revision-expanded-check.log 2>&1
 ```
 
 Success requires `run_manifest.json` to say `completed`, with `synthetic: false`.
-The checker verifies input hashes, all 200 outer folds, patient separation,
+The checker verifies input hashes, all 20 outer folds, patient separation,
 inner partitions, coverage, class/probability order, matched controls and the
 complete Holm family. Candidate failures and unavailable streams must still be
 reviewed; a completed run does not establish clinical adequacy.
@@ -110,10 +144,26 @@ Return the logs and the complete `results/revision-expanded/` tree for our next
 review, subject to the study's existing data-access conditions. Especially useful:
 
 - `run_manifest.json`, `resolved_config.json`, `analysis_status.json`
-- `all_metrics.csv`, `paired_comparisons_holm.csv`
+- `parallel_execution.json`, complete `fold-checkpoints/` tree
+- `classification_outputs.csv`: AUC/F1/precision/SN/SP/PPV/NPV with patient-bootstrap intervals
+- `corrected_resampled_tests_holm.csv`: paired CV tests and full-family adjusted p values
+- `all_metrics.csv`, `paired_comparisons_holm.csv` (the latter is supplementary conditional prediction permutation)
 - task-level `per_class_metrics.csv`, `split_population_counts.csv`,
   `candidate_failures.json`, `unavailable_streams.json`
+- task-level `outer_fold_metrics.csv`, `cv_metrics_summary.csv`, `cv_comparison_fold_differences.csv`
+- task-level `cv_population_summary.csv`, `cv_pathology_breakdown.csv`,
+  `cv_demographics_*.csv`, `cv_patient_groups.csv`, `task_label_audit.csv`
 - `quality/`, `repeatability/`, and generated plots
+
+Corrected tests use SE² = (1/n_folds + mean(n_test_patients/n_train_patients)) ×
+the sample variance of paired fold differences, with n_folds−1 t degrees of freedom.
+The patient-grouped/nonlinear-metric application is approximate; five folds provide
+limited information about variation between training partitions. Undefined folds or
+constant nonzero differences produce unavailable p values, retained in the family.
+The method follows [Bouckaert & Frank, sections 3.2–3.3](https://ml.cms.waikato.ac.nz/publications/2004/bouckaert-frank.pdf).
+Confidence intervals use 1,000 whole-patient bootstrap draws, not independent-fold
+standard errors. Tests condition on common quality coverage. Precision/PPV share
+one hypothesis; the CSV also includes within-metric Holm values.
 
 ## 5. Paper builds and later numerical imports
 

@@ -5,11 +5,12 @@ The authoritative revision workflow is `./run_all.sh`. It replaces cohort-wide p
 ## Running the analyses
 
 **Author decision, 20 October 2026:** the final run uses the expanded
-`configs/revision.json` profile: 5 outer × 4 inner patient folds, 10 repeats.
+`configs/revision.json` profile: 5 outer × 4 inner patient folds, one outer partition
+(reduced from ten repeats for runtime; the nested search is retained).
 See [SERVER_RUN.md](SERVER_RUN.md) for the ordered schedule. No project code,
 tests, evaluation or LaTeX build was executed during this preparation.
 
-Use `source ./setup_environment.sh` from Bash or Zsh to create/reuse and activate `iivv-revision` from `environment.yml` (Python 3.11, scientific packages, tests and notebooks). The reference uses CPU scikit-learn; two tasks run concurrently on fork-capable systems, keeping fitted state separate. Set `task_workers` to 1 on platforms without fork. `environment-freeze.txt` records installed versions; the environment YAML and activation helper are archived with the run sources.
+Use `source ./setup_environment.sh` from Bash or Zsh to create/reuse and activate `iivv-revision` from `environment.yml` (Python 3.11, scientific packages, tests and notebooks). The reference uses CPU scikit-learn; `fold_workers=20` schedules independent outer folds on fork-capable systems, keeping fitted state separate. Set `fold_workers` and `task_workers` to 1 on platforms without fork. `environment-freeze.txt` records installed versions; the environment YAML and activation helper are archived with the run sources.
 
 ```sh
 source ./setup_environment.sh
@@ -28,7 +29,23 @@ python -m pytest -q tests/test_revision.py
 
 A result directory is not overwritten after fitting starts. Use a fresh `--output` for another run. To continue an interrupted/failed expanded run with identical inputs and configuration, use `./run_all.sh --resume --output results/revision-expanded`. Only fully checkpointed folds are reused; hashes/configuration must match, partial folds are rerun, and source snapshots plus per-fold source versions/resume manifests are retained. A completed or active run cannot be resumed. Rejected resumes retain the original input inventory, so a second attempt cannot silently accept changed inputs. `--preflight` must use a separate output directory and cannot be combined with `--resume`; it computes quality/repeatability audits but fits no classifiers. Synthetic runs are explicitly marked and cannot enter clinical reporting. Large runs require substantial memory, disk and CPU time; the available test means alone occupy approximately 4 GB.
 
-The shell runner defaults BLAS and OpenMP to eight threads, respecting explicit environment settings. The server schedule sets BLAS/OpenMP/MKL to one thread to limit nested contention with two task workers and four RF threads. CPU affinity is optional; choose CPU IDs allowed on the server. Set `PYTHON=/path/to/environment/bin/python` to select an interpreter. The manifest records effective affinity and thread settings.
+The shell runner and Conda environment default BLAS/OpenMP/MKL to one thread. Worker-level threadpoolctl limits enforce `blas_threads=1` even if a loaded library already initialized its own pool. CPU affinity is optional; choose CPU IDs allowed on the server. Set `PYTHON=/path/to/environment/bin/python` to select an interpreter. The manifest records effective affinity and thread settings.
+
+`revision/parallel.py` schedules all 20 task/outer-fold combinations, capped by
+available CPUs and `rf_jobs=4`. Up to 80 RF threads run on the supplied server.
+Each fold has an 8 GiB feature cache (up to 160 GiB total), isolated checkpoints
+and unchanged seeds, training boundaries, candidate grids and inference rules.
+Workers return small completion records; raw arrays are inherited through fork.
+Hash-verified fold completion markers gate resume and deterministic parent assembly.
+Fitting workers exit before four task-report workers start. Exceptions/interrupts
+terminate active workers, preserving finished checkpoints. `revision-check`
+verifies the fold inventory and checkpoint hashes as well as scientific outputs.
+`verbose_candidates=false` logs progress every 250 candidates plus fold events;
+all search scores/failures are retained. `fold_workers=0` retains the older
+task-level execution path, and `--fold-workers 1` allows a serial parity check.
+Synthetic runs use the small serial path by default; prepared regression tests
+compare serial/parallel predictions and interrupted-fold reuse on the server.
+Use a fresh `results/revision-parallel` directory when updating from older runs.
 
 The previous computation is interrupted with its checkpoint files preserved. No full clinical completion is claimed. The current handoff is code preparation only: run the computation and completion check above, then return for manuscript/reviewer updates. The runner writes numerical tables, audits and plots only; it does not invoke the later manuscript/rebuttal import commands. For a fresh run, replace the output path in all subsequent checking commands with that fresh path.
 
@@ -48,11 +65,11 @@ The previous computation is interrupted with its checkpoint files preserved. No 
 
 ## Prespecified configurations and interpretation
 
-The older compact profiles were removed from active configuration; their settings remain in historical result manifests and Git history. The final expanded profile uses 1,000 patient-cluster bootstrap/permutation draws, all 31 frequency counts, 13 geometry masks, six selectors, five representations, three normalization/imputation choices and default/balanced class weights. Cutoffs are strict `<`; 100.000001 permits the full supplied quality-score range with training-fitted imputation. The reference cutoff is 60%.
+The older compact profiles were removed from active configuration; their settings remain in historical result manifests and Git history. The active profile uses 1,000 patient-cluster bootstrap/permutation draws, all 31 frequency counts, 13 geometry masks, four selectors (PCA, mutual information, RFE, permutation), five representations, three normalization/imputation choices and default/balanced class weights. Cutoffs are strict `<`; 100.000001 permits the full supplied quality-score range with training-fitted imputation. The reference cutoff is 60%.
 
 Search is staged: a fixed SVM screens one factor at a time inside outer-training data. Each objective retains the configured number of frequency counts and geometry masks plus its best impedance-threshold mask, then jointly tunes these with the screened preprocessing, selector and representation. Every candidate, failure and selection is recorded. Outer ablations assess the screened alternatives; incomplete ablation populations are withheld and identified in `unavailable_streams.json`. Results compare pipelines under the configured search budget, not a global optimum.
 
-**Final profile:** `configs/revision.json` has five outer/four inner folds, ten partitions, top-four frequency/mask choices, impedance quantiles 0.10/0.25/0.50/0.75/0.90 and cutoffs 20/40/60/80/100.000001%. SVM uses four kernels and seven C values (0.001 through 1000); LR uses the same C values. RF uses 100/300/800 trees, depth 8/16/unlimited and feature fractions 0.3/0.7/1.0. This is the default of `run_all.sh` and the sole active profile.
+**Final profile:** `configs/revision.json` has five outer/four inner folds, one partition (20 outer folds across four tasks), top-four frequency/mask choices, impedance quantiles 0.10/0.25/0.50/0.75/0.90 and cutoffs 40/60/80/100.000001%. SVM uses four kernels and seven C values (0.001 through 1000); LR uses the same C values. RF uses 100/300/800 trees, depth 8/16/unlimited and feature fractions 0.3/0.7/1.0. This is the default of `run_all.sh` and the sole active profile.
 
 The four objectives are macro AUC, accuracy, macro F1 and sensitivity. The binary sensitivity objective maximizes specificity subject to a **training** sensitivity target of 0.95. Multiclass sensitivity selection targets high-grade dysplasia recall. Specificity operating targets 0.80/0.90/0.95 and projected prevalences 0.10/0.20 are analysis assumptions, not validated clinical requirements. A held-out sensitivity below the training target is possible and must be reported.
 
@@ -73,6 +90,11 @@ Canonical pathology mapping is centralized in `revision/data.py`, follows the hi
 
 The last task combines OSCC/high-grade dysplasia/CIS against healthy/benign/mild dysplasia. Four other diagnoses remain excluded. The 60% cutoff retains 256 of 272 eligible sites: Healthy 90/100, Cancer 96/96, high-grade dysplasia 29/32, non-malignant 41/44. Including the four excluded diagnoses gives 260 retained sites, explaining the old table's apparent discrepancy.
 
+The author confirmed that high risk includes **moderate dysplasia through invasive
+carcinoma**, and low risk includes **healthy/normal, benign and mild dysplasia**.
+This retains the existing mapping. `classes.json` records the definition and
+`task_label_audit.csv` lists every source site, its raw pathology and inclusion.
+
 `Avg_Cutpats` is a supplied acquisition quality score. It is **not silently replaced** by NaN counts: the averaged spectra differ by more than one percentage point in 209/276 sites, with maximum absolute discrepancy 36.154 percentage points. Observed missing patterns are defined as patterns with at least one non-finite frequency. A direct source audit verifies that all 276 supplied quality scores equal the mean of per-test rejection percentages, and every exported spectrum equals the NaN-aware mean of the available test spectra. Averaging recovers coordinates absent from an individual test; the average test-mean NaN-pattern percentage also agrees with the recorded mean rejection score for every site. Exact within-burst filtering semantics remain unverified. Quality and missingness-only controls use explicit definitions and report both quantities.
 
 ## Leakage corrections and features
@@ -89,6 +111,42 @@ The last task combines OSCC/high-grade dysplasia/CIS against healthy/benign/mild
 - Saved frequency indices are actual zero-based coordinate identities and physical hertz. Subset-size rankings are stored separately, fixing the previous count-versus-frequency artifact mismatch. Outer summaries are reporting artifacts and are never loaded back into evaluation.
 
 ## Metrics, uncertainty and missing measurements
+
+The primary classification export is `classification_outputs.csv`: **AUC, F1,
+precision, SN (sensitivity), SP (specificity), PPV and NPV**, with 95% whole-patient
+bootstrap intervals. Binary summaries refer to the explicit positive class;
+multiclass summaries use macro one-versus-rest values and retain every class's
+results separately. Precision and PPV are identical. Undefined quantities remain
+undefined. Existing accuracy/calibration outputs and four selection objectives are
+retained; requesting more reporting metrics does not add searches.
+
+`revision/cv_statistics.py` exports each outer fold's scores, descriptive fold
+means/SDs and paired tuned-minus-baseline differences. Significance uses an
+approximate **Nadeau–Bengio corrected resampled test** with
+SE² = (1/n + mean(n_test_patients/n_train_patients)) × sample variance(d),
+Student t reference with n−1 degrees of freedom. The extension to grouped patients,
+unequal folds and nonlinear diagnostic metrics is approximate. A single five-fold
+partition gives limited information about training-partition variation.
+Any undefined/missing fold withholds that test; constant nonzero differences also
+withhold significance. Holm correction retains all scheduled hypotheses across
+tasks/models/objectives and six unique metrics (288 here). Precision/PPV share one
+hypothesis. Within-metric corrections are also exported. This follows
+[Bouckaert & Frank (2004), sections 3.2–3.3](https://ml.cms.waikato.ac.nz/publications/2004/bouckaert-frank.pdf).
+Whole-patient bootstrap CIs on frozen predictions remain separate from fold tests;
+conditional prediction permutation comparisons are supplementary.
+
+`fit_training_rules` centralizes training-only OOF calibration and threshold fitting
+for main and matched-control streams. Fits explicitly reject intersecting patient
+groups. Saved inner-fit and postprocessing site/patient provenance is checked by
+`revision-check`. Older checkpoints without this provenance require a fresh run.
+
+`revision/demographics.py` adds full and quality-retained population totals, raw
+pathology splits, sample counts per patient, mixed-class patients, categorical
+demographic counts, numeric distributions, missing-field inventories and individual
+patient group memberships for every outer/inner role. Patient counts are deduplicated
+within each stratum; patients can occur in several pathology/location strata.
+Unavailable age/sex/exposure fields remain missing; no clinical values are imputed
+for descriptive reporting. These reports never feed feature/model selection.
 
 `revision/metrics.py` and `revision/analysis.py` report per-class one-versus-rest AUC, sensitivity, specificity, PPV, NPV, F1, TP/FP/FN/TN; macro/micro summaries, balanced accuracy, Brier score, log loss, count/normalized confusion matrices and correctly aligned ROC curves. A missing reference class gives an undefined full-target macro AUC rather than silently reducing the class set. Dysplasia false-negative destinations are visible in the full confusion matrices.
 
@@ -113,7 +171,12 @@ Each output root contains `run_manifest.json`, `resolved_config.json`, `environm
 | Output | Purpose |
 |---|---|
 | `all_metrics.csv`, `BaselineResults.csv`, `FinalResults.csv` | Cross-task metrics and familiar baseline/tuned tables |
-| `paired_comparisons_holm.csv` | Paired patient-block comparisons with the full-family correction |
+| `classification_outputs.csv` | Requested diagnostic metrics and whole-patient bootstrap intervals |
+| `corrected_resampled_tests_holm.csv` | Approximate corrected outer-fold tests, full unique-metric and within-metric Holm adjustments |
+| `paired_comparisons_holm.csv` | Supplementary conditional patient-block prediction comparisons |
+| `TASK/outer_fold_metrics.csv`, `cv_metrics_summary.csv` | Per-fold metrics and descriptive mean/SD; no independent-fold confidence intervals |
+| `TASK/cv_comparison_fold_differences.csv` | Exact paired fold scores and scheduled train/test patient counts |
+| `TASK/cv_population_summary.csv`, `cv_pathology_breakdown.csv`, `cv_demographics_*.csv`, `cv_patient_groups.csv` | Detailed split populations, demographics and patient memberships |
 | `TASK/outer_predictions.csv`, `classes.json` | Every outer prediction, class order, raw/calibrated probabilities, abstentions and decisions |
 | `TASK/splits.json`, `selections.json` | Exact patient partitions, fitted feature identities, hyperparameters, thresholds, warnings and timing |
 | `TASK/split_population_counts.csv` | Class/location site and patient counts for every outer/inner partition and quality cutoff |
@@ -144,9 +207,9 @@ Detailed comment-by-comment actions and outstanding evidence are recorded in `ma
 |---|---|
 | R1 C1–3, C7–8, C21; R3 C1, C3 | Patient-nested fitting, train-only transforms, frozen masks and saved splits/identities |
 | R1 C4–5, C12–14 | Completeness/NaN audits, class/anatomy tables, missingness control, available covariates |
-| R1 C6, C9; R3 C3–4 | Six selectors, complex/ratio/circuit representations, ranking stability |
+| R1 C6, C9; R3 C3–4 | Four configured selectors, complex/ratio/circuit representations, ranking stability |
 | R1 C10, C15–16 | Patient weights/endpoints, per-class counts, dysplasia errors, macro/balanced metrics |
-| R1 C17–19 | Whole-patient conditional uncertainty, paired comparisons and Holm correction |
+| R1 C17–19 | Corrected paired outer-CV tests, whole-patient bootstrap uncertainty and Holm correction |
 | R1 C20–21, C26–27; R3 C2 | Verified feature identities, frozen impedance masks, measured software timing, electrode/drive counts |
 | R1 C24–25 | Available test-mean repeatability; contact controls and burst-level evidence remain unavailable |
 | R1 C30; R2 C3–5 | Combined referral task, sensitivity-aware tuning, calibration, PPV/NPV and decision curves |
@@ -159,7 +222,7 @@ The available-covariate comparison includes matched EIS-only LR (`covariate_eis_
 
 The older interrupted clinical run has a documented legacy input-inventory recovery and archived source history. It is preserved separately; the final expanded run starts afresh. New runs persist input hashes before fitting, verify cached extraction sidecars, and include the original MATLAB source and extraction manifest in the provenance inventory. A missing MATLAB file is an error for `run_all.sh`.
 
-Forest trees train on four threads; inference resets to one for fixed tree-order probability accumulation. Regression checks compare trees and probabilities against single-thread fitting. Two tasks may run concurrently, so fit timings describe that resource setting. All current binary reporting uses explicit positive-class metadata.
+Forest trees train on four threads; inference resets to one for fixed tree-order probability accumulation. Regression checks compare trees and probabilities against single-thread fitting. Up to 20 outer folds may run concurrently, so fit timings describe that resource setting. All current binary reporting uses explicit positive-class metadata.
 
 Deferred until the user returns with a completed clinical run and matched controls: update the paper and rebuttal using:
 

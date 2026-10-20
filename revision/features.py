@@ -340,7 +340,7 @@ class FeatureBuilder:
         )
 
 
-def make_model(candidate, seed):
+def make_model(candidate, seed, rf_jobs=4):
     import json
 
     c = candidate
@@ -352,9 +352,9 @@ def make_model(candidate, seed):
         return TrainingSpanLogisticRegression(max_iter=5000, **common, **params)
     if c.model == "rf":
         return (
-            RandomForestClassifier(n_estimators=100, n_jobs=4, **common, **params)
+            RandomForestClassifier(n_estimators=100, n_jobs=rf_jobs, **common, **params)
             if "n_estimators" not in params
-            else RandomForestClassifier(n_jobs=4, **common, **params)
+            else RandomForestClassifier(n_jobs=rf_jobs, **common, **params)
         )
     if c.model == "svm":
         # Patient-grouped OOF calibration is performed by the outer-training loop.

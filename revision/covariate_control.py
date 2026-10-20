@@ -6,18 +6,19 @@ import hashlib
 import json
 import numpy as np
 import pandas as pd
-from .features import Candidate, patient_weights
+from .features import Candidate
 from .pipeline import (
     group_splits,
     inner_evaluate,
     fit_predict,
-    OOFCalibrator,
+    fit_training_rules,
     write_json,
 )
-from .metrics import threshold_for_sensitivity, select_threshold
 
 
-def add_matched_control(dataset, task, config, outdir, predictions, selections):
+def add_matched_control(
+    dataset, task, config, outdir, predictions, selections, *, taskdir=None
+):
     """Reuse frozen outer-training-selected settings; never select on test outcomes.
 
     Combined LR uses C=1 with the selected EIS feature/preprocessing rule. Its
@@ -27,7 +28,7 @@ def add_matched_control(dataset, task, config, outdir, predictions, selections):
     source = [row for row in selections if row["stream"] == "covariate_combined"]
     if not source:
         return predictions, selections
-    folder = Path(outdir) / task
+    folder = Path(taskdir) if taskdir is not None else Path(outdir) / task
     indices, y, classes = dataset.task(task)
     config = {**config, "_class_names": list(classes)}
     groups = dataset.table.iloc[indices].patient_id.to_numpy()
@@ -81,25 +82,15 @@ def add_matched_control(dataset, task, config, outdir, predictions, selections):
         result = inner_evaluate(
             dataset, indices[tr], y[tr], candidate, inner, seed, config
         )
-        inner_p = result["predictions"]
-        good = np.isfinite(inner_p).all(axis=1)
-        calibrator = OOFCalibrator(config["calibration"]).fit(
-            y[tr][good], inner_p[good], groups[tr][good]
+        calibrator, threshold, operating, postprocessing = fit_training_rules(
+            result,
+            y[tr],
+            groups[tr],
+            samples[tr],
+            classes,
+            config,
+            test_groups=groups[te],
         )
-        cal_train = calibrator.transform(inner_p[good])
-        w = patient_weights(groups[tr])[good]
-        threshold = 0.5
-        operating = {}
-        if len(classes) == 2:
-            threshold = threshold_for_sensitivity(
-                y[tr][good], cal_train[:, 1], config["sensitivity_target"], w
-            )
-            operating = {
-                str(target): select_threshold(
-                    y[tr][good], cal_train[:, 1], target, "specificity", w
-                )
-                for target in config["specificity_targets"]
-            }
         raw, meta, _ = fit_predict(dataset, indices, y, candidate, tr, te, seed, config)
         covered = np.isfinite(raw).all(axis=1)
         cal = np.full_like(raw, np.nan)
@@ -117,6 +108,7 @@ def add_matched_control(dataset, task, config, outdir, predictions, selections):
                 evaluation=evaluation,
                 candidate=candidate.dictionary(),
                 inner_selection_objective=None,
+                inner_fit_provenance=result["metadata"],
                 calibration=config["calibration"],
                 sensitivity_threshold=(
                     threshold if np.isfinite(threshold) else str(threshold)
@@ -126,6 +118,7 @@ def add_matched_control(dataset, task, config, outdir, predictions, selections):
                     for key, value in operating.items()
                 },
                 source_version=source_version,
+                **postprocessing,
                 **meta,
             )
         )

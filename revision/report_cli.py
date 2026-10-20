@@ -63,7 +63,11 @@ def main(argv=None):
                 .to_string(index=False)
             )
     else:
-        path = root / "all_metrics.csv"
+        path = root / "classification_outputs.csv"
+        if not path.is_file():
+            path = (
+                root / "all_metrics.csv"
+            )  # historical runs before the explicit metric export
         if not path.is_file():
             print(f"{path} has not been generated.")
             return 2

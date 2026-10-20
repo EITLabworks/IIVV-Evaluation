@@ -18,6 +18,7 @@ from .features import (
     patient_weights,
 )
 from .metrics import scores, threshold_for_sensitivity, select_threshold
+from .data import RISK_DEFINITION
 
 
 def clean_json(value):
@@ -72,6 +73,10 @@ def group_splits(y, groups, folds, seed):
 def fit_predict(dataset, indices, y, candidate, train, test, seed, config):
     """Only training indices enter fit; quality failures in test are explicit abstentions."""
     groups = dataset.table.iloc[indices].patient_id.to_numpy()
+    if set(np.asarray(train)).intersection(np.asarray(test)) or set(
+        groups[train]
+    ).intersection(groups[test]):
+        raise ValueError("Fitting requires disjoint training/test sites and patients")
     quality = dataset.table.iloc[indices].missing_percent.to_numpy(float)
     tr = np.asarray(train)[quality[train] < candidate.cutoff]
     te = np.asarray(test)
@@ -191,7 +196,7 @@ def fit_predict(dataset, indices, y, candidate, train, test, seed, config):
             if candidate.stage == "covariate_only"
             else np.column_stack([xtrain, clinical_x])
         )
-    model = make_model(candidate, seed)
+    model = make_model(candidate, seed, rf_jobs=config.get("rf_jobs", 4))
     weights = (
         patient_weights(groups[tr]) if candidate.patient_weighted else np.ones(len(tr))
     )
@@ -441,17 +446,104 @@ class OOFCalibrator:
         )
 
 
-def run_task(dataset, task, config, outdir):
+def fit_training_rules(
+    result, y, groups, sample_ids, classes, config, *, test_groups=()
+):
+    """Freeze calibration and all operating thresholds before outer-test prediction.
+
+    Inputs are exclusively inner OOF predictions/outcomes of outer-training sites.
+    A shared helper keeps the main and matched-control paths under the same rules.
+    """
+    y, groups, sample_ids = np.asarray(y), np.asarray(groups), np.asarray(sample_ids)
+    inner_p = result["predictions"]
+    if len(inner_p) != len(y) or len(groups) != len(y) or len(sample_ids) != len(y):
+        raise ValueError(
+            "Training OOF probabilities, outcomes and identifiers must align"
+        )
+    if set(groups).intersection(test_groups):
+        raise ValueError("Calibration/threshold training contains outer-test patients")
+    good = np.isfinite(inner_p).all(axis=1)
+    if set(y[good]) != set(range(len(classes))):
+        raise ValueError("Training OOF calibration/threshold data lose a target class")
+    calibrator = OOFCalibrator(config["calibration"]).fit(
+        y[good], inner_p[good], groups[good]
+    )
+    calibrated = calibrator.transform(inner_p[good])
+    weights = patient_weights(groups)[good]
+    threshold, operating = 0.5, {}
+    if len(classes) == 2:
+        threshold = threshold_for_sensitivity(
+            y[good], calibrated[:, 1], config["sensitivity_target"], weights
+        )
+        operating = {
+            str(target): select_threshold(
+                y[good], calibrated[:, 1], target, "specificity", weights
+            )
+            for target in config["specificity_targets"]
+        }
+    provenance = dict(
+        postprocessing_fit_scope="inner OOF predictions from outer-training patients only",
+        postprocessing_fit_patient_ids=sorted(set(groups[good])),
+        postprocessing_fit_sample_ids=sample_ids[good].tolist(),
+        postprocessing_n_training_sites=int(good.sum()),
+    )
+    return calibrator, threshold, operating, provenance
+
+
+def task_outer_splits(dataset, task, config):
+    """One deterministic schedule shared by serial and parallel execution."""
+    indices, y, _ = dataset.task(task)
+    groups = dataset.table.iloc[indices].patient_id.to_numpy()
+    external = np.zeros(len(indices), bool)
+    if config.get("external_cohort_column"):
+        column = config["external_cohort_column"]
+        if column not in dataset.table:
+            raise ValueError(f"External cohort column {column} is absent")
+        external = (
+            dataset.table.iloc[indices][column]
+            .astype(str)
+            .isin(config["external_cohort_values"])
+            .to_numpy()
+        )
+        if set(groups[external]).intersection(groups[~external]):
+            raise ValueError(
+                "A patient occurs in both development and external cohorts"
+            )
+    dev = np.flatnonzero(~external)
+    outer = []
+    for repeat in range(config["outer_repeats"]):
+        for fold, (tr, te) in enumerate(
+            group_splits(
+                y[dev],
+                groups[dev],
+                config["outer_folds"],
+                config["seed"] + repeat * 1000,
+            )
+        ):
+            outer.append((repeat, fold, dev[tr], dev[te], "nested_cv"))
+    if external.any():
+        outer.append((0, 0, dev, np.flatnonzero(external), "external"))
+    return outer
+
+
+def run_task(dataset, task, config, outdir, *, taskdir=None):
     indices, y, classes = dataset.task(task)
     if not len(indices):
         raise ValueError(f"{task}: no sites with accepted explicit pathology labels")
     config = {**config, "_class_names": list(classes)}
     groups = dataset.table.iloc[indices].patient_id.to_numpy()
-    taskdir = Path(outdir) / task
+    taskdir = Path(taskdir) if taskdir is not None else Path(outdir) / task
     taskdir.mkdir(parents=True, exist_ok=True)
-    dataset.table.iloc[indices].assign(class_index=y).to_csv(
-        taskdir / "task_inclusion.csv", index=False
-    )
+    dataset.table.iloc[indices].assign(
+        class_index=y, task_class=[classes[v] for v in y]
+    ).to_csv(taskdir / "task_inclusion.csv", index=False)
+    label_audit = dataset.table.copy()
+    label_audit["included"] = False
+    label_audit["task_class"] = "Excluded"
+    label_audit.loc[label_audit.index[indices], "included"] = True
+    label_audit.loc[label_audit.index[indices], "task_class"] = [classes[v] for v in y]
+    label_audit["task"] = task
+    label_audit.to_csv(taskdir / "task_label_audit.csv", index=False)
     predictions, selections, splits_log, inner_rows, failures = [], [], [], [], []
     completed_folds = set()
     checkpoint_names = [
@@ -527,36 +619,12 @@ def run_task(dataset, task, config, outdir):
             f"{task}: reusing {len(completed_folds)} fully checkpointed outer folds; prior source versions retained",
             flush=True,
         )
-    # External cohorts are never used in folds, preprocessing, or candidate selection.
-    external = np.zeros(len(indices), bool)
-    if config.get("external_cohort_column"):
-        col = config["external_cohort_column"]
-        if col not in dataset.table:
-            raise ValueError(f"External cohort column {col} is absent")
-        external = (
-            dataset.table.iloc[indices][col]
-            .astype(str)
-            .isin(config["external_cohort_values"])
-            .to_numpy()
-        )
-        if set(groups[external]).intersection(groups[~external]):
-            raise ValueError(
-                "A patient occurs in both development and external cohorts"
-            )
-    dev = np.flatnonzero(~external)
-    outer = []
-    for repeat in range(config["outer_repeats"]):
-        for fold, (tr, te) in enumerate(
-            group_splits(
-                y[dev],
-                groups[dev],
-                config["outer_folds"],
-                config["seed"] + repeat * 1000,
-            )
-        ):
-            outer.append((repeat, fold, dev[tr], dev[te], "nested_cv"))
-    if external.any():
-        outer.append((0, 0, dev, np.flatnonzero(external), "external"))
+    outer = task_outer_splits(dataset, task, config)
+    if config.get("_fold_key") is not None:
+        requested = tuple(config["_fold_key"])
+        outer = [row for row in outer if (row[0], row[1], row[4]) == requested]
+        if len(outer) != 1:
+            raise ValueError(f"Unknown or duplicate outer fold: {requested}")
     for repeat, fold, tr, te, evaluation in outer:
         fold_name = f"{evaluation}_repeat{repeat}_fold{fold}"
         if (repeat, fold, evaluation) in completed_folds:
@@ -582,6 +650,12 @@ def run_task(dataset, task, config, outdir):
                 dict(
                     train_patients=sorted(set(groups[tr][a])),
                     validation_patients=sorted(set(groups[tr][b])),
+                    train_sample_ids=dataset.table.iloc[
+                        train_indices[a]
+                    ].sample_id.tolist(),
+                    validation_sample_ids=dataset.table.iloc[
+                        train_indices[b]
+                    ].sample_id.tolist(),
                 )
                 for a, b in inner
             ],
@@ -593,10 +667,11 @@ def run_task(dataset, task, config, outdir):
         def evaluate(candidate):
             if candidate not in cache:
                 started = time.perf_counter()
-                print(
-                    f'{task}/{fold_name}: inner {len(cache)+1}: {candidate.stage}/{candidate.model}, frequencies={candidate.n_freq or "all"}, mask={candidate.mask}',
-                    flush=True,
-                )
+                if config.get("verbose_candidates", False):
+                    print(
+                        f'{task}/{fold_name}: inner {len(cache)+1}: {candidate.stage}/{candidate.model}, frequencies={candidate.n_freq or "all"}, mask={candidate.mask}',
+                        flush=True,
+                    )
                 try:
                     value = inner_evaluate(
                         dataset, train_indices, train_y, candidate, inner, seed, config
@@ -628,10 +703,16 @@ def run_task(dataset, task, config, outdir):
                         )
                     )
                     cache[candidate] = None
-                print(
-                    f"{task}/{fold_name}: inner completed in {time.perf_counter()-started:.2f}s",
-                    flush=True,
-                )
+                if config.get("verbose_candidates", False):
+                    print(
+                        f"{task}/{fold_name}: inner completed in {time.perf_counter()-started:.2f}s",
+                        flush=True,
+                    )
+                elif len(cache) % 250 == 0:
+                    print(
+                        f"{task}/{fold_name}: {len(cache)} candidates completed",
+                        flush=True,
+                    )
             return cache[candidate]
 
         screened = [
@@ -718,25 +799,17 @@ def run_task(dataset, task, config, outdir):
         outer_cache = {}
         for stream, (result, objective, model_name) in streams.items():
             candidate = result["candidate"]
-            inner_p = result["predictions"]
-            good = np.isfinite(inner_p).all(axis=1)
-            calibrator = OOFCalibrator(config["calibration"]).fit(
-                train_y[good], inner_p[good], groups[tr][good]
-            )
-            cal_train = calibrator.transform(inner_p[good])
-            w = patient_weights(groups[tr])[good]
-            sensitivity_threshold = 0.5
-            operating = {}
-            if len(classes) == 2:
-                sensitivity_threshold = threshold_for_sensitivity(
-                    train_y[good], cal_train[:, 1], config["sensitivity_target"], w
+            calibrator, sensitivity_threshold, operating, postprocessing = (
+                fit_training_rules(
+                    result,
+                    train_y,
+                    groups[tr],
+                    dataset.table.iloc[train_indices].sample_id.to_numpy(),
+                    classes,
+                    config,
+                    test_groups=groups[te],
                 )
-                operating = {
-                    str(target): select_threshold(
-                        train_y[good], cal_train[:, 1], target, "specificity", w
-                    )
-                    for target in config["specificity_targets"]
-                }
+            )
             if candidate not in outer_cache:
                 outer_cache[candidate] = fit_predict(
                     dataset, indices, y, candidate, tr, te, seed, config
@@ -761,6 +834,7 @@ def run_task(dataset, task, config, outdir):
                 evaluation=evaluation,
                 candidate=candidate.dictionary(),
                 inner_selection_objective=result["objectives"].get(objective),
+                inner_fit_provenance=result["metadata"],
                 calibration=config["calibration"],
                 sensitivity_threshold=(
                     str(sensitivity_threshold)
@@ -771,6 +845,7 @@ def run_task(dataset, task, config, outdir):
                     key: str(val) if not np.isfinite(val) else val
                     for key, val in operating.items()
                 },
+                **postprocessing,
                 **meta,
             )
             selections.append(selection)
@@ -826,6 +901,7 @@ def run_task(dataset, task, config, outdir):
         pd.DataFrame(predictions).to_csv(taskdir / "outer_predictions.csv", index=False)
         pd.DataFrame(inner_rows).to_csv(taskdir / "inner_search.csv", index=False)
         config.pop("_feature_cache", None)
+        print(f"{task}: {fold_name} completed ({len(cache)} candidates)", flush=True)
         # Do not retain all inner OOF arrays beyond this outer fold.
     write_json(
         taskdir / "classes.json",
@@ -833,6 +909,11 @@ def run_task(dataset, task, config, outdir):
             classes=list(classes),
             positive_class=classes[1] if len(classes) == 2 else None,
             probability_columns={f"p_{k}": v for k, v in enumerate(classes)},
+            task_definition=(
+                RISK_DEFINITION
+                if task == "highrisk_vs_lowrisk"
+                else "See task_label_audit.csv"
+            ),
         ),
     )
     return pd.DataFrame(predictions), selections

@@ -16,6 +16,7 @@ from .metrics import (
     prevalence_table,
     paired_cluster_comparison,
     holm,
+    classification_rows,
 )
 from .pipeline import write_json
 
@@ -231,6 +232,7 @@ def report_task(dataset, task, predictions, selections, config, outdir):
     k = len(classes)
     folder = Path(outdir) / task
     reports, class_reports, comparisons = [], [], []
+    classification_reports = []
     pooled = {}
     unavailable = []
     split_records = json.loads((folder / "splits.json").read_text())
@@ -368,6 +370,38 @@ def report_task(dataset, task, predictions, selections, config, outdir):
                 folder / f"{prefix}_{unit}_per_class_confidence_intervals.csv",
                 index=False,
             )
+            report_identity = dict(
+                task=task,
+                stream=stream,
+                evaluation=evaluation,
+                unit=unit,
+                coverage=row["coverage"],
+                n_sites=len(data),
+                n_covered=len(c),
+                n_patients=data.patient_id.nunique(),
+            )
+            for value in classification_rows(metrics, boot):
+                classification_reports.append(
+                    dict(
+                        **report_identity,
+                        scope="positive_class" if k == 2 else "macro_ovr",
+                        class_name=(
+                            classes[1] if k == 2 else "Macro (all target classes)"
+                        ),
+                        **value,
+                    )
+                )
+            for value in pc.to_dict("records"):
+                intervals = class_boot[class_boot.class_index == value["class_index"]]
+                for metric_row in classification_rows(value, intervals):
+                    classification_reports.append(
+                        dict(
+                            **report_identity,
+                            scope="per_class_ovr",
+                            class_name=value["class_name"],
+                            **metric_row,
+                        )
+                    )
             if unit == "site":
                 prevalence_table(pc, config["prevalences"]).assign(
                     class_name=lambda d: d.class_index.map(dict(enumerate(classes)))
@@ -498,6 +532,9 @@ def report_task(dataset, task, predictions, selections, config, outdir):
     write_json(folder / "unavailable_streams.json", unavailable)
     summary = pd.DataFrame(reports)
     summary.to_csv(folder / "metrics_summary.csv", index=False)
+    pd.DataFrame(classification_reports).to_csv(
+        folder / "classification_outputs.csv", index=False
+    )
     if class_reports:
         pd.concat(class_reports).to_csv(folder / "per_class_metrics.csv", index=False)
     # Site/location-stratified results use the SAME untouched outer predictions.
@@ -534,6 +571,14 @@ def report_task(dataset, task, predictions, selections, config, outdir):
     export_search.plots = config.get("plots", True)
     export_search(folder, selections, dataset, task)
     export_split_populations(folder, dataset, task, config)
+    from .demographics import export_cv_demographics
+    from .cv_statistics import export_cv_statistics
+
+    export_cv_demographics(folder, dataset, task, config)
+    export_cv_statistics(predictions, split_records, classes, config, folder)
+    pd.DataFrame(comparisons).to_csv(
+        folder / "prediction_permutation_comparisons.csv", index=False
+    )
     return summary, pd.DataFrame(comparisons)
 
 

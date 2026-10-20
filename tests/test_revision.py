@@ -178,8 +178,239 @@ def test_named_binary_metrics_do_not_swap_sensitivity_and_specificity():
     assert m["specificity"] == pytest.approx(0.5)
     assert m["npv"] == pytest.approx(1 / 3)
     assert m["precision"] == pytest.approx(0.5)
+    assert m["ppv"] == m["precision"]
     assert cm.tolist() == [[1, 1], [2, 1]]
     assert m["brier"] == pytest.approx(np.mean((p[:, 1] - y) ** 2))
+
+
+def test_requested_multiclass_outputs_are_macro_ovr_with_precision_ppv_alias():
+    from revision.metrics import CLASSIFICATION_METRICS
+
+    y = np.array([0, 0, 1, 1, 2, 2])
+    p = np.array(
+        [
+            [0.8, 0.1, 0.1],
+            [0.1, 0.7, 0.2],
+            [0.2, 0.6, 0.2],
+            [0.1, 0.7, 0.2],
+            [0.3, 0.1, 0.6],
+            [0.6, 0.1, 0.3],
+        ]
+    )
+    summary, perclass, _ = scores(y, p)
+    assert set(CLASSIFICATION_METRICS) <= set(summary)
+    for metric in (
+        "auc",
+        "f1",
+        "precision",
+        "sensitivity",
+        "specificity",
+        "ppv",
+        "npv",
+    ):
+        assert summary[metric] == pytest.approx(perclass[metric].mean())
+    np.testing.assert_array_equal(perclass.ppv, perclass.precision)
+
+
+def test_corrected_cv_test_uses_overlap_and_patient_split_ratio():
+    from scipy.stats import t
+    from revision.metrics import corrected_resampled_test
+
+    result = corrected_resampled_test([0.1, 0.2, -0.1, 0.3, 0], [80] * 5, [20] * 5)
+    assert result["mean_difference"] == pytest.approx(0.1)
+    assert result["sample_variance"] == pytest.approx(0.025)
+    assert result["corrected_se"] == pytest.approx(np.sqrt(0.01125))
+    assert result["degrees_of_freedom"] == 4
+    assert result["p_value"] == pytest.approx(2 * t.sf(0.1 / np.sqrt(0.01125), 4))
+    assert result["corrected_se"] > np.sqrt(0.025 / 5)
+
+
+def test_corrected_cv_test_withholds_partial_and_degenerate_nonzero_comparisons():
+    from revision.metrics import corrected_resampled_test
+
+    assert np.isnan(
+        corrected_resampled_test([0.1, np.nan, 0.2], [80] * 3, [20] * 3)["p_value"]
+    )
+    assert np.isnan(corrected_resampled_test([0.1] * 5, [80] * 5, [20] * 5)["p_value"])
+    assert corrected_resampled_test([0] * 5, [80] * 5, [20] * 5)["p_value"] == 1
+
+
+def test_postprocessing_refuses_outer_test_patients_before_fitting():
+    from revision.pipeline import fit_training_rules
+
+    with pytest.raises(ValueError, match="outer-test patients"):
+        fit_training_rules(
+            {"predictions": np.array([[0.8, 0.2], [0.2, 0.8]])},
+            np.array([0, 1]),
+            np.array(["p1", "p2"]),
+            ["s1", "s2"],
+            ["Low", "High"],
+            {"calibration": True},
+            test_groups=["p2"],
+        )
+
+
+def test_outer_fold_worker_count_respects_scheduler_cpu_budget(monkeypatch):
+    import revision.parallel as parallel
+
+    monkeypatch.setattr(parallel.os, "sched_getaffinity", lambda _: set(range(256)))
+    monkeypatch.setenv("SLURM_CPUS_PER_TASK", "16")
+    monkeypatch.delenv("PBS_NP", raising=False)
+    monkeypatch.delenv("NSLOTS", raising=False)
+    monkeypatch.setattr(parallel.Path, "is_file", lambda _: False)
+    assert parallel.worker_count(20, 20, 4) == 4
+    assert parallel.worker_count(20, 2, 4) == 2
+
+
+def test_serial_and_parallel_outer_folds_and_resume_preserve_predictions(
+    tmp_path, monkeypatch
+):
+    import multiprocessing
+    from run_revision import main
+    import revision.parallel as parallel
+
+    if "fork" not in multiprocessing.get_all_start_methods():
+        pytest.skip("Outer-fold process parity requires fork")
+    # Two tiny LR workers exercise actual process isolation even on a quota-limited CI host.
+    monkeypatch.setattr(
+        parallel,
+        "worker_count",
+        lambda requested, jobs, threads=1: min(requested, jobs),
+    )
+    common = [
+        "--synthetic",
+        "--tasks",
+        "healthy_vs_cancer",
+        "--models",
+        "lr",
+        "--objectives",
+        "auc",
+        "--bootstrap-samples",
+        "2",
+        "--no-plots",
+        "--rf-jobs",
+        "1",
+    ]
+    serial, concurrent = tmp_path / "serial", tmp_path / "parallel"
+    assert main([*common, "--fold-workers", "1", "--output", str(serial)]) == 0
+    assert main([*common, "--fold-workers", "2", "--output", str(concurrent)]) == 0
+
+    def predictions(root):
+        frame = pd.read_csv(root / "healthy_vs_cancer/outer_predictions.csv")
+        return frame.sort_values(
+            ["repeat", "outer_fold", "stream", "sample_id"]
+        ).reset_index(drop=True)
+
+    pd.testing.assert_frame_equal(
+        predictions(serial),
+        predictions(concurrent),
+        check_exact=False,
+        atol=1e-12,
+        rtol=1e-12,
+    )
+    checkpoints = sorted(
+        (concurrent / "fold-checkpoints/healthy_vs_cancer").glob("*/complete.json")
+    )
+    assert len(checkpoints) == 3
+    original = {path: path.read_bytes() for path in checkpoints[1:]}
+    checkpoints[0].unlink()
+    (checkpoints[0].parent / "outer_predictions.csv").unlink()
+    manifest = json.loads((concurrent / "run_manifest.json").read_text())
+    manifest["status"] = "interrupted"
+    (concurrent / "run_manifest.json").write_text(json.dumps(manifest))
+    assert (
+        main([*common, "--fold-workers", "2", "--output", str(concurrent), "--resume"])
+        == 0
+    )
+    pd.testing.assert_frame_equal(
+        predictions(serial),
+        predictions(concurrent),
+        check_exact=False,
+        atol=1e-12,
+        rtol=1e-12,
+    )
+    assert all(path.read_bytes() == value for path, value in original.items())
+    from revision.verification import verify_results
+
+    assert verify_results(concurrent)["checked_outer_folds"] == 3
+
+
+def test_cv_statistics_keep_scheduled_pairs_and_precision_ppv_one_hypothesis(tmp_path):
+    from revision.cv_statistics import export_cv_statistics, combine_corrected_tests
+
+    folder = tmp_path / "healthy_vs_cancer"
+    folder.mkdir()
+    rows, splits = [], []
+    patients = [f"p{i}" for i in range(20)]
+    samples = [f"s{i}" for i in range(20)]
+    for fold in range(5):
+        test = list(range(fold * 4, fold * 4 + 4))
+        train = sorted(set(range(20)) - set(test))
+        splits.append(
+            dict(
+                evaluation="nested_cv",
+                repeat=0,
+                outer_fold=fold,
+                train_patients=[patients[i] for i in train],
+                test_patients=[patients[i] for i in test],
+                train_sample_ids=[samples[i] for i in train],
+                test_sample_ids=[samples[i] for i in test],
+            )
+        )
+        for stream in ("baseline_lr", "auc_lr"):
+            for i in test:
+                truth = i % 2
+                rows.append(
+                    dict(
+                        stream=stream,
+                        evaluation="nested_cv",
+                        repeat=0,
+                        outer_fold=fold,
+                        sample_id=samples[i],
+                        patient_id=patients[i],
+                        y_true=truth,
+                        y_pred=truth,
+                        covered=True,
+                        p_0=0.1 if truth else 0.9,
+                        p_1=0.9 if truth else 0.1,
+                    )
+                )
+    config = {"models": ["lr"], "objectives": ["auc"]}
+    frame = pd.DataFrame(rows)
+    result = export_cv_statistics(frame, splits, ["Healthy", "Cancer"], config, folder)
+    assert len(result) == 7
+    assert result.n_scheduled_folds.eq(5).all()
+    assert result.p_value.eq(1).all()
+    adjusted = combine_corrected_tests(tmp_path, [folder.name])
+    assert adjusted.n_unique_hypotheses.eq(6).all()
+    assert adjusted.p_holm_all_unique_metrics.eq(1).all()
+    # Missing common coverage in one fold must not produce a four-fold test.
+    frame.loc[(frame.outer_fold == 2) & (frame.stream == "baseline_lr"), "covered"] = (
+        False
+    )
+    result = export_cv_statistics(frame, splits, ["Healthy", "Cancer"], config, folder)
+    assert result.n_valid_folds.eq(4).all()
+    assert result.p_value.isna().all()
+
+
+def test_confirmed_risk_groups_retain_moderate_and_benign(dataset):
+    from revision.data import PATHOLOGY, RISK_CLASS
+
+    expected = {
+        "healthy": "Low risk",
+        "normal": "Low risk",
+        "benign": "Low risk",
+        "mild dysplasia": "Low risk",
+        "moderate dysplasia": "High risk",
+        "severe dysplasia": "High risk",
+        "cis": "High risk",
+        "invasive carcinoma": "High risk",
+    }
+    for raw, label in expected.items():
+        assert RISK_CLASS[PATHOLOGY[raw]] == label
+    indices, y, classes = dataset.task("highrisk_vs_lowrisk")
+    assert classes == ("Low risk", "High risk")
+    assert set(y) == {0, 1}
 
 
 def test_macro_auc_is_undefined_when_a_target_class_is_missing():
@@ -606,6 +837,25 @@ def test_fold_population_counts_preserve_classes_sites_and_quality(dataset, tmp_
     assert test.n_retained_sites.sum() == sum(
         dataset.table.iloc[ix[te]].missing_percent < 60
     )
+    # Detailed reports preserve patients as clusters and raw pathology strata.
+    from revision.demographics import export_cv_demographics
+
+    export_cv_demographics(
+        tmp_path, dataset, "MC", {"cutoffs": [10, 60], "default_cutoff": 60}
+    )
+    detail = pd.read_csv(tmp_path / "cv_population_summary.csv")
+    detail = detail[
+        (detail.partition == "outer_test") & (detail.population == "unfiltered")
+    ]
+    assert detail.n_samples.iloc[0] == len(te)
+    assert detail.n_patients.iloc[0] == len(set(groups[te]))
+    raw = pd.read_csv(tmp_path / "cv_pathology_breakdown.csv")
+    raw = raw[(raw.partition == "outer_test") & (raw.population == "unfiltered")]
+    assert raw.n_samples.sum() == len(te)
+    availability = pd.read_csv(tmp_path / "cv_demographics_availability.csv")
+    assert not availability[
+        availability.variable == "smoking"
+    ].available_in_source.any()
 
 
 def test_per_class_cluster_intervals_keep_explicit_class_identity():

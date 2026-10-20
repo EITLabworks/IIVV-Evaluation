@@ -78,6 +78,17 @@ def parse_args(argv=None):
     p.add_argument("--inner-folds", type=int)
     p.add_argument("--bootstrap-samples", type=int)
     p.add_argument(
+        "--fold-workers",
+        type=int,
+        help="Parallel outer folds; 0 uses task-level execution",
+    )
+    p.add_argument(
+        "--rf-jobs", type=int, help="Tree-training threads per random forest"
+    )
+    p.add_argument(
+        "--blas-threads", type=int, help="BLAS/OpenMP threads per fold worker"
+    )
+    p.add_argument(
         "--resume",
         action="store_true",
         help="Resume fully checkpointed folds with unchanged configuration/input hashes; source versions are archived",
@@ -166,6 +177,7 @@ def runtime_manifest(args, config):
         "matplotlib",
         "Pillow",
         "joblib",
+        "threadpoolctl",
         "h5py",
     ]:
         try:
@@ -190,6 +202,7 @@ def runtime_manifest(args, config):
         git_revision = None
     return dict(
         status="running",
+        reporting_protocol_version=1,
         started_utc=datetime.now(timezone.utc).isoformat(),
         arguments=vars(args),
         config=config,
@@ -219,6 +232,7 @@ def runtime_manifest(args, config):
             "CPU scikit-learn is the reference implementation; no GPU calibration differences.",
             "Inner searches select configurations; outer outcomes are used only for assessment.",
             "Patient bootstrap/permutation inference is conditional on fitted outer predictions, not full model refitting.",
+            "CV significance uses approximate corrected resampled paired outer-fold tests; patient-bootstrap intervals remain separate.",
             "Clinical sensitivity/specificity targets are analysis assumptions, not validated safety requirements.",
         ],
     )
@@ -232,6 +246,11 @@ def validate_config(config):
             raise ValueError(f"{key} must be >=2")
     if int(config.get("task_workers", 1)) < 1:
         raise ValueError("task_workers must be positive")
+    if int(config.get("fold_workers", 0)) < 0:
+        raise ValueError("fold_workers must be >=0")
+    for key in ("rf_jobs", "blas_threads"):
+        if int(config.get(key, 1)) < 1:
+            raise ValueError(f"{key} must be positive")
     for key in ["outer_repeats", "bootstrap_samples", "permutation_samples", "top_k"]:
         if config[key] < 1:
             raise ValueError(f"{key} must be >=1")
@@ -317,6 +336,9 @@ def main(argv=None):
         "outer_folds",
         "inner_folds",
         "bootstrap_samples",
+        "fold_workers",
+        "rf_jobs",
+        "blas_threads",
     ]:
         value = getattr(args, key, None)
         if value is not None:
@@ -360,6 +382,8 @@ def main(argv=None):
             outer_folds=3,
             inner_folds=2,
             outer_repeats=1,
+            fold_workers=args.fold_workers if args.fold_workers is not None else 0,
+            task_workers=1,
             top_k=1,
             frequency_counts=[1, 3, 8],
             models=args.models or ["lr"],
@@ -387,6 +411,13 @@ def main(argv=None):
     validate_config(config)
     if previous_manifest is not None and previous_manifest.get("config") != config:
         raise ValueError("Resume requires the identical resolved configuration")
+    if (
+        previous_manifest is not None
+        and previous_manifest.get("reporting_protocol_version") != 1
+    ):
+        raise ValueError(
+            "Older checkpoints lack training-scope/statistical provenance; use a fresh output directory"
+        )
     manifest = runtime_manifest(args, config)
     if previous_manifest is not None:
         # A failed resume must keep the inventory governing existing checkpoints.
@@ -641,7 +672,13 @@ def main(argv=None):
             ),
         }
         workers = min(int(config.get("task_workers", 1)), len(config["tasks"]))
-        if workers > 1:
+        if config.get("fold_workers", 0) > 0:
+            from revision.parallel import run_parallel
+
+            all_summaries, all_comparisons = run_parallel(
+                dataset, execution_config, output
+            )
+        elif workers > 1:
             import multiprocessing
             from concurrent.futures import ProcessPoolExecutor
 
@@ -687,6 +724,16 @@ def main(argv=None):
                 all_comparisons.append(comparison)
         summary = pd.concat(all_summaries, ignore_index=True)
         summary.to_csv(output / "all_metrics.csv", index=False)
+        pd.concat(
+            [
+                pd.read_csv(output / task / "classification_outputs.csv")
+                for task in config["tasks"]
+            ],
+            ignore_index=True,
+        ).to_csv(output / "classification_outputs.csv", index=False)
+        from revision.cv_statistics import combine_corrected_tests
+
+        combine_corrected_tests(output, config["tasks"])
         # Familiar table names with explicit nested evaluation provenance and class semantics.
         summary[summary.stream.str.startswith("baseline_")].to_csv(
             output / "BaselineResults.csv", index=False
@@ -714,6 +761,13 @@ def main(argv=None):
             for task in config["tasks"]
         )
         statuses["completed_task_populations"] = config["tasks"]
+        statuses["cv_statistics"] = {
+            "test": "approximate Nadeau-Bengio corrected resampled paired outer-fold t test",
+            "artifact": "corrected_resampled_tests_holm.csv",
+            "multiple_testing": "Holm across all tasks/models/objectives and six unique metrics; PPV aliases precision",
+            "confidence_intervals": "whole-patient bootstrap of frozen outer predictions",
+            "supplementary": "paired_comparisons_holm.csv retains conditional patient-block prediction permutations",
+        }
         statuses["real_patient_reanalysis_completed"] = not args.synthetic
         write_json(output / "analysis_status.json", statuses)
         manifest["matched_covariate_control_completed"] = all(
