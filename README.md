@@ -73,14 +73,28 @@ All committed notebooks have empty outputs and unexecuted cells.
 | Notebook | Purpose |
 |---|---|
 | [Revision-Evaluation.ipynb](Revision-Evaluation.ipynb) | Canonical test/preflight/evaluation/check commands, with execution switches disabled by default |
+| [Revision-Snapshot.ipynb](Revision-Snapshot.ipynb) | Ongoing-run snapshots: saved cohort/quality/repeatability evidence and hash-verified completed-fold partition audits; no fitting or aggregate classifier inference |
 | [mat-to-npz.ipynb](mat-to-npz.ipynb) | Saved source/export alignment, centralized labels, metadata availability, quality, anatomy and test-mean repeatability audits |
 | [Figures-and-Tables.ipynb](Figures-and-Tables.ipynb) | Completed outer results for all reviewer analyses, clinical metrics, dysplasia errors, ablations, uncertainty, matched controls, identities, timing and figures |
 
-The two reporting notebooks read existing artifacts without fitting models or
-changing result files. Run preflight before the source notebook; run evaluation and
+The reporting notebooks read existing artifacts without fitting models or
+changing primary result files. Run preflight before the source notebook; run evaluation and
 completion checks before the figure notebook. The historical conversion code and
 notebook outputs remain available in Git history. Patient identifiers may appear
 when notebooks are executed; keep those copies under the study's access conditions.
+
+For copied outputs from an ongoing server run:
+
+```sh
+source ./setup_environment.sh
+IIVV_SNAPSHOT=results/revision-server-snapshot jupyter lab Revision-Snapshot.ipynb
+```
+
+Run its cells in order. It verifies completion-marker hashes and writes derived CSV,
+PNG and PDF files under `results/revision-snapshot-analysis/<snapshot-hash>/`.
+Cohort audits cover their recorded source population; completed-fold tables remain
+preliminary. No final AUC/F1/SN/SP/PPV/NPV, CV tests, bootstrap recomputation or
+manuscript import is performed. Existing completed-run notebook guards remain intact.
 
 ## Result inspection
 

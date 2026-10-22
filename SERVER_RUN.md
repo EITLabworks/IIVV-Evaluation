@@ -128,6 +128,27 @@ Do not resume this full experiment using the older clinical profile. For a
 different fresh output name, supply `REVISION_OUTPUT=results/NAME` consistently
 to evaluation, resume and check targets.
 
+### Inspect a copied snapshot while the server continues
+
+Use `Revision-Snapshot.ipynb` for the transferred `quality/`, `repeatability/`,
+manifest/execution files and completed `fold-checkpoints/` folders. On the local host:
+
+```sh
+source ./setup_environment.sh
+IIVV_SNAPSHOT=results/revision-server-snapshot jupyter lab Revision-Snapshot.ipynb
+```
+
+Run cells in order. Completion hashes, patient boundaries and fitting provenance
+are checked before fold-derived tables are used. Saved cohort, quality and
+test-mean repeatability audits can already support reviewer responses. Derived
+CSVs and PDF/PNG figures go to `results/revision-snapshot-analysis/<snapshot-hash>/`.
+There is no fitting, threshold tuning, bootstrap recomputation, aggregate classifier
+performance or significance testing on partial folds. Copying only the quickest
+folds is not a valid overall performance estimate. Recopy new completed folds and
+rerun to refresh the evidence. If the run was resumed, also copy its
+`resume-parent-*.json` manifests for checkpoint source-provenance verification.
+Keep the final-result notebook completion guards and the original run status.
+
 ## 4. Verify and return the results
 
 ```sh
