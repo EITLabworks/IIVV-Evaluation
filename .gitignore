@@ -3,6 +3,7 @@
 /source/
 /manuscript/
 /templates/
+/archive/
 
 # Local paper/response sources and LaTeX generation tools
 /manuscript.mk
@@ -27,7 +28,7 @@ latexmkrc
 *.fls
 *.synctex.gz
 *.run.xml
-
+Evaluationsablauf.txt
 # Generated results, logs and local environments (tracked historical files remain)
 /results/
 /logs/
