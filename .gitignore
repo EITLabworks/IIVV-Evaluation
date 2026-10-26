@@ -29,6 +29,7 @@ latexmkrc
 *.synctex.gz
 *.run.xml
 Evaluationsablauf.txt
+README-Evaluation.md
 # Generated results, logs and local environments (tracked historical files remain)
 /results/
 /logs/
