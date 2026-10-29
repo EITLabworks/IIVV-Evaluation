@@ -149,6 +149,62 @@ rerun to refresh the evidence. If the run was resumed, also copy its
 `resume-parent-*.json` manifests for checkpoint source-provenance verification.
 Keep the final-result notebook completion guards and the original run status.
 
+### Diagnose slow folds without fitting
+
+Copy `scripts/diagnose_revision.py` to the server checkout without restarting the
+run or changing its seed/configuration. This standard-library tool only reads
+logs and hash-checks saved complete-fold artifacts; it imports no evaluation
+modules, fits no models, and writes no results:
+
+```sh
+python scripts/diagnose_revision.py \
+  --results-dir results/revision-expanded \
+  --log logs/revision-expanded.log \
+  --folds MC:0:2 healthy_vs_cancer:0:4
+```
+
+The final output lists measured complete-fold wall times (minimum/median/maximum),
+last logged candidate counts, run age and thread settings. Saved outer-fit times
+and warnings describe those configurations, not the inner search. Fits reused
+across objectives are counted once. Incomplete-fold start times and timed candidate
+progress are absent, so remaining time cannot be reliably calculated. A copied
+log's modification time is not a fold-progress timestamp.
+
+Inspect the current candidate without another fit by finding active worker PIDs:
+
+```sh
+ps -u "$USER" -o pid,ppid,stat,pcpu,etime,time,comm --sort=-pcpu
+```
+
+If `py-spy` is available, replace `12345` with an active worker PID, then take two
+stack dumps a few minutes apart, or inspect its live profile:
+
+```sh
+py-spy dump --pid 12345 --locals
+py-spy top --pid 12345 --native
+```
+
+`run_task`/`inner_evaluate`/`fit_predict` frames can expose the task, fold and
+candidate. `_libsvm` suggests SVM optimization, `_lbfgsb` LR, tree-building functions
+RF, and preprocessing/least-squares frames feature preparation. Repeated samples
+in one function suggest an expensive step, not proof of a deadlock. Attaching
+does not launch training, but stack collection can briefly pause the process.
+Linux may require administrator permission to attach. See the
+[py-spy documentation](https://github.com/benfred/py-spy#dump).
+
+SVM currently has no explicit iteration cap; classifier LR has `max_iter=5000`.
+Inner convergence warnings are caught but not retained in the inner-search
+export. `candidate_failures.json` records exceptions, not convergence warnings;
+an empty failure list therefore does not rule out slow/nonconverged fits.
+Changing the global seed changes patient partitions and prevents combining those
+folds with the existing 18; changing solver limits changes the protocol.
+
+Optional server checks of this diagnostic tool only (no model imports/fits):
+
+```sh
+python -m unittest discover -s tests -p test_diagnose_revision.py
+```
+
 ## 4. Verify and return the results
 
 ```sh
