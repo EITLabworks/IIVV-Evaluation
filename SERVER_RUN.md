@@ -111,6 +111,32 @@ than resuming earlier task-only runs. Example:
 make revision-evaluation REVISION_OUTPUT=results/revision-parallel > logs/revision-parallel.log 2>&1
 ```
 
+#### Optional independent run with another seed
+
+`configs/revision-seed-20261029.json` differs from the original configuration
+only in `seed` (20261029 instead of 1729). It starts a full independent 20-fold
+evaluation, not a replacement for the two unfinished folds. Keep all its outputs
+separate; patient partitions differ, so its folds cannot complete the original
+18-fold set. A different seed has no guaranteed runtime advantage. Treat this as
+an additional partition; do not choose which partition to report by runtime or
+observed classification scores. Concurrent runs also compete for CPU and RAM.
+
+In an activated environment, inside a persistent server session:
+
+```sh
+mkdir -p logs
+make revision-evaluation \
+  REVISION_CONFIG=configs/revision-seed-20261029.json \
+  REVISION_OUTPUT=results/revision-seed-20261029 \
+  > logs/revision-seed-20261029.log 2>&1
+```
+
+Use an unused output directory. After completion:
+
+```sh
+make revision-check REVISION_OUTPUT=results/revision-seed-20261029
+```
+
 The log reports fold start/completion and every 250 candidates, rather than two
 lines per candidate. Set `verbose_candidates: true` in the config for detailed
 candidate timings. Every candidate's scores/failures remain archived regardless
