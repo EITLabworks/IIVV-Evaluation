@@ -12,8 +12,8 @@ export OMP_NUM_THREADS="${OMP_NUM_THREADS:-1}"
 export OPENBLAS_NUM_THREADS="${OPENBLAS_NUM_THREADS:-1}"
 export MKL_NUM_THREADS="${MKL_NUM_THREADS:-1}"
 
-# Use the operating system's allowed CPUs by default (also works on non-Linux hosts).
-# Set CPUSET explicitly to restrict affinity, e.g. CPUSET=0-7 ./run_all.sh ...
+# run_all.sh defaults to CPUSET=224-255; direct invocation uses allowed CPUs if unset.
+# Override affinity explicitly, e.g. CPUSET=0-7 ./run_all.sh ...
 if [[ -n "${CPUSET:-}" ]]; then
     if ! command -v taskset >/dev/null 2>&1; then
         echo 'CPUSET requires the Linux taskset utility; unset CPUSET on this host.' >&2

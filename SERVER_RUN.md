@@ -33,12 +33,16 @@ and tests, sets noninteractive plotting and limits BLAS/OpenMP/MKL to one thread
 The helper reuses existing environments; update packages explicitly with
 `conda env update --name iivv-revision --file environment.yml --prune` when needed.
 
-The reference workflow uses CPU scikit-learn. `fold_workers=20` runs up to 20
-independent outer folds, with `rf_jobs=4`, `blas_threads=1` and an 8 GiB feature
-cache per fold. This targets the supplied 128-core/2 TiB server: up to 80 RF
-threads and 160 GiB of feature caches, plus raw inputs and temporary arrays.
-A planning reservation is 80 CPU cores and 384 GiB RAM; this is not a measured
-peak. Concurrency is capped by CPU affinity, common scheduler allocations and
+The reference workflow uses CPU scikit-learn. `run_all.sh` defaults to logical
+CPUs **224–255** (`CPUSET=224-255`). With `fold_workers=20`, `rf_jobs=4` and
+`blas_threads=1`, affinity limits execution to at most **8 concurrent folds**:
+up to 32 RF threads and 64 GiB of feature caches, plus inputs and temporary arrays.
+Override explicitly with `CPUSET=0-255 make revision-evaluation` only when the
+full server is allocated; up to 20 folds then use 80 RF threads and 160 GiB of
+feature caches. These are configured capacities, not measured memory peaks.
+CPU IDs refer to logical CPUs, including SMT threads. On other hosts or restricted
+allocations, set an available CPU range explicitly; there is no silent fallback.
+Concurrency is capped by CPU affinity, common scheduler allocations and
 cgroup CPU quotas. On smaller jobs, reduce `fold_workers` and/or
 `feature_cache_bytes` for the allocated RAM. No GPU is required.
 

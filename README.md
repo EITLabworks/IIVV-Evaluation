@@ -50,8 +50,10 @@ Results go to `results/revision-expanded`. An interrupted/failed run with identi
 inputs and settings can use `make revision-resume`. Earlier results and source
 snapshots remain separate. The runner never imports results into manuscripts.
 
-The server profile runs up to **20 independent outer folds**, each with four RF
-threads, then assembles task reports. CPU affinity, scheduler allocations and
+`run_all.sh` defaults to logical CPUs **224–255**. With four RF threads per fold,
+up to **8 independent outer folds** run concurrently, then task reports are assembled.
+Override with `CPUSET=0-255 make revision-evaluation` when the full server is allocated.
+CPU affinity, scheduler allocations and
 cgroup CPU quotas limit concurrency automatically. Each fold has an 8 GiB feature
 cache and an isolated, hash-verified checkpoint under `fold-checkpoints/`.
 Use a fresh output after updating from the earlier task-only execution:
