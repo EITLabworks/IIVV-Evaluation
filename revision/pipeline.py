@@ -22,6 +22,10 @@ from .metrics import scores, threshold_for_sensitivity, select_threshold
 from .data import RISK_DEFINITION
 
 
+class ModelFitConvergenceError(ValueError):
+    """A rejected numerical fit, rather than an invalid data/split definition."""
+
+
 def clean_json(value):
     if isinstance(value, dict):
         return {str(k): clean_json(v) for k, v in value.items()}
@@ -213,7 +217,7 @@ def fit_predict(dataset, indices, y, candidate, train, test, seed, config):
         if config.get("fine_tuning") and any(
             issubclass(w.category, ConvergenceWarning) for w in caught
         ):
-            raise ValueError(
+            raise ModelFitConvergenceError(
                 "Fine-tuning fit did not converge; candidate rejected: "
                 + "; ".join(
                     str(w.message)
@@ -775,6 +779,8 @@ def run_task(dataset, task, config, outdir, *, taskdir=None):
             )
             result = evaluate(baseline)
             if result is None:
+                if config.get("fine_tuning"):
+                    continue
                 raise RuntimeError(
                     f"Baseline {model} failed: cannot perform a paired evaluation"
                 )
@@ -808,10 +814,14 @@ def run_task(dataset, task, config, outdir, *, taskdir=None):
                 if (r := evaluate(c)) is not None
             ]
             if not tuned:
+                if config.get("fine_tuning"):
+                    continue
                 raise RuntimeError("Every tuning candidate failed")
             for model in config["models"]:
                 options = [r for r in tuned if r["candidate"].model == model]
                 if not options:
+                    if config.get("fine_tuning"):
+                        continue
                     reasons = list(
                         dict.fromkeys(
                             row["reason"]
@@ -834,7 +844,7 @@ def run_task(dataset, task, config, outdir, *, taskdir=None):
                 best["candidate"].model,
             )
         # Prespecified confounding comparisons, fitted only on the current training patients.
-        if any(v in dataset.table for v in config["clinical_covariates"]):
+        if streams and any(v in dataset.table for v in config["clinical_covariates"]):
             base = streams.get("auc_selected", next(iter(streams.values())))[0][
                 "candidate"
             ]
@@ -850,8 +860,11 @@ def run_task(dataset, task, config, outdir, *, taskdir=None):
             result["candidate"] for result, _, _ in streams.values()
         )
         outer_cache = {}
+        failed_outer_candidates = set()
         for stream, (result, objective, model_name) in streams.items():
             candidate = result["candidate"]
+            if candidate in failed_outer_candidates:
+                continue
             calibrator, sensitivity_threshold, operating, postprocessing = (
                 fit_training_rules(
                     result,
@@ -864,9 +877,18 @@ def run_task(dataset, task, config, outdir, *, taskdir=None):
                 )
             )
             if candidate not in outer_cache:
-                outer_cache[candidate] = fit_predict(
-                    dataset, indices, y, candidate, tr, te, seed, config
-                )
+                try:
+                    outer_cache[candidate] = fit_predict(
+                        dataset, indices, y, candidate, tr, te, seed, config
+                    )
+                except ModelFitConvergenceError as exc:
+                    if not config.get("fine_tuning"):
+                        raise
+                    failures.append(dict(task=task, fold=fold_name, stream=stream,
+                                         candidate=candidate.dictionary(), reason=str(exc)))
+                    failed_outer_candidates.add(candidate)
+                    write_json(taskdir / "candidate_failures.json", failures)
+                    continue
             raw, meta, fitted = outer_cache[candidate]
             covered = np.isfinite(raw).all(axis=1)
             calibrated = np.full_like(raw, np.nan)

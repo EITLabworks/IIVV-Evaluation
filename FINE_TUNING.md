@@ -44,9 +44,11 @@ keine Konvergenz. Bei geändertem Budget einen neuen Ergebnisordner verwenden,
 z. B. `bash run_finetuning.sh --output results/revision-finetuning-lr20k`;
 ein Resume mit abweichender Konfiguration wird bewusst abgelehnt.
 Konvergenzwarnungen bei Modell-Fits führen im neuen Modus zur Ablehnung des
-betreffenden Kandidaten. Wenn ein Modell keinen gültigen Kandidaten hat, stoppt
-der Lauf mit dokumentiertem Fehler. Es werden keine nicht konvergierten Fits
-stillschweigend akzeptiert. Das SVM-Limit ist **kein Zeitlimit** und garantiert
+betreffenden Kandidaten. Wenn ein Modell keinen gültigen Kandidaten hat, wird
+sein Stream übersprungen; andere Modelle und Folds werden weitergerechnet.
+Nicht konvergierte äußere Fits und LR-Kontrollen werden ebenfalls dokumentiert
+und ausgelassen. Daten-/Splitfehler brechen weiterhin ab.
+Das SVM-Limit ist **kein Zeitlimit** und garantiert
 keine bestimmte Laufzeit; diese Solveränderung ist im Methodenbericht anzugeben.
 Der ursprüngliche breite Modus behält sein bisheriges Verhalten.
 
@@ -138,6 +140,10 @@ Unter `results/revision-finetuning/`:
 * `classification_outputs.csv`: AUC, F1, Precision/PPV, SN, SP, NPV und die
   bestehenden patientenweisen Bootstrap-Konfidenzintervalle (1.000 Ziehungen).
 * `all_metrics.csv`, `BaselineResults.csv`, `FinalResults.csv`: Vergleichstabellen.
+* `unavailable_results.csv`: nicht verfügbare Streams. Bei fehlenden Modellfolds
+  werden gepoolte Modellkennzahlen vollständig zurückgehalten; es wird keine
+  Auswahl nur erfolgreicher Folds berichtet. Korrigierte Tests behalten ihre
+  Hypothesen bei, fehlende Foldpaare führen zu NaN statt scheinbarer Signifikanz.
 * `corrected_resampled_tests_holm.csv`: korrigierte CV-Tests und Holm-Korrektur
   der 288 eindeutigen Hypothesen; PPV ist ein Alias von Precision. Bei MC nur
   vier Folds/df=3 und explorativer Geltungsbereich.

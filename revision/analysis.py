@@ -247,6 +247,11 @@ def report_task(dataset, task, predictions, selections, config, outdir):
         weighting="class_weight",
     )
     expected_ablations = {"ablation_missingness"}
+    if config.get("fine_tuning"):
+        expected_ablations.update({"covariate_only", "covariate_combined", "covariate_eis_only"})
+        expected_ablations.update(f"baseline_{model}" for model in config["models"])
+        expected_ablations.update(f"{objective}_{model}" for objective in config["objectives"]
+                                  for model in [*config["models"], "selected"])
     for candidate in screen_candidates(
         config, len(dataset.frequencies), dataset.complex_available
     ):
@@ -276,7 +281,7 @@ def report_task(dataset, task, predictions, selections, config, outdir):
         }
         observed = set(zip(part["repeat"], part.sample_id))
         if observed != expected:
-            if not stream.startswith("ablation_"):
+            if not stream.startswith("ablation_") and not config.get("fine_tuning"):
                 raise ValueError(f"{task}/{stream}: incomplete outer population")
             unavailable.append(
                 dict(
@@ -496,6 +501,8 @@ def report_task(dataset, task, predictions, selections, config, outdir):
     # Predetermined family: every same-model/objective tuned-vs-baseline comparison, per task.
     for model, objective in itertools.product(config["models"], config["objectives"]):
         if ("nested_cv", f"{objective}_{model}") not in pooled:
+            continue
+        if ("nested_cv", f"baseline_{model}") not in pooled:
             continue
         a = pooled[("nested_cv", f"{objective}_{model}")]
         b = pooled[("nested_cv", f"baseline_{model}")]

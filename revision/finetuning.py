@@ -232,6 +232,11 @@ def annotate(output, config, plan):
                     )
                 )
     pd.DataFrame(rows).to_csv(output / "review_selected_parameters.csv", index=False)
+    unavailable = []
+    for task in config["tasks"]:
+        for row in json.loads((output / task / "unavailable_streams.json").read_text()):
+            unavailable.append(dict(row, task=task, folds_available=counts[task], folds_expected=expected))
+    pd.DataFrame(unavailable).to_csv(output / "unavailable_results.csv", index=False)
     budget = [
         dict(
             fold=identity,
@@ -267,4 +272,6 @@ def annotate(output, config, plan):
         "MC statistics/intervals condition on the four available folds; they do not represent the full cohort.",
         "Ablations were not rerun; unavailable_streams.json records their absence.",
     ]
+    lines += ["Failed model fits were skipped, not accepted as converged.",
+              "Incomplete streams have no pooled performance claim; see unavailable_results.csv."]
     (output / "REVIEW_RESULTS.md").write_text("\n".join(lines) + "\n")

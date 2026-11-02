@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 from .features import Candidate
 from .pipeline import (
+    ModelFitConvergenceError,
     group_splits,
     inner_evaluate,
     fit_predict,
@@ -79,19 +80,24 @@ def add_matched_control(
             f"{task}: matched EIS-only LR control repeat={repeat} fold={fold}",
             flush=True,
         )
-        result = inner_evaluate(
-            dataset, indices[tr], y[tr], candidate, inner, seed, config
-        )
-        calibrator, threshold, operating, postprocessing = fit_training_rules(
-            result,
-            y[tr],
-            groups[tr],
-            samples[tr],
-            classes,
-            config,
-            test_groups=groups[te],
-        )
-        raw, meta, _ = fit_predict(dataset, indices, y, candidate, tr, te, seed, config)
+        try:
+            result = inner_evaluate(
+                dataset, indices[tr], y[tr], candidate, inner, seed, config
+            )
+            calibrator, threshold, operating, postprocessing = fit_training_rules(
+                result, y[tr], groups[tr], samples[tr], classes, config,
+                test_groups=groups[te],
+            )
+            raw, meta, _ = fit_predict(dataset, indices, y, candidate, tr, te, seed, config)
+        except ModelFitConvergenceError as exc:
+            if not config.get("fine_tuning"):
+                raise
+            path = folder / "candidate_failures.json"
+            failures = json.loads(path.read_text()) if path.exists() else []
+            failures.append(dict(task=task, fold=f"{evaluation}_repeat{repeat}_fold{fold}",
+                                 candidate=candidate.dictionary(), reason=str(exc)))
+            write_json(path, failures)
+            continue
         covered = np.isfinite(raw).all(axis=1)
         cal = np.full_like(raw, np.nan)
         cal[covered] = calibrator.transform(raw[covered])
@@ -154,7 +160,11 @@ def add_matched_control(
     write_json(
         folder / "matched_covariate_control.json",
         dict(
-            status="completed",
+            status=("completed" if all(any(
+                row["stream"] == "covariate_eis_only" and
+                (row["repeat"], row["outer_fold"], row["evaluation"]) ==
+                (ref["repeat"], ref["outer_fold"], ref["evaluation"])
+                for row in selections) for ref in source) else "unavailable_partial"),
             source_version=source_version,
             matched_eis_stream="covariate_eis_only",
             combined_stream="covariate_combined",

@@ -191,8 +191,9 @@ def test_fine_mode_rejects_convergence_warning(tmp_path, monkeypatch, fine_confi
         )
 
 
-def test_failed_shortlist_saves_reasons_before_fold_completion(
-    tmp_path, monkeypatch, fine_config
+@pytest.mark.parametrize("fail_baseline", [False, True])
+def test_failed_lr_shortlist_is_recorded_and_other_models_finish(
+    tmp_path, monkeypatch, fine_config, fail_baseline
 ):
     import revision.pipeline as pipeline
     from revision.data import load_dataset
@@ -201,7 +202,8 @@ def test_failed_shortlist_saves_reasons_before_fold_completion(
 
     data, patterns = synthetic_fixture(tmp_path / "fixture")
     dataset = load_dataset(data, patterns_path=patterns)
-    cfg = dict(fine_config, models=["lr", "svm"], outer_folds=3, inner_folds=2)
+    cfg = dict(fine_config, models=["lr", "svm"], outer_folds=3, inner_folds=2,
+               clinical_covariates=[])
     cfg["fine_tuning"] = dict(cfg["fine_tuning"], folds={"healthy_vs_cancer": [0]})
     choices = [Candidate(model=model).dictionary() for model in cfg["models"]]
     cfg["_shortlist"] = {
@@ -212,19 +214,33 @@ def test_failed_shortlist_saves_reasons_before_fold_completion(
     monkeypatch.setattr("revision.finetuning.validate_split", lambda *args: None)
 
     def evaluate(_data, _indices, _y, candidate, *args):
-        if candidate.model == "lr" and candidate.stage == "tuning":
+        if candidate.model == "lr" and (candidate.stage == "tuning" or fail_baseline):
             raise ValueError("test LR iteration limit")
         return dict(
             candidate=candidate,
             metrics={},
             objectives={goal: 0.5 for goal in cfg["objectives"]},
             coverage=1,
+            metadata=[],
         )
 
     monkeypatch.setattr(pipeline, "inner_evaluate", evaluate)
+    class Identity:
+        def transform(self, values):
+            return values
+
+    import numpy as np
+    monkeypatch.setattr(pipeline, "fit_training_rules", lambda *args, **kwargs:
+                        (Identity(), 0.5, {}, {}))
+    monkeypatch.setattr(pipeline, "fit_predict", lambda d, i, y, c, tr, te, *args:
+                        (np.full((len(te), 2), 0.5),
+                         {"input_features": 1, "frequencies_hz": [1]}, (None, None, None)))
     output = tmp_path / "output"
-    with pytest.raises(RuntimeError, match="test LR iteration limit"):
-        pipeline.run_task(dataset, "healthy_vs_cancer", cfg, output)
+    predictions, selections = pipeline.run_task(dataset, "healthy_vs_cancer", cfg, output)
+    streams = set(predictions.stream)
+    assert "auc_svm" in streams and "auc_selected" in streams
+    assert "auc_lr" not in streams
+    assert ("baseline_lr" in streams) == (not fail_baseline)
     errors = json.loads(
         (output / "healthy_vs_cancer/candidate_failures.json").read_text()
     )

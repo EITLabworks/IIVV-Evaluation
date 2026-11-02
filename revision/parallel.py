@@ -217,6 +217,9 @@ def merge_task(root, task, keys):
             target / "matched_covariate_control.json",
             {
                 **controls[0],
+                "status": ("completed" if len(controls) == len(folders) and
+                           all(row["status"] == "completed" for row in controls)
+                           else "unavailable_partial"),
                 "n_outer_folds": sum(row["n_outer_folds"] for row in controls),
                 "newly_fitted_folds": [
                     item for row in controls for item in row["newly_fitted_folds"]
