@@ -130,6 +130,28 @@ weiterhin einen unvollständigen Gesamtversuch. Diese Schutzfunktion bleibt best
 
 ## Dateien für die Reviewer
 
+### Fertigen Serverlauf lokal anzeigen
+
+Den vollständigen Ordner kopieren, einschließlich `fold-checkpoints/`, Plan,
+Manifesten, Tabellen und Abbildungen. Für den am 2. November abgeschlossenen Run
+auf dem lokalen PC im Repository ausführen:
+
+```sh
+mkdir -p results logs
+scp -r jt292@excalibur.iae.ief.uni-rostock.de:/home/jt292/IIVV-Evaluation/results/revision-finetuning-20261102-122955 ./results/
+scp 'jt292@excalibur.iae.ief.uni-rostock.de:/home/jt292/IIVV-Evaluation/logs/revision-finetuning*.log' ./logs/
+conda activate iivv-revision
+jupyter lab Fine-Tuning-Results.ipynb
+```
+
+Erst nach Abschluss des Kopierens im Notebook alle Zellen ausführen. Es liest nur
+vorhandene Dateien, prüft die kopierten Checkpoint-Hashes und zeigt Metriken/CIs,
+Parameter, Fehler, CV-Statistik, Demografie und gespeicherte Plots. Es startet kein
+Training, Bootstrap oder neue Statistik. Für einen anderen Ergebnisordner:
+`IIVV_FINETUNING_RESULTS=results/anderer-run jupyter lab Fine-Tuning-Results.ipynb`.
+`completed_partial` ist für diesen 19-Fold-Lauf der erwartete Abschlussstatus.
+Das Notebook macht daraus keinen vollständigen MC-Endpunkt.
+
 Unter `results/revision-finetuning/`:
 
 * `REVIEW_RESULTS.md`: Abdeckung und Grenzen; MC ausdrücklich vorläufig.
