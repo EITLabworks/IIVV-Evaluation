@@ -295,21 +295,12 @@ preserved. The tracked `templates/Revision-1-clean.tex` recreates the entry
 point when needed. The clean paper contains the current draft's content; it is
 not a claim that pending revision results are already incorporated.
 
-**Defer the following until we have reviewed the completed run together:**
-
-```sh
-python scripts/update_manuscript_results.py --results results/revision-expanded
-python scripts/update_abstract_results.py --results results/revision-expanded
-python scripts/update_response_results.py --results results/revision-expanded
-python scripts/create_rebuttal_screenshots.py
-make revision-clean response
-python scripts/validate_revision.py --results results/revision-expanded --require-completed
-```
-
-The importers reject incomplete/synthetic evidence and now describe the actual
-expanded configuration. Existing generated manuscript blocks have preservation
-guards: if an audit differs from the earlier draft, stop and review the marked
-replacement with us instead of overwriting the existing block.
+The current paper/response use only `results/revision-finetuning-20261102-122955`.
+Review evidence and scope are recorded in `manuscript/REVISION-FINETUNING-NOTES.md`
+and `manuscript/Paper/revision-finetuning-evidence.json`. Apply text changes through
+`\edit{}`/`\edits{}` and include exact matching excerpts in the response letter.
+Superseded automatic importers and screenshot generation have been removed; they
+must not overwrite the current sources. The original `main.tex` stays unchanged.
 
 ## Source evidence checked without running project code
 

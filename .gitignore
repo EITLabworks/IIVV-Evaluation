@@ -9,12 +9,6 @@ reviewing_ppt.txt
 
 # Local paper/response sources and LaTeX generation tools
 /manuscript.mk
-/scripts/create_rebuttal_screenshots.py
-/scripts/marked_manuscript.py
-/scripts/update_abstract_results.py
-/scripts/update_manuscript_results.py
-/scripts/update_response_results.py
-/scripts/validate_revision.py
 *.tex
 *.bib
 *.cls

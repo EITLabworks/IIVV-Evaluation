@@ -133,13 +133,15 @@ present; copy these local files separately if building documents on another host
 - `configs/revision.json`: final expanded protocol.
 - `environment.yml`, `setup_environment.sh`: Conda dependencies and activation.
 - `revision/`: active data, geometry, fitting, metrics, reporting and verification.
-- `scripts/`: source audits and guarded manuscript/rebuttal preparation.
+- `scripts/`: source audits, run diagnostics, result checks and the parameter explorer.
 - `tests/`: scientific regression and integration checks.
 
 Obsolete numbered entry points, compatibility adapters, unused toolbox modules,
 GPU dependency stack and interim profiles were removed. The live geometry module was
-moved unchanged to `revision/geometry.py`. Historical figures/results and private
-inputs were preserved. No evaluation, tests, notebooks or builds were executed
-during cleanup; only static dependency/diff and notebook-file checks were made.
+moved unchanged to `revision/geometry.py`. The later cleanup removed superseded
+manuscript importers, screenshot tooling, stale generated reports and unreferenced
+root figure copies. Current paper assets, clinical runs, provenance and private
+inputs are preserved. The complete deletion list is in [CLEANUP-REMOVED.txt](CLEANUP-REMOVED.txt).
+No evaluation, tests, notebooks or builds were executed during cleanup.
 
 For citation metadata, see [CITATION.cff](CITATION.cff).

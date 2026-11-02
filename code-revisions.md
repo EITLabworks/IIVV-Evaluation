@@ -199,9 +199,9 @@ The obsolete numbered entry points, compatibility adapter and unused toolbox wer
 
 ## Manuscript, rebuttal and reviewer traceability
 
-Paper revisions are in `manuscript/Paper/Revision-1.tex`, with additions in `\edit{}` and retained deletions in `\edits{}`. `manuscript/Paper/main.tex` must remain unchanged. The response letter uses a purple star for comments linked to changed code and the corresponding rerun outputs, including comments whose experimental/clinical component still needs external evidence. It distinguishes implementation, completed computations and unresolved clinical evidence. Screenshots are supplementary excerpts from the compiled revised manuscript, not substitutes for precise textual locations.
+Paper revisions are in `manuscript/Paper/Revision-1.tex`, with additions in `\edit{}` and retained deletions in `\edits{}`. `manuscript/Paper/main.tex` must remain unchanged. The response letter distinguishes implementation, completed computations and unresolved clinical evidence. It uses exact matching marked text excerpts; screenshots are no longer generated.
 
-Detailed comment-by-comment actions and outstanding evidence are recorded in `manuscript/REVISION_SUMMARY.md`. Major code-related groups are:
+Detailed comment-by-comment actions and outstanding evidence are recorded in `manuscript/REVISION-FINETUNING-NOTES.md`. Major code-related groups are:
 
 | Reviewer comments | Implementation / evidence |
 |---|---|
@@ -216,7 +216,9 @@ Detailed comment-by-comment actions and outstanding evidence are recorded in `ma
 | R1 M6–8, M10 | Reconciled populations, weights, CPU environment, commands and provenance |
 | R1 C11; R2 C1–2 | No code can recover missing pathology registration, blinding or mixed-histology records |
 
-Build the marked/clean drafts and response with `make revision revision-clean response`. The clean entry point suppresses deletions, unwraps additions and includes the current marked source; it does not modify either manuscript source. The clean PDF is `manuscript/Paper/Revision-1-clean.pdf`. Generate supplementary screenshots from the marked PDF only after we review and import completed results. Importers require completed non-synthetic evidence and validate result structure; they do not silently replace changed generated manuscript blocks.
+Build the marked/clean drafts and response with `make revision revision-clean response`. The clean entry point suppresses deletions, unwraps additions and includes the current marked source; it does not modify either manuscript source. The clean PDF is `manuscript/Paper/Revision-1-clean.pdf`. The current paper/response evidence ledger is
+`manuscript/Paper/revision-finetuning-evidence.json`. Numerical imports are reviewed
+explicitly; superseded importers and screenshot tooling have been removed.
 
 The available-covariate comparison includes matched EIS-only LR (`covariate_eis_only`) with the same C=1, frozen EIS rule, quality eligibility and patient folds as `covariate_combined`. The canonical runner includes it automatically. The obsolete backfill script for older runs was removed; historical artifacts remain unchanged.
 
@@ -224,15 +226,9 @@ The older interrupted clinical run has a documented legacy input-inventory recov
 
 Forest trees train on four threads; inference resets to one for fixed tree-order probability accumulation. Regression checks compare trees and probabilities against single-thread fitting. Up to 20 outer folds may run concurrently, so fit timings describe that resource setting. All current binary reporting uses explicit positive-class metadata.
 
-Deferred until the user returns with a completed clinical run and matched controls: update the paper and rebuttal using:
-
-```sh
-python scripts/update_manuscript_results.py --results results/revision-expanded
-python scripts/update_abstract_results.py --results results/revision-expanded
-python scripts/update_response_results.py --results results/revision-expanded
-python scripts/create_rebuttal_screenshots.py
-make revision-clean response
-python scripts/validate_revision.py --results results/revision-expanded --require-completed
-```
-
-The numerical imports reject synthetic/incomplete evidence. Marked manuscript replacements append a reversible ledger; changed generated blocks require explicit revision handling rather than silent replacement.
+The current manuscript update uses only the completed-partial reduced run
+`results/revision-finetuning-20261102-122955`. MC has four outer folds, and the
+Task 2 LR/AUC stream is unavailable. Keep both limitations explicit. Rebuild with
+`make revision revision-clean response`; preserve `main.tex` and all original
+reviewer comments. See `manuscript/REVISION-FINETUNING-NOTES.md` for the current
+writing/evidence review and `CLEANUP-REMOVED.txt` for removed obsolete files.
