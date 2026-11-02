@@ -152,6 +152,28 @@ Training, Bootstrap oder neue Statistik. Für einen anderen Ergebnisordner:
 `completed_partial` ist für diesen 19-Fold-Lauf der erwartete Abschlussstatus.
 Das Notebook macht daraus keinen vollständigen MC-Endpunkt.
 
+Im Abschnitt **Interaktiver Parameter Explorer** lassen sich Task, Modell, Fold,
+Stream, Maske, Selektor, Repräsentation, Normalisierung, Imputation, Cutoff und
+Klassengewicht filtern. Achsen sind wählbar, C kann logarithmisch dargestellt
+werden; Klick auf einen Punkt bzw. eine Tabellenzeile zeigt alle Parameter.
+Die drei Modi trennen innere Kandidaten, ausgewählte äußere Fits und gespeicherte
+Fehler. Innere Auswahlziele enthalten die Coverage-Gewichtung und unterscheiden
+sich von den dargestellten Rohmetriken. Fehlgeschlagene Fits erhalten keine
+erfundene Kennzahl; ein erfolgreicher einzelner Fold macht einen insgesamt
+unvollständigen Modellstream nicht zu einem vollständigen Ergebnis.
+
+Die Notebook-Zelle erzeugt `parameter-explorer.html` im Ergebnisordner. Diese
+Datei funktioniert offline ohne Zusatzpakete und kann separat im Browser
+geöffnet werden. Alternativ nur die HTML-Ansicht erstellen (kein Training):
+
+```sh
+python scripts/create_parameter_explorer.py \
+  --results-dir results/revision-finetuning-20261102-122955
+```
+
+Vorbereitete Tests des CSV-Joins und der HTML-Datenübergabe:
+`python -m pytest -q tests/test_parameter_explorer.py`.
+
 Unter `results/revision-finetuning/`:
 
 * `REVIEW_RESULTS.md`: Abdeckung und Grenzen; MC ausdrücklich vorläufig.

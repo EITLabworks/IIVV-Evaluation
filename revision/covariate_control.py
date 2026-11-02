@@ -85,17 +85,30 @@ def add_matched_control(
                 dataset, indices[tr], y[tr], candidate, inner, seed, config
             )
             calibrator, threshold, operating, postprocessing = fit_training_rules(
-                result, y[tr], groups[tr], samples[tr], classes, config,
+                result,
+                y[tr],
+                groups[tr],
+                samples[tr],
+                classes,
+                config,
                 test_groups=groups[te],
             )
-            raw, meta, _ = fit_predict(dataset, indices, y, candidate, tr, te, seed, config)
+            raw, meta, _ = fit_predict(
+                dataset, indices, y, candidate, tr, te, seed, config
+            )
         except ModelFitConvergenceError as exc:
             if not config.get("fine_tuning"):
                 raise
             path = folder / "candidate_failures.json"
             failures = json.loads(path.read_text()) if path.exists() else []
-            failures.append(dict(task=task, fold=f"{evaluation}_repeat{repeat}_fold{fold}",
-                                 candidate=candidate.dictionary(), reason=str(exc)))
+            failures.append(
+                dict(
+                    task=task,
+                    fold=f"{evaluation}_repeat{repeat}_fold{fold}",
+                    candidate=candidate.dictionary(),
+                    reason=str(exc),
+                )
+            )
             write_json(path, failures)
             continue
         covered = np.isfinite(raw).all(axis=1)
@@ -160,11 +173,19 @@ def add_matched_control(
     write_json(
         folder / "matched_covariate_control.json",
         dict(
-            status=("completed" if all(any(
-                row["stream"] == "covariate_eis_only" and
-                (row["repeat"], row["outer_fold"], row["evaluation"]) ==
-                (ref["repeat"], ref["outer_fold"], ref["evaluation"])
-                for row in selections) for ref in source) else "unavailable_partial"),
+            status=(
+                "completed"
+                if all(
+                    any(
+                        row["stream"] == "covariate_eis_only"
+                        and (row["repeat"], row["outer_fold"], row["evaluation"])
+                        == (ref["repeat"], ref["outer_fold"], ref["evaluation"])
+                        for row in selections
+                    )
+                    for ref in source
+                )
+                else "unavailable_partial"
+            ),
             source_version=source_version,
             matched_eis_stream="covariate_eis_only",
             combined_stream="covariate_combined",

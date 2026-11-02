@@ -248,10 +248,15 @@ def report_task(dataset, task, predictions, selections, config, outdir):
     )
     expected_ablations = {"ablation_missingness"}
     if config.get("fine_tuning"):
-        expected_ablations.update({"covariate_only", "covariate_combined", "covariate_eis_only"})
+        expected_ablations.update(
+            {"covariate_only", "covariate_combined", "covariate_eis_only"}
+        )
         expected_ablations.update(f"baseline_{model}" for model in config["models"])
-        expected_ablations.update(f"{objective}_{model}" for objective in config["objectives"]
-                                  for model in [*config["models"], "selected"])
+        expected_ablations.update(
+            f"{objective}_{model}"
+            for objective in config["objectives"]
+            for model in [*config["models"], "selected"]
+        )
     for candidate in screen_candidates(
         config, len(dataset.frequencies), dataset.complex_available
     ):

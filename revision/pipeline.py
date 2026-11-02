@@ -202,7 +202,9 @@ def fit_predict(dataset, indices, y, candidate, train, test, seed, config):
             else np.column_stack([xtrain, clinical_x])
         )
     model = make_model(
-        candidate, seed, rf_jobs=config.get("rf_jobs", 4),
+        candidate,
+        seed,
+        rf_jobs=config.get("rf_jobs", 4),
         lr_max_iter=config.get("fine_tuning", {}).get("lr_max_iter", 5000),
     )
     weights = (
@@ -884,8 +886,15 @@ def run_task(dataset, task, config, outdir, *, taskdir=None):
                 except ModelFitConvergenceError as exc:
                     if not config.get("fine_tuning"):
                         raise
-                    failures.append(dict(task=task, fold=fold_name, stream=stream,
-                                         candidate=candidate.dictionary(), reason=str(exc)))
+                    failures.append(
+                        dict(
+                            task=task,
+                            fold=fold_name,
+                            stream=stream,
+                            candidate=candidate.dictionary(),
+                            reason=str(exc),
+                        )
+                    )
                     failed_outer_candidates.add(candidate)
                     write_json(taskdir / "candidate_failures.json", failures)
                     continue

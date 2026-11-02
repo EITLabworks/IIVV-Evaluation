@@ -34,7 +34,9 @@ def test_lr_iteration_budget_leaves_original_default_unchanged(fine_config):
 
     candidate = Candidate(model="lr", params_json='{"C":1.0}')
     assert make_model(candidate, 1729).parameters["max_iter"] == 5000
-    model = make_model(candidate, 1729, lr_max_iter=fine_config["fine_tuning"]["lr_max_iter"])
+    model = make_model(
+        candidate, 1729, lr_max_iter=fine_config["fine_tuning"]["lr_max_iter"]
+    )
     assert model.parameters["max_iter"] == 20000
     assert model.parameters["C"] == 1.0
 
@@ -173,6 +175,7 @@ def test_fine_mode_rejects_convergence_warning(tmp_path, monkeypatch, fine_confi
     indices, y, _ = dataset.task("healthy_vs_cancer")
     groups = dataset.table.iloc[indices].patient_id.to_numpy()
     train, test = pipeline.group_splits(y, groups, 3, 1729)[0]
+
     def make_nonconverged(*args, **kwargs):
         assert kwargs["lr_max_iter"] == fine_config["fine_tuning"]["lr_max_iter"]
         return Nonconverged()
@@ -202,8 +205,13 @@ def test_failed_lr_shortlist_is_recorded_and_other_models_finish(
 
     data, patterns = synthetic_fixture(tmp_path / "fixture")
     dataset = load_dataset(data, patterns_path=patterns)
-    cfg = dict(fine_config, models=["lr", "svm"], outer_folds=3, inner_folds=2,
-               clinical_covariates=[])
+    cfg = dict(
+        fine_config,
+        models=["lr", "svm"],
+        outer_folds=3,
+        inner_folds=2,
+        clinical_covariates=[],
+    )
     cfg["fine_tuning"] = dict(cfg["fine_tuning"], folds={"healthy_vs_cancer": [0]})
     choices = [Candidate(model=model).dictionary() for model in cfg["models"]]
     cfg["_shortlist"] = {
@@ -225,18 +233,31 @@ def test_failed_lr_shortlist_is_recorded_and_other_models_finish(
         )
 
     monkeypatch.setattr(pipeline, "inner_evaluate", evaluate)
+
     class Identity:
         def transform(self, values):
             return values
 
     import numpy as np
-    monkeypatch.setattr(pipeline, "fit_training_rules", lambda *args, **kwargs:
-                        (Identity(), 0.5, {}, {}))
-    monkeypatch.setattr(pipeline, "fit_predict", lambda d, i, y, c, tr, te, *args:
-                        (np.full((len(te), 2), 0.5),
-                         {"input_features": 1, "frequencies_hz": [1]}, (None, None, None)))
+
+    monkeypatch.setattr(
+        pipeline,
+        "fit_training_rules",
+        lambda *args, **kwargs: (Identity(), 0.5, {}, {}),
+    )
+    monkeypatch.setattr(
+        pipeline,
+        "fit_predict",
+        lambda d, i, y, c, tr, te, *args: (
+            np.full((len(te), 2), 0.5),
+            {"input_features": 1, "frequencies_hz": [1]},
+            (None, None, None),
+        ),
+    )
     output = tmp_path / "output"
-    predictions, selections = pipeline.run_task(dataset, "healthy_vs_cancer", cfg, output)
+    predictions, selections = pipeline.run_task(
+        dataset, "healthy_vs_cancer", cfg, output
+    )
     streams = set(predictions.stream)
     assert "auc_svm" in streams and "auc_selected" in streams
     assert "auc_lr" not in streams
