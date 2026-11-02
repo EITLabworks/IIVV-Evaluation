@@ -35,7 +35,14 @@ Ergebnisse bleiben erhalten; die neue Analyse soll sie nicht nachträglich erset
 * Breites Screening und Ablationen entfallen. Fehlende Ablationen werden als
   unavailable dokumentiert; hierfür die ursprüngliche Auswertung verwenden.
 
-Die SVM erhält auch in der Baseline `max_iter=100000`; LR bleibt bei 5.000.
+Die SVM erhält auch in der Baseline `max_iter=100000`. LR erhält im Fine-Tuning
+`lr_max_iter=20000` (auch für Baselines und LR-Kontrollen), weil bei 5.000 bereits
+alle LR-Kandidaten eines Folds das Limit erreichten. Der ursprüngliche breite
+Modus bleibt bei 5.000. Das höhere Limit verändert weder C noch Skalierung,
+Toleranz oder Zielfunktion und wird nur bei Bedarf ausgeschöpft. Es garantiert
+keine Konvergenz. Bei geändertem Budget einen neuen Ergebnisordner verwenden,
+z. B. `bash run_finetuning.sh --output results/revision-finetuning-lr20k`;
+ein Resume mit abweichender Konfiguration wird bewusst abgelehnt.
 Konvergenzwarnungen bei Modell-Fits führen im neuen Modus zur Ablehnung des
 betreffenden Kandidaten. Wenn ein Modell keinen gültigen Kandidaten hat, stoppt
 der Lauf mit dokumentiertem Fehler. Es werden keine nicht konvergierten Fits

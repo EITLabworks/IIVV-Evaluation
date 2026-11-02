@@ -29,6 +29,16 @@ def test_neighbourhood_is_bounded_and_rf_unchanged(fine_config):
     )
 
 
+def test_lr_iteration_budget_leaves_original_default_unchanged(fine_config):
+    from revision.features import make_model
+
+    candidate = Candidate(model="lr", params_json='{"C":1.0}')
+    assert make_model(candidate, 1729).parameters["max_iter"] == 5000
+    model = make_model(candidate, 1729, lr_max_iter=fine_config["fine_tuning"]["lr_max_iter"])
+    assert model.parameters["max_iter"] == 20000
+    assert model.parameters["C"] == 1.0
+
+
 def test_split_guard_rejects_other_outer_and_inner_patients():
     split = dict(
         train_sample_ids=["a"],
@@ -163,7 +173,11 @@ def test_fine_mode_rejects_convergence_warning(tmp_path, monkeypatch, fine_confi
     indices, y, _ = dataset.task("healthy_vs_cancer")
     groups = dataset.table.iloc[indices].patient_id.to_numpy()
     train, test = pipeline.group_splits(y, groups, 3, 1729)[0]
-    monkeypatch.setattr(pipeline, "make_model", lambda *args, **kwargs: Nonconverged())
+    def make_nonconverged(*args, **kwargs):
+        assert kwargs["lr_max_iter"] == fine_config["fine_tuning"]["lr_max_iter"]
+        return Nonconverged()
+
+    monkeypatch.setattr(pipeline, "make_model", make_nonconverged)
     with pytest.raises(ValueError, match="test iteration limit"):
         pipeline.fit_predict(
             dataset,

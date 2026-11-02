@@ -340,7 +340,7 @@ class FeatureBuilder:
         )
 
 
-def make_model(candidate, seed, rf_jobs=4):
+def make_model(candidate, seed, rf_jobs=4, lr_max_iter=5000):
     import json
 
     c = candidate
@@ -349,7 +349,8 @@ def make_model(candidate, seed, rf_jobs=4):
     if c.model == "lr":
         from .linear_span import TrainingSpanLogisticRegression
 
-        return TrainingSpanLogisticRegression(max_iter=5000, **common, **params)
+        params.setdefault("max_iter", lr_max_iter)
+        return TrainingSpanLogisticRegression(**common, **params)
     if c.model == "rf":
         return (
             RandomForestClassifier(n_estimators=100, n_jobs=rf_jobs, **common, **params)

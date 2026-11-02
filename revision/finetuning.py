@@ -48,8 +48,10 @@ def prepare(config, input_hashes, output):
         or any(not math.isfinite(x) or x <= 0 for x in settings["c_factors"])
         or not isinstance(settings["svm_max_iter"], int)
         or settings["svm_max_iter"] < 1
+        or not isinstance(settings.get("lr_max_iter", 5000), int)
+        or settings.get("lr_max_iter", 5000) < 1
     ):
-        raise ValueError("Invalid C factors or SVM iteration limit")
+        raise ValueError("Invalid C factors or model iteration limits")
     manifest = json.loads((source / "run_manifest.json").read_text())
     if manifest.get("synthetic") or manifest.get("input_hashes") != input_hashes:
         raise ValueError("Fine tuning requires identical clinical input hashes")
@@ -222,6 +224,7 @@ def annotate(output, config, plan):
                         stream=row["stream"],
                         candidate=json.dumps(row["candidate"], sort_keys=True),
                         fit_seconds=row.get("model_fit_seconds"),
+                    model_max_iter=row.get("model_max_iter"),
                         features=row["input_features"],
                         frequencies_hz=json.dumps(row["frequencies_hz"]),
                         folds_available=counts[task],

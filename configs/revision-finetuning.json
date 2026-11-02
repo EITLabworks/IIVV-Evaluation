@@ -201,6 +201,7 @@
       1.0,
       2.0
     ],
-    "svm_max_iter": 100000
+    "svm_max_iter": 100000,
+    "lr_max_iter": 20000
   }
 }

@@ -197,7 +197,10 @@ def fit_predict(dataset, indices, y, candidate, train, test, seed, config):
             if candidate.stage == "covariate_only"
             else np.column_stack([xtrain, clinical_x])
         )
-    model = make_model(candidate, seed, rf_jobs=config.get("rf_jobs", 4))
+    model = make_model(
+        candidate, seed, rf_jobs=config.get("rf_jobs", 4),
+        lr_max_iter=config.get("fine_tuning", {}).get("lr_max_iter", 5000),
+    )
     weights = (
         patient_weights(groups[tr]) if candidate.patient_weighted else np.ones(len(tr))
     )
@@ -257,6 +260,7 @@ def fit_predict(dataset, indices, y, candidate, train, test, seed, config):
     meta["preparation_and_fit_seconds"] = fitted_seconds
     meta["model_fit_seconds"] = model_fit_seconds
     meta["model_training_jobs"] = model_training_jobs
+    meta["model_max_iter"] = getattr(model, "parameters", {}).get("max_iter")
     meta["timing_scope"] = (
         "Cached full-ranked feature preparation; preparation includes test transform on a cache miss; no acquisition timing"
     )
