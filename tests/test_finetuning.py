@@ -175,3 +175,41 @@ def test_fine_mode_rejects_convergence_warning(tmp_path, monkeypatch, fine_confi
             1729,
             fine_config,
         )
+
+
+def test_failed_shortlist_saves_reasons_before_fold_completion(
+    tmp_path, monkeypatch, fine_config
+):
+    import revision.pipeline as pipeline
+    from revision.data import load_dataset
+    from revision.finetuning import fold_id
+    from run_revision import synthetic_fixture
+
+    data, patterns = synthetic_fixture(tmp_path / "fixture")
+    dataset = load_dataset(data, patterns_path=patterns)
+    cfg = dict(fine_config, models=["lr", "svm"], outer_folds=3, inner_folds=2)
+    cfg["fine_tuning"] = dict(cfg["fine_tuning"], folds={"healthy_vs_cancer": [0]})
+    choices = [Candidate(model=model).dictionary() for model in cfg["models"]]
+    cfg["_shortlist"] = {
+        fold_id("healthy_vs_cancer", 0, 0): {
+            "candidates": {goal: choices for goal in cfg["objectives"]}
+        }
+    }
+    monkeypatch.setattr("revision.finetuning.validate_split", lambda *args: None)
+
+    def evaluate(_data, _indices, _y, candidate, *args):
+        if candidate.model == "lr" and candidate.stage == "tuning":
+            raise ValueError("test LR iteration limit")
+        return dict(
+            metrics={}, objectives={goal: 0.5 for goal in cfg["objectives"]}, coverage=1
+        )
+
+    monkeypatch.setattr(pipeline, "inner_evaluate", evaluate)
+    output = tmp_path / "output"
+    with pytest.raises(RuntimeError, match="test LR iteration limit"):
+        pipeline.run_task(dataset, "healthy_vs_cancer", cfg, output)
+    errors = json.loads(
+        (output / "healthy_vs_cancer/candidate_failures.json").read_text()
+    )
+    assert any(row["reason"] == "test LR iteration limit" for row in errors)
+    assert not (output / "healthy_vs_cancer/complete.json").exists()

@@ -718,6 +718,8 @@ def run_task(dataset, task, config, outdir, *, taskdir=None):
                         )
                     )
                     cache[candidate] = None
+                    if config.get("fine_tuning"):
+                        write_json(taskdir / "candidate_failures.json", failures)
                 if config.get("verbose_candidates", False):
                     print(
                         f"{task}/{fold_name}: inner completed in {time.perf_counter()-started:.2f}s",
@@ -806,7 +808,19 @@ def run_task(dataset, task, config, outdir, *, taskdir=None):
             for model in config["models"]:
                 options = [r for r in tuned if r["candidate"].model == model]
                 if not options:
-                    raise RuntimeError(f"No evaluable tuning candidate for {model}")
+                    reasons = list(
+                        dict.fromkeys(
+                            row["reason"]
+                            for row in failures
+                            if row["fold"] == fold_name
+                            and row["candidate"]["model"] == model
+                        )
+                    )
+                    raise RuntimeError(
+                        f"{task}/{fold_name}/{objective}: No evaluable tuning candidate for {model}. "
+                        f"Reasons: {'; '.join(reasons[-3:]) or 'not recorded'}. "
+                        f"See {taskdir / 'candidate_failures.json'}"
+                    )
                 best = max(options, key=lambda r: r["objectives"][objective])
                 streams[f"{objective}_{model}"] = (best, objective, model)
             best = max(tuned, key=lambda r: r["objectives"][objective])
