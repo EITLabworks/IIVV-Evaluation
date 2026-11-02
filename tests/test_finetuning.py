@@ -146,7 +146,7 @@ def test_checker_does_not_accept_running_or_changed_plan(tmp_path):
         module.main(["--results-dir", str(tmp_path)])
 
 
-def test_fine_mode_rejects_convergence_warning(tmp_path, monkeypatch):
+def test_fine_mode_rejects_convergence_warning(tmp_path, monkeypatch, fine_config):
     import warnings
     from sklearn.exceptions import ConvergenceWarning
     import revision.pipeline as pipeline
@@ -173,5 +173,5 @@ def test_fine_mode_rejects_convergence_warning(tmp_path, monkeypatch):
             train,
             test,
             1729,
-            {"fine_tuning": {"svm_max_iter": 100000}},
+            fine_config,
         )
