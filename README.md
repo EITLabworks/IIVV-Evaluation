@@ -1,5 +1,8 @@
 # IIVV Evaluation — reviewer revision
 
+For the optional reduced search based on the 19 available source folds, see
+[FINE_TUNING.md](FINE_TUNING.md). Its MC results remain explicitly partial.
+
 Patient-grouped nested evaluation of in vivo oral-lesion EIS. The author-selected
 protocol uses **5 outer × 4 inner folds, one outer partition**, seed 1729, four diagnostic
 tasks, three classifiers and four selection objectives. All learned preprocessing,

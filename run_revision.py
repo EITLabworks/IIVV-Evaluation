@@ -191,6 +191,7 @@ def runtime_manifest(args, config):
         *sorted((root / "scripts").glob("*.py")),
         root / "run_all.sh",
         root / "run_revision.sh",
+        root / "run_finetuning.sh",
         root / "environment.yml",
         root / "setup_environment.sh",
     ]
@@ -567,6 +568,11 @@ def main(argv=None):
         manifest["input_hashes"] = dataset.input_hashes
         if source_hashes is not None:
             manifest["source_input_hashes"] = source_hashes
+        shortlist = None
+        if config.get("fine_tuning"):
+            from revision.finetuning import prepare
+
+            shortlist = prepare(config, dataset.input_hashes, output)
         inventory = sorted(
             (d.metadata.get("Name", "unknown"), d.version)
             for d in importlib.metadata.distributions()
@@ -658,6 +664,7 @@ def main(argv=None):
         start = time.perf_counter()
         execution_config = {
             **config,
+            "_shortlist": shortlist,
             "_resume": args.resume,
             "_source_version": dict(
                 started_utc=manifest["started_utc"], hashes=manifest["source_hashes"]
@@ -760,7 +767,16 @@ def main(argv=None):
             len(json.loads((output / task / "unavailable_streams.json").read_text()))
             for task in config["tasks"]
         )
-        statuses["completed_task_populations"] = config["tasks"]
+        partial_tasks = [
+            task
+            for task in config["tasks"]
+            if config.get("fine_tuning")
+            and len(config["fine_tuning"]["folds"][task]) != config["outer_folds"]
+        ]
+        statuses["completed_task_populations"] = [
+            t for t in config["tasks"] if t not in partial_tasks
+        ]
+        statuses["partial_task_populations"] = partial_tasks
         statuses["cv_statistics"] = {
             "test": "approximate Nadeau-Bengio corrected resampled paired outer-fold t test",
             "artifact": "corrected_resampled_tests_holm.csv",
@@ -768,7 +784,9 @@ def main(argv=None):
             "confidence_intervals": "whole-patient bootstrap of frozen outer predictions",
             "supplementary": "paired_comparisons_holm.csv retains conditional patient-block prediction permutations",
         }
-        statuses["real_patient_reanalysis_completed"] = not args.synthetic
+        statuses["real_patient_reanalysis_completed"] = (
+            not args.synthetic and not partial_tasks
+        )
         write_json(output / "analysis_status.json", statuses)
         manifest["matched_covariate_control_completed"] = all(
             (output / task / "matched_covariate_control.json").is_file()
@@ -778,18 +796,32 @@ def main(argv=None):
             == "completed"
             for task in config["tasks"]
         )
+        if config.get("fine_tuning"):
+            from revision.finetuning import annotate
+
+            annotate(output, config, shortlist)
+            manifest["fine_tuning_plan_sha256"] = digest(
+                output / "fine_tuning_plan.json"
+            )
+            manifest["partial_tasks"] = partial_tasks
         manifest.update(
-            status="completed",
+            status="completed_partial" if partial_tasks else "completed",
             elapsed_seconds=time.perf_counter() - start,
             finished_utc=datetime.now(timezone.utc).isoformat(),
             claim_scope=(
                 "SYNTHETIC SOFTWARE VALIDATION ONLY"
                 if args.synthetic
-                else "Retrospective nested validation; conditional uncertainty, not prospective clinical validation"
+                else (
+                    "Adaptive same-partition fine tuning; partial tasks exploratory only"
+                    if config.get("fine_tuning")
+                    else "Retrospective nested validation; conditional uncertainty, not prospective clinical validation"
+                )
             ),
         )
         write_json(output / "run_manifest.json", manifest)
-        print(f'Completed {len(config["tasks"])} tasks: {output}')
+        print(
+            f'Completed {len(config["tasks"])} task computations; status={manifest["status"]}: {output}'
+        )
         return 0
     except KeyboardInterrupt:
         manifest.update(

@@ -9,6 +9,7 @@ import warnings
 import numpy as np
 import pandas as pd
 from sklearn.linear_model import LogisticRegression
+from sklearn.exceptions import ConvergenceWarning
 from sklearn.model_selection import ParameterGrid, StratifiedGroupKFold
 from .features import (
     Candidate,
@@ -206,6 +207,17 @@ def fit_predict(dataset, indices, y, candidate, train, test, seed, config):
         model_start = time.perf_counter()
         model.fit(xtrain, y[tr], sample_weight=weights)
         model_fit_seconds = time.perf_counter() - model_start
+        if config.get("fine_tuning") and any(
+            issubclass(w.category, ConvergenceWarning) for w in caught
+        ):
+            raise ValueError(
+                "Fine-tuning fit did not converge; candidate rejected: "
+                + "; ".join(
+                    str(w.message)
+                    for w in caught
+                    if issubclass(w.category, ConvergenceWarning)
+                )
+            )
         if candidate.model == "rf":
             model.n_jobs = 1  # fixed tree-order accumulation during inference
     fitted_seconds = time.perf_counter() - start
@@ -523,6 +535,9 @@ def task_outer_splits(dataset, task, config):
             outer.append((repeat, fold, dev[tr], dev[te], "nested_cv"))
     if external.any():
         outer.append((0, 0, dev, np.flatnonzero(external), "external"))
+    if config.get("fine_tuning"):
+        allowed = config["fine_tuning"]["folds"][task]
+        outer = [row for row in outer if row[1] in allowed]
     return outer
 
 
@@ -715,14 +730,25 @@ def run_task(dataset, task, config, outdir, *, taskdir=None):
                     )
             return cache[candidate]
 
-        screened = [
-            r
-            for c in screen_candidates(
-                config, len(dataset.frequencies), dataset.complex_available
-            )
-            if (r := evaluate(c)) is not None
-        ]
-        if not screened:
+        shortlist = None
+        if config.get("fine_tuning"):
+            from .finetuning import fold_id, validate_split
+
+            entry = config["_shortlist"][fold_id(task, repeat, fold, evaluation)]
+            validate_split(entry, split_record)
+            shortlist = entry["candidates"]
+        screened = (
+            [
+                r
+                for c in screen_candidates(
+                    config, len(dataset.frequencies), dataset.complex_available
+                )
+                if (r := evaluate(c)) is not None
+            ]
+            if shortlist is None
+            else []
+        )
+        if shortlist is None and not screened:
             raise RuntimeError(
                 f"{task}/{fold_name}: every screening candidate failed; inspect input labels and quality"
             )
@@ -735,6 +761,11 @@ def run_task(dataset, task, config, outdir, *, taskdir=None):
                 cutoff=config["default_cutoff"],
                 patient_weighted=config["patient_weighted_training"],
                 selector="all",
+                params_json=(
+                    json.dumps({"max_iter": config["fine_tuning"]["svm_max_iter"]})
+                    if config.get("fine_tuning") and model == "svm"
+                    else "{}"
+                ),
             )
             result = evaluate(baseline)
             if result is None:
@@ -761,8 +792,12 @@ def run_task(dataset, task, config, outdir, *, taskdir=None):
         for objective in config["objectives"]:
             tuned = [
                 r
-                for c in tune_candidates(
-                    screened, config, objective, len(dataset.frequencies)
+                for c in (
+                    tune_candidates(
+                        screened, config, objective, len(dataset.frequencies)
+                    )
+                    if shortlist is None
+                    else [Candidate(**c) for c in shortlist[objective]]
                 )
                 if (r := evaluate(c)) is not None
             ]

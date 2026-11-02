@@ -1,5 +1,9 @@
 # Revision evaluation on the server
 
+For the separate, reduced fine-tuning run over the currently available 19 folds,
+use [FINE_TUNING.md](FINE_TUNING.md). It has its own config, launcher and explicitly
+partial MC outputs; it does not replace or resume the original evaluation.
+
 Protocol chosen by the author on 20 October 2026: **5 outer × 4 inner
 patient folds, one outer partition**, seed 1729, four tasks, three classifiers,
 four objectives. Use `configs/revision.json`. This produces **20 outer

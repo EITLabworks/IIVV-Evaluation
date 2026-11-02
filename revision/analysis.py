@@ -455,7 +455,14 @@ def report_task(dataset, task, predictions, selections, config, outdir):
             / stream
         )
         if config.get("plots", True):
-            plot_outputs(plotdir, frame, classes, f"{task}: {stream} ({evaluation})")
+            partial = (
+                config.get("fine_tuning")
+                and len(config["fine_tuning"]["folds"][task]) < config["outer_folds"]
+            )
+            prefix = "PARTIAL EXPLORATORY: " if partial else ""
+            plot_outputs(
+                plotdir, frame, classes, f"{prefix}{task}: {stream} ({evaluation})"
+            )
         # Keep recognizable legacy plot names inside this new results directory only.
         if evaluation == "nested_cv" and (
             stream.startswith("baseline_")
