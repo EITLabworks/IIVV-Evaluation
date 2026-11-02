@@ -201,7 +201,10 @@ def test_failed_shortlist_saves_reasons_before_fold_completion(
         if candidate.model == "lr" and candidate.stage == "tuning":
             raise ValueError("test LR iteration limit")
         return dict(
-            metrics={}, objectives={goal: 0.5 for goal in cfg["objectives"]}, coverage=1
+            candidate=candidate,
+            metrics={},
+            objectives={goal: 0.5 for goal in cfg["objectives"]},
+            coverage=1,
         )
 
     monkeypatch.setattr(pipeline, "inner_evaluate", evaluate)
