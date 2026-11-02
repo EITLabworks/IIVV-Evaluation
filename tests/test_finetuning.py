@@ -162,7 +162,7 @@ def test_fine_mode_rejects_convergence_warning(tmp_path, monkeypatch):
     dataset = load_dataset(data, patterns_path=patterns)
     indices, y, _ = dataset.task("healthy_vs_cancer")
     groups = dataset.table.iloc[indices].patient_id.to_numpy()
-    train, test = next(pipeline.group_splits(y, groups, 3, 1729))
+    train, test = pipeline.group_splits(y, groups, 3, 1729)[0]
     monkeypatch.setattr(pipeline, "make_model", lambda *args, **kwargs: Nonconverged())
     with pytest.raises(ValueError, match="test iteration limit"):
         pipeline.fit_predict(
