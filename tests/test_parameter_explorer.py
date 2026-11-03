@@ -118,3 +118,43 @@ def test_active_run_is_rejected(tmp_path):
     (tmp_path / "run_manifest.json").write_text('{"status":"running"}')
     with pytest.raises(ValueError, match="finished"):
         explorer.load_points(tmp_path)
+
+
+def test_final_selection_uses_actual_mc_partition_without_partial_label(tmp_path):
+    (tmp_path / "run_manifest.json").write_text(
+        json.dumps(
+            dict(
+                status="completed",
+                config=dict(
+                    tasks=["MC"],
+                    outer_folds=5,
+                    outer_repeats=1,
+                    final_selection={"scope": "adaptive"},
+                ),
+            )
+        )
+    )
+    (tmp_path / "MC").mkdir()
+    (tmp_path / "MC/splits.json").write_text(
+        json.dumps([dict(evaluation="nested_cv", outer_fold=i) for i in range(5)])
+    )
+    write_csv(
+        tmp_path / "MC/inner_search.csv",
+        [
+            dict(
+                model="svm",
+                repeat="0",
+                outer_fold="2",
+                evaluation="nested_cv",
+                stage="tuning",
+                params_json='{"C":1}',
+                auc="0.6",
+            )
+        ],
+    )
+    rows, tasks = explorer.load_points(tmp_path)
+    assert tasks == ["MC"] and len(rows) == 1
+    assert rows[0]["fold"] == "2"
+    assert (
+        rows[0]["status"] == "complete original partition; adaptive follow-up analysis"
+    )

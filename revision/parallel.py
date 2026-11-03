@@ -1,6 +1,6 @@
 """Independent outer folds, isolated checkpoints and deterministic task assembly."""
 
-from concurrent.futures import ProcessPoolExecutor, as_completed
+from concurrent.futures import ProcessPoolExecutor, as_completed, wait, FIRST_COMPLETED
 import json
 import multiprocessing as mp
 import os
@@ -84,8 +84,28 @@ def _execute(function, jobs, workers, dataset, config):
     )
     futures = []
     try:
+        since = time.time()
         futures = [pool.submit(function, job, config) for job in jobs]
-        results = [future.result() for future in as_completed(futures)]
+        interval = config.get("progress_interval_seconds", 0)
+        if interval:
+            from .progress import heartbeat
+
+            pending = set(futures)
+            results = []
+            while pending:
+                done, pending = wait(
+                    pending, timeout=interval, return_when=FIRST_COMPLETED
+                )
+                results.extend(future.result() for future in done)
+                heartbeat(
+                    [job for future, job in zip(futures, jobs) if future in pending],
+                    len(results),
+                    len(jobs),
+                    since_epoch=since,
+                    label="folds" if len(jobs[0]) == 3 else "reports",
+                )
+        else:
+            results = [future.result() for future in as_completed(futures)]
     except BaseException:
         for future in futures:
             future.cancel()
@@ -135,14 +155,20 @@ def _fit_fold(job, config):
         return task, key
     started = time.perf_counter()
     fold_config = {**config, "_fold_key": key}
+    if config.get("progress_interval_seconds"):
+        fold_config["_progress_path"] = str(folder / "progress.json")
+        fold_config["_progress_state"] = {}
     predictions, selections = run_task(
         _DATASET, task, fold_config, root, taskdir=folder
     )
     from .covariate_control import add_matched_control
+    from .progress import update_progress
 
+    update_progress(fold_config, "matched-covariate-control", inner_fold=None)
     add_matched_control(
         _DATASET, task, fold_config, root, predictions, selections, taskdir=folder
     )
+    update_progress(fold_config, "complete")
     names = [*_JSON_PARTS, *_CSV_PARTS, *_IDENTICAL]
     if (folder / "matched_covariate_control.json").is_file():
         names.append("matched_covariate_control.json")
@@ -263,6 +289,9 @@ def run_parallel(dataset, config, root):
         for task in config["tasks"]
     }
     jobs = [(task, key, str(root)) for task, keys in schedule.items() for key in keys]
+    if config.get("fold_schedule") == "round_robin":
+        task_order = {task: i for i, task in enumerate(schedule)}
+        jobs.sort(key=lambda job: (job[1], task_order[job[0]]))
     workers = worker_count(
         config.get("fold_workers", 1),
         len(jobs),
@@ -286,9 +315,16 @@ def run_parallel(dataset, config, root):
         flush=True,
     )
     _execute(_fit_fold, jobs, workers, dataset, config)
+    if config.get("progress_interval_seconds"):
+        print("PIPELINE: merge hash-verified fold checkpoints", flush=True)
     for task, keys in schedule.items():
         merge_task(root, task, keys)
     # Reports start only after fitting workers exit, releasing their feature caches.
+    if config.get("progress_interval_seconds"):
+        print(
+            "PIPELINE: per-task reports, patient bootstrap, corrected CV tests and plots",
+            flush=True,
+        )
     report_workers = worker_count(
         config.get("task_workers", 1), len(schedule), config.get("blas_threads", 1)
     )

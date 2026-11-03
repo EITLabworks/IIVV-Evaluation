@@ -1,5 +1,10 @@
 # IIVV Evaluation — reviewer revision
 
+For a fresh reduced search over **all 20 task/folds**, use
+[`./run_final.sh`](run_final.sh). [FINAL_SELECTION.md](FINAL_SELECTION.md) explains
+every omitted option, the unchanged 5×4 patient protocol, 32-CPU execution,
+progress logs and review exports. This is an adaptive follow-up, not independent confirmation.
+
 For the optional reduced search based on the 19 available source folds, see
 [FINE_TUNING.md](FINE_TUNING.md). Its MC results remain explicitly partial.
 

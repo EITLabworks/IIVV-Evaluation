@@ -1,5 +1,10 @@
 # Revision evaluation on the server
 
+For the new minimal fresh search over all four tasks and all 20 outer folds,
+use **`./run_final.sh`** and [FINAL_SELECTION.md](FINAL_SELECTION.md). The launcher
+defaults to CPUs 224–255, 16 fold workers × 2 threads, automatic timestamped outputs,
+progress logging, the standard report pipeline and a completion check.
+
 For the separate, reduced fine-tuning run over the currently available 19 folds,
 use [FINE_TUNING.md](FINE_TUNING.md). It has its own config, launcher and explicitly
 partial MC outputs; it does not replace or resume the original evaluation.

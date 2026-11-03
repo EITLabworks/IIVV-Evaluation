@@ -1,0 +1,147 @@
+{
+  "source_hashes": {
+    "results/revision-finetuning-20261102-122955/healthy_vs_cancer/selections.json": "74a6419de1a82830e571a79f2593b4cf8784262d039df3cfd7a72947a8c6a7d3",
+    "results/revision-finetuning-20261102-122955/cancer_vs_lr_hr/selections.json": "ede9560139c5ce801c319c5d8db81e5fb3c6d6f48d377cf358e9287523cb9567",
+    "results/revision-finetuning-20261102-122955/MC/selections.json": "5a07e5fa6a9e35b8289ff48ffeb88e7608d1666c9df4b771dc2fa5192a607e25",
+    "results/revision-finetuning-20261102-122955/highrisk_vs_lowrisk/selections.json": "f6f07ace887b22e4aad73da413f4d3b8c3b4733105622b7c988f4f5097acb808"
+  },
+  "n_model_objective_training_winners": 227,
+  "note": "Repeated model/objective winners share training settings; counts are descriptive, not independent evidence of superiority. No outer-test performance values were used. New candidates are selected afresh within their own current training folds.",
+  "training_winner_counts": {
+    "selector": {
+      "pca": 116,
+      "rfe": 24,
+      "mutual_info": 69,
+      "permutation": 18
+    },
+    "representation": {
+      "magnitude": 134,
+      "magnitude_phase": 57,
+      "ratio": 6,
+      "real_imag": 24,
+      "circuit": 6
+    },
+    "normalization": {
+      "global": 150,
+      "freq": 54,
+      "none": 23
+    },
+    "imputation": {
+      "mean": 158,
+      "median": 39,
+      "zero": 30
+    },
+    "cutoff": {
+      "100.000001": 102,
+      "80": 98,
+      "40": 15,
+      "60": 12
+    },
+    "threshold_masks": 53,
+    "svm_kernel": {
+      "poly": 9,
+      "rbf": 40,
+      "linear": 13,
+      "sigmoid": 14
+    },
+    "lr_C": {
+      "0.01": 10,
+      "0.001": 45,
+      "100.0": 2,
+      "0.005": 3,
+      "0.002": 2,
+      "0.02": 3,
+      "200.0": 1,
+      "50.0": 2,
+      "1.0": 3,
+      "0.1": 2,
+      "0.05": 1,
+      "1000.0": 1
+    },
+    "rf_n_estimators": {
+      "800": 11,
+      "100": 46,
+      "300": 19
+    },
+    "rf_max_depth": {
+      "8": 63,
+      "16": 13
+    },
+    "rf_max_features": {
+      "0.3": 27,
+      "1.0": 26,
+      "0.7": 23
+    }
+  },
+  "previous_runs": {
+    "revision-expanded": {
+      "completed_folds": 19,
+      "successful_unique_candidates": 79936,
+      "min_candidates_per_fold": 3238,
+      "max_candidates_per_fold": 5036,
+      "max_fold_seconds": 613805.0696831942
+    },
+    "revision-finetuning-20261102-122955": {
+      "completed_folds": 19,
+      "successful_unique_candidates": 511,
+      "min_candidates_per_fold": 24,
+      "max_candidates_per_fold": 32,
+      "max_fold_seconds": 2961.236922606826
+    }
+  },
+  "new_upper_bound": {
+    "screen_candidates": 35,
+    "joint_per_objective": 34,
+    "objectives": 4,
+    "baseline_candidates": 3,
+    "clinical_control_candidates_including_matched": 3,
+    "unique_inner_candidates_per_outer_fold": 177,
+    "outer_folds": 20,
+    "inner_fits_including_matched_control": 14160,
+    "note": "Upper bound before duplicate/failure reuse, excluding outer refits, audits and bootstrap reporting."
+  },
+  "verified_checkpoint_counts": {
+    "revision-expanded": 19,
+    "revision-finetuning-20261102-122955": 19
+  },
+  "source_checkpoint_marker_hashes": {
+    "results/revision-expanded/fold-checkpoints/highrisk_vs_lowrisk/nested_cv_repeat0_fold3/complete.json": "fc5120de6783e9f94d7131ef01fb582370dc2a1be37a3e1cf0291d1219874548",
+    "results/revision-expanded/fold-checkpoints/highrisk_vs_lowrisk/nested_cv_repeat0_fold2/complete.json": "e2c96aacc975605acf4d119ce6a200d5a94152d95ac2c7488aa298545ba6d23f",
+    "results/revision-expanded/fold-checkpoints/highrisk_vs_lowrisk/nested_cv_repeat0_fold4/complete.json": "830400f1544e31a803a77f0bf5b06cda0a0eaffe24433e4dde038296dcb19d29",
+    "results/revision-expanded/fold-checkpoints/highrisk_vs_lowrisk/nested_cv_repeat0_fold0/complete.json": "8bc78f80803527a24a929ab6dd8edc0cf162566360d21ec3d044fcb7d76fb8e2",
+    "results/revision-expanded/fold-checkpoints/highrisk_vs_lowrisk/nested_cv_repeat0_fold1/complete.json": "b9da0e6b0a3894aa64774b0a5711b2cfa35c60154fdbf009c980b69f705f609c",
+    "results/revision-expanded/fold-checkpoints/cancer_vs_lr_hr/nested_cv_repeat0_fold3/complete.json": "53997b5d239b0584d7f383cd3e8a60fdd0adfa6cadbb13a46ac0cdd8266ed04e",
+    "results/revision-expanded/fold-checkpoints/cancer_vs_lr_hr/nested_cv_repeat0_fold2/complete.json": "37e0e8a0d1a275183b3262312841cbe1ec00b6ffdcae75f130f053ee0a5666e5",
+    "results/revision-expanded/fold-checkpoints/cancer_vs_lr_hr/nested_cv_repeat0_fold4/complete.json": "b560bbb038bd5e4c233d7bcec546c6c8c206a0180bdd2dafc21ccac79b54d6fa",
+    "results/revision-expanded/fold-checkpoints/cancer_vs_lr_hr/nested_cv_repeat0_fold0/complete.json": "1e4f81090763f024b76bc921bf3d2605edc07c13f8df82ee111ae56f70f84342",
+    "results/revision-expanded/fold-checkpoints/cancer_vs_lr_hr/nested_cv_repeat0_fold1/complete.json": "e3c93234d6a4a952209c516c60b1694e622cf408eedaf8c54e86786f82e2cb0f",
+    "results/revision-expanded/fold-checkpoints/healthy_vs_cancer/nested_cv_repeat0_fold3/complete.json": "038bf0ce062f9b70737c81b101a1918698c8b712b9629023fa38802e4a2cce73",
+    "results/revision-expanded/fold-checkpoints/healthy_vs_cancer/nested_cv_repeat0_fold2/complete.json": "3b54a50a512c4f036e3adb81102e4af8bde180f0a0bdc89be13c12ef5066850f",
+    "results/revision-expanded/fold-checkpoints/healthy_vs_cancer/nested_cv_repeat0_fold4/complete.json": "ee6245b2dca49d4fe6a20bacf3b0ceda5f02bedd0ce8698986e30d825f3bf62e",
+    "results/revision-expanded/fold-checkpoints/healthy_vs_cancer/nested_cv_repeat0_fold0/complete.json": "e79fd9b1f1c012743fa7ca71bd318d04ba5f3fabcbb56a01fab98652c9b5557b",
+    "results/revision-expanded/fold-checkpoints/healthy_vs_cancer/nested_cv_repeat0_fold1/complete.json": "4ad6c2d0d276cf9e45b5e65d2867a759c923b9009d1d1e1db46f60c48255c23b",
+    "results/revision-expanded/fold-checkpoints/MC/nested_cv_repeat0_fold3/complete.json": "2dbdac4fbfb4f86ba9d98e9574f062ab3d4a581863585055d1c3127b281acf83",
+    "results/revision-expanded/fold-checkpoints/MC/nested_cv_repeat0_fold4/complete.json": "ec3405cf680021e0797fe5a71cef8de11e3b60c7a5bfba43da7958b0e0ae397b",
+    "results/revision-expanded/fold-checkpoints/MC/nested_cv_repeat0_fold0/complete.json": "3ca5ff5fb02863bb9ad8bcf06b8af444654c3b4141177017c1a76ea277d8b4d8",
+    "results/revision-expanded/fold-checkpoints/MC/nested_cv_repeat0_fold1/complete.json": "9c3181ccea148dac9e165ef6a1528964103f21918545c0e5ed46a980f261230b",
+    "results/revision-finetuning-20261102-122955/fold-checkpoints/highrisk_vs_lowrisk/nested_cv_repeat0_fold3/complete.json": "6b67812fbf8a47a34869dfcef24da3f227a7135ca9a555a392c0be77b1819fdb",
+    "results/revision-finetuning-20261102-122955/fold-checkpoints/highrisk_vs_lowrisk/nested_cv_repeat0_fold2/complete.json": "6ac5ebc2e3e5226141587f9303cca0226b9cdae57a60ff2b4bf8e584d0c30e15",
+    "results/revision-finetuning-20261102-122955/fold-checkpoints/highrisk_vs_lowrisk/nested_cv_repeat0_fold4/complete.json": "48715a481239032ad0b118f43ff2b79f9f7b3eea31cfe24e3933b162c279178a",
+    "results/revision-finetuning-20261102-122955/fold-checkpoints/highrisk_vs_lowrisk/nested_cv_repeat0_fold0/complete.json": "e1f1af405e149baa605a881cf10e242a4ef49eb80b291e45f5d0a136295d2476",
+    "results/revision-finetuning-20261102-122955/fold-checkpoints/highrisk_vs_lowrisk/nested_cv_repeat0_fold1/complete.json": "4cbde4de8aef8f6e38cef4c682dc96e13dfa90b60a7d1d3b7f2a8a9edf12f3b4",
+    "results/revision-finetuning-20261102-122955/fold-checkpoints/cancer_vs_lr_hr/nested_cv_repeat0_fold3/complete.json": "2fdc1696049d1eef52b3aad19377b97eb6ee50a8bc35a49704796958114f8c80",
+    "results/revision-finetuning-20261102-122955/fold-checkpoints/cancer_vs_lr_hr/nested_cv_repeat0_fold2/complete.json": "faf1b454124d45b6648ffe396d31a24b9be918541ca22194240554ee503d6b3f",
+    "results/revision-finetuning-20261102-122955/fold-checkpoints/cancer_vs_lr_hr/nested_cv_repeat0_fold4/complete.json": "835e012a87a2312b9d00c46bdddbe984440a3f4cd46dff1d24efb15ffcba9fb5",
+    "results/revision-finetuning-20261102-122955/fold-checkpoints/cancer_vs_lr_hr/nested_cv_repeat0_fold0/complete.json": "1dd4776097b5192ca572ad53d3a5dd1eedf8dd3f2aed15c61ffae89c2b2c75d1",
+    "results/revision-finetuning-20261102-122955/fold-checkpoints/cancer_vs_lr_hr/nested_cv_repeat0_fold1/complete.json": "168cca627b8d25951673cb071ebbeea8a7f29c98a663707df3416c9d5f32093e",
+    "results/revision-finetuning-20261102-122955/fold-checkpoints/healthy_vs_cancer/nested_cv_repeat0_fold3/complete.json": "6e8574fcec332d9d5c3424c0571f5e0c3205451510d3a09133b8fdcb9d7b13dd",
+    "results/revision-finetuning-20261102-122955/fold-checkpoints/healthy_vs_cancer/nested_cv_repeat0_fold2/complete.json": "76822248d89053760a2bf6e0f9b872be41138ee28c517d081f9a895548ed01c4",
+    "results/revision-finetuning-20261102-122955/fold-checkpoints/healthy_vs_cancer/nested_cv_repeat0_fold4/complete.json": "51d4e8c2f945b0df0ef50b3050512af6d3daf1264396d3e9c057f9ee1cabd22e",
+    "results/revision-finetuning-20261102-122955/fold-checkpoints/healthy_vs_cancer/nested_cv_repeat0_fold0/complete.json": "0e64fa9948dff173c2835e65588751284e76e6553eb803e0cb4d765d03801bbd",
+    "results/revision-finetuning-20261102-122955/fold-checkpoints/healthy_vs_cancer/nested_cv_repeat0_fold1/complete.json": "82ad36804effbd21bbbc67f99a9cd0086bd668b2421f777e14f9c886a1160522",
+    "results/revision-finetuning-20261102-122955/fold-checkpoints/MC/nested_cv_repeat0_fold3/complete.json": "ddc283a02f8d370c89a2b5bfc653eb6cfae1ac69bb984fda5f609e61b053b15a",
+    "results/revision-finetuning-20261102-122955/fold-checkpoints/MC/nested_cv_repeat0_fold4/complete.json": "a68b6d90fe9bed2d6471ea4b5d14744af1a3f00c9ed110429ddbe7a5b6992cde",
+    "results/revision-finetuning-20261102-122955/fold-checkpoints/MC/nested_cv_repeat0_fold0/complete.json": "59f0827e3be88c09478401a9968c6d0fe6a3c888c77fc41a0123ffc14ce7813f",
+    "results/revision-finetuning-20261102-122955/fold-checkpoints/MC/nested_cv_repeat0_fold1/complete.json": "fadb8c7ef0d2a4bfcf52bf0163ef97c30f5b543b2479192336da11c91df93884"
+  }
+}

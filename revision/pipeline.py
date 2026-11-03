@@ -20,6 +20,7 @@ from .features import (
 )
 from .metrics import scores, threshold_for_sensitivity, select_threshold
 from .data import RISK_DEFINITION
+from .progress import update_progress
 
 
 class ModelFitConvergenceError(ValueError):
@@ -109,6 +110,11 @@ def fit_predict(dataset, indices, y, candidate, train, test, seed, config):
         candidate.imputation,
     )
     cached = cache.pop(feature_key, None)
+    update_progress(
+        config,
+        "feature-cache" if cached is not None else "feature-fit",
+        candidate=candidate.dictionary(),
+    )
     start = time.perf_counter()
     if cached is None:
         full_candidate = replace(candidate, n_freq=0)
@@ -205,7 +211,9 @@ def fit_predict(dataset, indices, y, candidate, train, test, seed, config):
         candidate,
         seed,
         rf_jobs=config.get("rf_jobs", 4),
-        lr_max_iter=config.get("fine_tuning", {}).get("lr_max_iter", 5000),
+        lr_max_iter=(
+            config.get("fine_tuning") or config.get("final_selection") or {}
+        ).get("lr_max_iter", 5000),
     )
     weights = (
         patient_weights(groups[tr]) if candidate.patient_weighted else np.ones(len(tr))
@@ -214,13 +222,32 @@ def fit_predict(dataset, indices, y, candidate, train, test, seed, config):
         warnings.simplefilter("always")
         model_training_jobs = getattr(model, "n_jobs", 1)
         model_start = time.perf_counter()
-        model.fit(xtrain, y[tr], sample_weight=weights)
+        update_progress(config, "model-fit")
+        fit_options = {}
+        gram_cache_hit = None
+        if (
+            config.get("cache_svm_training_gram")
+            and candidate.model == "svm"
+            and clinical is None
+        ):
+            grams = config.setdefault("_gram_cache", OrderedDict())
+            gram_key = (feature_key, count)
+            gram = grams.pop(gram_key, None)
+            gram_cache_hit = gram is not None
+            if gram is None:
+                gram = xtrain @ xtrain.T
+            grams[gram_key] = gram
+            while len(grams) > 128:
+                grams.popitem(last=False)
+            fit_options["training_gram"] = gram
+        model.fit(xtrain, y[tr], sample_weight=weights, **fit_options)
         model_fit_seconds = time.perf_counter() - model_start
-        if config.get("fine_tuning") and any(
+        if (config.get("fine_tuning") or config.get("final_selection")) and any(
             issubclass(w.category, ConvergenceWarning) for w in caught
         ):
             raise ModelFitConvergenceError(
-                "Fine-tuning fit did not converge; candidate rejected: "
+                ("Fine-tuning" if config.get("fine_tuning") else "Final-search")
+                + " fit did not converge; candidate rejected: "
                 + "; ".join(
                     str(w.message)
                     for w in caught
@@ -246,6 +273,7 @@ def fit_predict(dataset, indices, y, candidate, train, test, seed, config):
             )
         transform_seconds = test_transform_time + time.perf_counter() - start
         start = time.perf_counter()
+        update_progress(config, "model-predict")
         p[valid_test] = aligned_probabilities(model, xtest, nclasses)
         predict_seconds = time.perf_counter() - start
     meta = builder.metadata()
@@ -265,11 +293,18 @@ def fit_predict(dataset, indices, y, candidate, train, test, seed, config):
     )
     meta["preparation_and_fit_seconds"] = fitted_seconds
     meta["model_fit_seconds"] = model_fit_seconds
+    meta["svm_training_gram_cache_hit"] = gram_cache_hit
     meta["model_training_jobs"] = model_training_jobs
     meta["model_max_iter"] = getattr(model, "parameters", {}).get("max_iter")
     meta["timing_scope"] = (
         "Cached full-ranked feature preparation; preparation includes test transform on a cache miss; no acquisition timing"
     )
+    if config.get("cache_svm_training_gram"):
+        meta[
+            "timing_scope"
+        ] += (
+            "; SVM training Gram products may be reused for identical training features"
+        )
     meta["clinical_covariates"] = clinical_columns if clinical is not None else []
     return p, meta, (builder, model, clinical)
 
@@ -278,6 +313,7 @@ def inner_evaluate(dataset, indices, y, candidate, splits, seed, config):
     predictions = np.full((len(indices), len(np.unique(y))), np.nan)
     metadata = []
     for fold, (tr, va) in enumerate(splits):
+        update_progress(config, "inner-validation", inner_fold=fold + 1)
         p, meta, _ = fit_predict(
             dataset, indices, y, candidate, tr, va, seed + fold, config
         )
@@ -338,6 +374,11 @@ def screen_candidates(config, nfreq, complex_available):
         cutoff=config["default_cutoff"],
         patient_weighted=config["patient_weighted_training"],
     )
+    defaults.update(config.get("screen_defaults", {}))
+    if config.get("final_selection"):
+        defaults["params_json"] = json.dumps(
+            {"max_iter": config["final_selection"]["svm_max_iter"]}
+        )
     base = Candidate(**defaults)
     candidates = [
         replace(base, stage="frequency", n_freq=n)
@@ -688,10 +729,18 @@ def run_task(dataset, task, config, outdir, *, taskdir=None):
         split_record["source_version"] = config.get("_source_version")
         splits_log.append(split_record)
         cache = {}
+        update_progress(config, "inner-search", candidates_completed=0)
 
         def evaluate(candidate):
             if candidate not in cache:
                 started = time.perf_counter()
+                update_progress(
+                    config,
+                    "candidate",
+                    candidate=candidate.dictionary(),
+                    candidate_started_epoch=time.time(),
+                    candidates_completed=len(cache),
+                )
                 if config.get("verbose_candidates", False):
                     print(
                         f'{task}/{fold_name}: inner {len(cache)+1}: {candidate.stage}/{candidate.model}, frequencies={candidate.n_freq or "all"}, mask={candidate.mask}',
@@ -715,6 +764,7 @@ def run_task(dataset, task, config, outdir, *, taskdir=None):
                             "repeat": repeat,
                             "outer_fold": fold,
                             "evaluation": evaluation,
+                            "inner_evaluation_seconds": time.perf_counter() - started,
                         }
                     )
                     cache[candidate] = value
@@ -728,8 +778,11 @@ def run_task(dataset, task, config, outdir, *, taskdir=None):
                         )
                     )
                     cache[candidate] = None
-                    if config.get("fine_tuning"):
+                    if config.get("fine_tuning") or config.get("final_selection"):
                         write_json(taskdir / "candidate_failures.json", failures)
+                update_progress(
+                    config, "candidate-complete", candidates_completed=len(cache)
+                )
                 if config.get("verbose_candidates", False):
                     print(
                         f"{task}/{fold_name}: inner completed in {time.perf_counter()-started:.2f}s",
@@ -749,14 +802,20 @@ def run_task(dataset, task, config, outdir, *, taskdir=None):
             entry = config["_shortlist"][fold_id(task, repeat, fold, evaluation)]
             validate_split(entry, split_record)
             shortlist = entry["candidates"]
+        screen_options = (
+            screen_candidates(
+                config, len(dataset.frequencies), dataset.complex_available
+            )
+            if shortlist is None
+            else []
+        )
+        update_progress(
+            config,
+            "screening-and-baselines",
+            candidates_planned=len(screen_options) + len(config["models"]),
+        )
         screened = (
-            [
-                r
-                for c in screen_candidates(
-                    config, len(dataset.frequencies), dataset.complex_available
-                )
-                if (r := evaluate(c)) is not None
-            ]
+            [r for c in screen_options if (r := evaluate(c)) is not None]
             if shortlist is None
             else []
         )
@@ -774,20 +833,28 @@ def run_task(dataset, task, config, outdir, *, taskdir=None):
                 patient_weighted=config["patient_weighted_training"],
                 selector="all",
                 params_json=(
-                    json.dumps({"max_iter": config["fine_tuning"]["svm_max_iter"]})
-                    if config.get("fine_tuning") and model == "svm"
+                    json.dumps(
+                        {
+                            "max_iter": (
+                                config.get("fine_tuning")
+                                or config.get("final_selection")
+                            )["svm_max_iter"]
+                        }
+                    )
+                    if (config.get("fine_tuning") or config.get("final_selection"))
+                    and model == "svm"
                     else "{}"
                 ),
             )
             result = evaluate(baseline)
             if result is None:
-                if config.get("fine_tuning"):
+                if config.get("fine_tuning") or config.get("final_selection"):
                     continue
                 raise RuntimeError(
                     f"Baseline {model} failed: cannot perform a paired evaluation"
                 )
             streams[f"baseline_{model}"] = (result, "baseline", model)
-        # Prespecified screening-family winners get unbiased outer scoring too.
+        # Retained screening alternatives receive held-out outer scores.
         for stage, field in [
             ("selector", "selector"),
             ("representation", "representation"),
@@ -803,26 +870,35 @@ def run_task(dataset, task, config, outdir, *, taskdir=None):
         for value in screened:
             if value["candidate"].stage == "missingness":
                 streams["ablation_missingness"] = (value, "ablation", "svm")
+        tuning_plans = {
+            objective: (
+                tune_candidates(screened, config, objective, len(dataset.frequencies))
+                if shortlist is None
+                else [Candidate(**c) for c in shortlist[objective]]
+            )
+            for objective in config["objectives"]
+        }
+        has_controls = any(v in dataset.table for v in config["clinical_covariates"])
+        update_progress(
+            config,
+            "joint-tuning",
+            candidates_planned=len(
+                set(cache).union(*(set(v) for v in tuning_plans.values()))
+            )
+            + (2 if has_controls else 0),
+        )
         for objective in config["objectives"]:
             tuned = [
-                r
-                for c in (
-                    tune_candidates(
-                        screened, config, objective, len(dataset.frequencies)
-                    )
-                    if shortlist is None
-                    else [Candidate(**c) for c in shortlist[objective]]
-                )
-                if (r := evaluate(c)) is not None
+                r for c in tuning_plans[objective] if (r := evaluate(c)) is not None
             ]
             if not tuned:
-                if config.get("fine_tuning"):
+                if config.get("fine_tuning") or config.get("final_selection"):
                     continue
                 raise RuntimeError("Every tuning candidate failed")
             for model in config["models"]:
                 options = [r for r in tuned if r["candidate"].model == model]
                 if not options:
-                    if config.get("fine_tuning"):
+                    if config.get("fine_tuning") or config.get("final_selection"):
                         continue
                     reasons = list(
                         dict.fromkeys(
@@ -846,7 +922,7 @@ def run_task(dataset, task, config, outdir, *, taskdir=None):
                 best["candidate"].model,
             )
         # Prespecified confounding comparisons, fitted only on the current training patients.
-        if streams and any(v in dataset.table for v in config["clinical_covariates"]):
+        if streams and has_controls:
             base = streams.get("auc_selected", next(iter(streams.values())))[0][
                 "candidate"
             ]
@@ -867,6 +943,9 @@ def run_task(dataset, task, config, outdir, *, taskdir=None):
             candidate = result["candidate"]
             if candidate in failed_outer_candidates:
                 continue
+            update_progress(
+                config, "calibration-and-outer-refit", stream=stream, inner_fold=None
+            )
             calibrator, sensitivity_threshold, operating, postprocessing = (
                 fit_training_rules(
                     result,
@@ -884,7 +963,7 @@ def run_task(dataset, task, config, outdir, *, taskdir=None):
                         dataset, indices, y, candidate, tr, te, seed, config
                     )
                 except ModelFitConvergenceError as exc:
-                    if not config.get("fine_tuning"):
+                    if not (config.get("fine_tuning") or config.get("final_selection")):
                         raise
                     failures.append(
                         dict(

@@ -59,10 +59,11 @@ def point(candidate, row, task, mode):
 def load_points(root):
     root = Path(root)
     manifest = json.loads((root / "run_manifest.json").read_text())
-    if manifest["status"] not in {"completed", "completed_partial"} or not manifest[
-        "config"
-    ].get("fine_tuning"):
-        raise ValueError("Expected a finished fine-tuning run (partial allowed)")
+    if manifest["status"] not in {"completed", "completed_partial"}:
+        raise ValueError("Expected a finished search run (partial allowed)")
+    config = manifest["config"]
+    if not (config.get("fine_tuning") or config.get("final_selection")):
+        raise ValueError("Expected a finished fine-tuning or final-selection run")
     tasks = manifest["config"]["tasks"]
     points = []
     for task in tasks:
@@ -104,13 +105,22 @@ def load_points(root):
                 frequencies_hz=row.get("frequencies_hz"),
             )
             points.append(value)
-    counts = {
-        task: len(manifest["config"]["fine_tuning"]["folds"][task]) for task in tasks
-    }
+    counts = (
+        {task: len(config["fine_tuning"]["folds"][task]) for task in tasks}
+        if config.get("fine_tuning")
+        else {
+            task: sum(
+                row["evaluation"] == "nested_cv"
+                for row in json.loads((root / task / "splits.json").read_text())
+            )
+            for task in tasks
+        }
+    )
+    expected = config["outer_folds"] * config.get("outer_repeats", 1)
     for value in points:
         value["status"] = (
-            f"EXPLORATORY: {counts[value['task']]}/{manifest['config']['outer_folds']} folds"
-            if counts[value["task"]] < manifest["config"]["outer_folds"]
+            f"EXPLORATORY: {counts[value['task']]}/{expected} folds"
+            if counts[value["task"]] < expected
             else "complete original partition; adaptive follow-up analysis"
         )
     return points, tasks

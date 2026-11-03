@@ -192,6 +192,9 @@ def runtime_manifest(args, config):
         root / "run_all.sh",
         root / "run_revision.sh",
         root / "run_finetuning.sh",
+        root / "run_final.sh",
+        root / "FINAL_SELECTION.md",
+        root / "configs/revision-final-evidence.json",
         root / "environment.yml",
         root / "setup_environment.sh",
     ]
@@ -242,6 +245,31 @@ def runtime_manifest(args, config):
 def validate_config(config):
     if config.get("schema_version") != 2:
         raise ValueError("Expected revision config schema_version 2")
+    if config.get("final_selection"):
+        if config.get("fine_tuning"):
+            raise ValueError(
+                "Final selection is a fresh search, not a fine-tuning shortlist"
+            )
+        for key in ("svm_max_iter", "lr_max_iter"):
+            value = config["final_selection"].get(key)
+            if not isinstance(value, int) or isinstance(value, bool) or value < 1:
+                raise ValueError(f"Invalid final-selection {key}")
+    interval = config.get("progress_interval_seconds", 0)
+    if not isinstance(interval, int) or interval < 0:
+        raise ValueError("progress_interval_seconds must be a nonnegative integer")
+    if config.get("fold_schedule", "task_order") not in {"task_order", "round_robin"}:
+        raise ValueError("Unknown fold_schedule")
+    counts = config.get("frequency_counts")
+    if counts is not None and (
+        not counts
+        or len(set(counts)) != len(counts)
+        or any(not isinstance(n, int) or n < 1 for n in counts)
+    ):
+        raise ValueError("frequency_counts must contain unique positive integers")
+    if config.get("cache_svm_training_gram") and not set(
+        config["model_grids"].get("svm", {}).get("kernel", ["rbf"])
+    ) <= {"linear", "rbf"}:
+        raise ValueError("SVM Gram caching requires linear/RBF kernels")
     for key in ["outer_folds", "inner_folds"]:
         if config[key] < 2:
             raise ValueError(f"{key} must be >=2")
@@ -292,6 +320,18 @@ def validate_config(config):
         values = config[name]
         if not values or len(set(values)) != len(values) or not set(values) <= allowed:
             raise ValueError(f"Invalid, duplicate or empty {name}: {values}")
+    screen = config.get("screen_defaults", {})
+    allowed_screen = {"cutoff", "normalization", "imputation", "class_weight"}
+    if not isinstance(screen, dict) or not set(screen) <= allowed_screen:
+        raise ValueError("Invalid screen_defaults fields")
+    for field, collection in {
+        "cutoff": "cutoffs",
+        "normalization": "normalizations",
+        "imputation": "imputations",
+        "class_weight": "class_weights",
+    }.items():
+        if field in screen and screen[field] not in config[collection]:
+            raise ValueError(f"screen_defaults.{field} must occur in {collection}")
     if any(not 0 < q < 1 for q in config["z_quantiles"]):
         raise ValueError("z_quantiles must be in (0,1)")
     if any(
@@ -409,7 +449,22 @@ def main(argv=None):
                 },
             },
         )
+        if config.get("final_selection"):
+            config["screen_defaults"] = dict(
+                cutoff=100.000001,
+                normalization="freq",
+                imputation="mean",
+                class_weight=None,
+            )
+            config["model_grids"]["svm"]["max_iter"] = [
+                config["final_selection"]["svm_max_iter"]
+            ]
     validate_config(config)
+    if config.get("progress_interval_seconds"):
+        print(
+            "PIPELINE 1/6: verify inputs, source metadata and patient partitions",
+            flush=True,
+        )
     if previous_manifest is not None and previous_manifest.get("config") != config:
         raise ValueError("Resume requires the identical resolved configuration")
     if (
@@ -629,6 +684,11 @@ def main(argv=None):
                     )
             if config.get("external_cohort_column"):
                 group_splits(y, taskgroups, config["inner_folds"], config["seed"] + 1)
+        if config.get("progress_interval_seconds"):
+            print(
+                "PIPELINE 2/6: quality, clinical metadata and repeatability audits",
+                flush=True,
+            )
         quality_audit(dataset, config, output)
         repeatability_audit(
             dataset, output, config["bootstrap_samples"], config["seed"]
@@ -662,6 +722,11 @@ def main(argv=None):
         all_summaries = []
         all_comparisons = []
         start = time.perf_counter()
+        if config.get("progress_interval_seconds"):
+            print(
+                "PIPELINE 3/6: training-only screening -> joint tuning -> inner OOF calibration -> frozen outer testing",
+                flush=True,
+            )
         execution_config = {
             **config,
             "_shortlist": shortlist,
@@ -729,6 +794,11 @@ def main(argv=None):
                 )
                 all_summaries.append(summary)
                 all_comparisons.append(comparison)
+        if config.get("progress_interval_seconds"):
+            print(
+                "PIPELINE 4/6: combine task metrics and global corrected CV/Holm statistics",
+                flush=True,
+            )
         summary = pd.concat(all_summaries, ignore_index=True)
         summary.to_csv(output / "all_metrics.csv", index=False)
         pd.concat(
@@ -804,6 +874,18 @@ def main(argv=None):
                 output / "fine_tuning_plan.json"
             )
             manifest["partial_tasks"] = partial_tasks
+        if config.get("final_selection"):
+            from revision.final_selection import annotate
+
+            if config.get("progress_interval_seconds"):
+                print(
+                    "PIPELINE 5/6: export selected parameters, search budget and reviewer summary",
+                    flush=True,
+                )
+            annotate(output, config)
+            manifest["final_selection_protocol_sha256"] = digest(
+                output / "final_selection_protocol.json"
+            )
         manifest.update(
             status="completed_partial" if partial_tasks else "completed",
             elapsed_seconds=time.perf_counter() - start,
@@ -814,7 +896,11 @@ def main(argv=None):
                 else (
                     "Adaptive same-partition fine tuning; partial tasks exploratory only"
                     if config.get("fine_tuning")
-                    else "Retrospective nested validation; conditional uncertainty, not prospective clinical validation"
+                    else (
+                        "Adaptive reduced search on the original patient partition; not independent confirmation"
+                        if config.get("final_selection")
+                        else "Retrospective nested validation; conditional uncertainty, not prospective clinical validation"
+                    )
                 )
             ),
         )

@@ -32,7 +32,7 @@ class VectorizedSVC:
             return np.tanh(self.gamma_ * product + self.coef0_)
         raise ValueError(f"Unsupported vectorized kernel: {self.kernel_}")
 
-    def fit(self, x, y, sample_weight=None):
+    def fit(self, x, y, sample_weight=None, training_gram=None):
         parameters = dict(self.parameters)
         self.kernel_ = parameters.pop("kernel", "rbf")
         gamma = parameters.pop("gamma", "scale")
@@ -47,7 +47,28 @@ class VectorizedSVC:
             else 1.0 / x.shape[1] if gamma == "auto" else float(gamma)
         )
         self.model_ = SVC(kernel="precomputed", **parameters)
-        self.model_.fit(self._kernel(x), y, sample_weight=sample_weight)
+        if training_gram is None:
+            kernel = self._kernel(x)
+        else:
+            product = np.asarray(training_gram, float)
+            if product.shape != (len(x), len(x)) or not np.isfinite(product).all():
+                raise ValueError(
+                    "Training Gram matrix has incorrect shape or nonfinite values"
+                )
+            if self.kernel_ == "linear":
+                kernel = product
+            elif self.kernel_ == "rbf":
+                distance = (
+                    self.training_norm_[:, None]
+                    + self.training_norm_[None, :]
+                    - 2 * product
+                )
+                kernel = np.exp(-self.gamma_ * np.maximum(distance, 0))
+            else:
+                raise ValueError(
+                    "Cached training Gram matrix supports linear and RBF kernels"
+                )
+        self.model_.fit(kernel, y, sample_weight=sample_weight)
         self.classes_ = self.model_.classes_
         self.n_features_in_ = x.shape[1]
         return self

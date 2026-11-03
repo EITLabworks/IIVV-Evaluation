@@ -247,7 +247,7 @@ def report_task(dataset, task, predictions, selections, config, outdir):
         weighting="class_weight",
     )
     expected_ablations = {"ablation_missingness"}
-    if config.get("fine_tuning"):
+    if config.get("fine_tuning") or config.get("final_selection"):
         expected_ablations.update(
             {"covariate_only", "covariate_combined", "covariate_eis_only"}
         )
@@ -286,7 +286,9 @@ def report_task(dataset, task, predictions, selections, config, outdir):
         }
         observed = set(zip(part["repeat"], part.sample_id))
         if observed != expected:
-            if not stream.startswith("ablation_") and not config.get("fine_tuning"):
+            if not stream.startswith("ablation_") and not (
+                config.get("fine_tuning") or config.get("final_selection")
+            ):
                 raise ValueError(f"{task}/{stream}: incomplete outer population")
             unavailable.append(
                 dict(
@@ -505,9 +507,26 @@ def report_task(dataset, task, predictions, selections, config, outdir):
                     shutil.copy2(plotdir / src, legacy / dst)
     # Predetermined family: every same-model/objective tuned-vs-baseline comparison, per task.
     for model, objective in itertools.product(config["models"], config["objectives"]):
-        if ("nested_cv", f"{objective}_{model}") not in pooled:
-            continue
-        if ("nested_cv", f"baseline_{model}") not in pooled:
+        if ("nested_cv", f"{objective}_{model}") not in pooled or (
+            "nested_cv",
+            f"baseline_{model}",
+        ) not in pooled:
+            comparisons.append(
+                dict(
+                    task=task,
+                    objective=objective,
+                    model=model,
+                    delta_macro_auc=np.nan,
+                    ci_low=np.nan,
+                    ci_high=np.nan,
+                    p_value=np.nan,
+                    n_paired_sites=0,
+                    n_patients=0,
+                    valid_bootstraps=0,
+                    method="unavailable incomplete model stream; retained in Holm family",
+                    conditional_on_common_quality_coverage=True,
+                )
+            )
             continue
         a = pooled[("nested_cv", f"{objective}_{model}")]
         b = pooled[("nested_cv", f"baseline_{model}")]

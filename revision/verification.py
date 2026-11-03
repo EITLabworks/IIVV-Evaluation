@@ -21,6 +21,20 @@ def verify_results(root, *, verify_inputs=False):
     manifest = json.loads((root / "run_manifest.json").read_text())
     require(manifest.get("status") == "completed", "Run is not completed")
     cfg = manifest["config"]
+    if cfg.get("final_selection"):
+        protocol = root / "final_selection_protocol.json"
+        require(
+            protocol.is_file()
+            and digest(protocol) == manifest.get("final_selection_protocol_sha256"),
+            "Final selection protocol changed or is missing",
+        )
+        for name, expected in json.loads(protocol.read_text())[
+            "rationale_artifact_hashes"
+        ].items():
+            require(
+                (root / name).is_file() and digest(root / name) == expected,
+                f"Final-selection rationale changed: {name}",
+            )
     revised_reports = manifest.get("reporting_protocol_version", 0) >= 1
     checked_folds = 0
     require(manifest.get("input_hashes"), "Missing input inventory")
@@ -122,6 +136,8 @@ def verify_results(root, *, verify_inputs=False):
         lookup = inclusion.set_index("sample_id")
         splits = json.loads((folder / "splits.json").read_text())
         selections = json.loads((folder / "selections.json").read_text())
+        unavailable = json.loads((folder / "unavailable_streams.json").read_text())
+        failures = json.loads((folder / "candidate_failures.json").read_text())
         predictions = pd.read_csv(
             folder / "outer_predictions.csv",
             dtype={"patient_id": str, "sample_id": str},
@@ -208,10 +224,35 @@ def verify_results(root, *, verify_inputs=False):
             for key in keys:
                 part = part[part[key] == split[key]]
                 chosen = chosen[chosen[key] == split[key]]
-            require(
-                expected_streams <= set(part.stream),
-                f"{task}: missing baseline/tuned streams",
-            )
+            missing = expected_streams - set(part.stream)
+            if missing and cfg.get("final_selection"):
+                documented = {
+                    row["stream"]
+                    for row in unavailable
+                    if row["evaluation"] == split["evaluation"]
+                }
+                fold_name = f"{split['evaluation']}_repeat{split['repeat']}_fold{split['outer_fold']}"
+                failed_models = {
+                    row["candidate"]["model"]
+                    for row in failures
+                    if row["fold"] == fold_name
+                }
+                require(
+                    missing <= documented
+                    and all(
+                        stream.rsplit("_", 1)[-1] in failed_models
+                        or (stream.endswith("_selected") and bool(failed_models))
+                        for stream in missing
+                    ),
+                    f"{task}: missing streams without corresponding fold failure logs",
+                )
+                metrics = pd.read_csv(folder / "metrics_summary.csv")
+                require(
+                    not set(metrics.stream) & missing,
+                    f"{task}: pooled metrics reported for a failed stream",
+                )
+            else:
+                require(not missing, f"{task}: missing baseline/tuned streams")
             require(
                 set(chosen.stream) == set(part.stream),
                 f"{task}: prediction/selection streams disagree",
@@ -289,7 +330,14 @@ def verify_results(root, *, verify_inputs=False):
                 (folder / "matched_covariate_control.json").read_text()
             )
             require(
-                control.get("status") == "completed",
+                control.get("status") == "completed"
+                or (
+                    cfg.get("final_selection")
+                    and control.get("status") == "unavailable_partial"
+                    and any(
+                        row["stream"] == "covariate_eis_only" for row in unavailable
+                    )
+                ),
                 f"{task}: matched control incomplete",
             )
             for _, reference in selection_frame[
@@ -300,6 +348,17 @@ def verify_results(root, *, verify_inputs=False):
                 ]
                 for key in keys:
                     matched = matched[matched[key] == reference[key]]
+                if len(matched) == 0 and cfg.get("final_selection"):
+                    fold_name = f"{reference.evaluation}_repeat{reference['repeat']}_fold{reference.outer_fold}"
+                    require(
+                        any(
+                            row["fold"] == fold_name
+                            and row["candidate"].get("stage") == "covariate_eis_only"
+                            for row in failures
+                        ),
+                        f"{task}: missing matched LR fold without failure record",
+                    )
+                    continue
                 require(len(matched) == 1, f"{task}: missing matched LR fold")
                 other = matched.iloc[0]
                 a = dict(reference.candidate)
@@ -373,6 +432,15 @@ def verify_results(root, *, verify_inputs=False):
         checked_outer_folds=checked_folds,
         comparison_family=len(expected),
         input_hashes_checked=verify_inputs,
+        **(
+            {
+                "unavailable_streams_acknowledged": len(
+                    pd.read_csv(root / "unavailable_results.csv")
+                )
+            }
+            if cfg.get("final_selection")
+            else {}
+        ),
     )
 
 
