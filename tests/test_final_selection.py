@@ -15,26 +15,23 @@ from run_revision import validate_config
 
 @pytest.fixture
 def config():
-    return json.loads(Path("configs/revision-final.json").read_text())
+    return json.loads(Path("configs/revision.json").read_text())
 
 
 def test_final_search_budget_and_original_patient_protocol(config):
-    original = json.loads(Path("configs/revision.json").read_text())
     validate_config(config)
-    for key in (
-        "tasks",
-        "models",
-        "objectives",
-        "seed",
-        "outer_folds",
-        "inner_folds",
-        "outer_repeats",
-        "clinical_covariates",
-        "calibration",
-        "bootstrap_samples",
-        "permutation_samples",
-    ):
-        assert config[key] == original[key]
+    assert config["tasks"] == [
+        "healthy_vs_cancer",
+        "highrisk_vs_lowrisk",
+        "cancer_vs_lr_hr",
+    ]
+    assert (
+        config["seed"],
+        config["outer_folds"],
+        config["inner_folds"],
+        config["outer_repeats"],
+    ) == (1729, 5, 4, 1)
+    assert config["schema_version"] == 3
     assert "fine_tuning" not in config
     screened = screen_candidates(config, 31, True)
     assert len(screened) == 35
@@ -107,7 +104,7 @@ def test_progress_tracks_worker_and_phase_and_skips_stale_snapshots(tmp_path, ca
     import time
     from revision.progress import update_progress, heartbeat
 
-    folder = tmp_path / "fold-checkpoints/MC/nested_cv_repeat0_fold2"
+    folder = tmp_path / "fold-checkpoints/cancer_vs_lr_hr/nested_cv_repeat0_fold2"
     config = {
         "progress_interval_seconds": 60,
         "_progress_path": str(folder / "progress.json"),
@@ -117,21 +114,27 @@ def test_progress_tracks_worker_and_phase_and_skips_stale_snapshots(tmp_path, ca
     )
     state = json.loads((folder / "progress.json").read_text())
     assert state["pid"] > 0 and state["phase"] == "model-fit"
-    heartbeat([("MC", (0, 2, "nested_cv"), tmp_path)], 1, 20)
-    assert "MC/f2: model-fit candidate=3/20 inner=2" in capsys.readouterr().out
-    heartbeat(
-        [("MC", (0, 2, "nested_cv"), tmp_path)], 1, 20, since_epoch=time.time() + 1
+    heartbeat([("cancer_vs_lr_hr", (0, 2, "nested_cv"), tmp_path)], 1, 20)
+    assert (
+        "cancer_vs_lr_hr/f2: model-fit candidate=3/20 inner=2"
+        in capsys.readouterr().out
     )
-    assert "MC/f2" not in capsys.readouterr().out
-    heartbeat([("MC", str(tmp_path))], 0, 4, label="reports")
+    heartbeat(
+        [("cancer_vs_lr_hr", (0, 2, "nested_cv"), tmp_path)],
+        1,
+        20,
+        since_epoch=time.time() + 1,
+    )
+    assert "cancer_vs_lr_hr/f2" not in capsys.readouterr().out
+    heartbeat([("cancer_vs_lr_hr", str(tmp_path))], 0, 4, label="reports")
     assert "reports=0/4" in capsys.readouterr().out
 
 
 def test_review_exports_retain_parameters_and_honest_scope(tmp_path, config):
     from revision.final_selection import annotate
 
-    config = dict(config, tasks=["MC"], outer_folds=2)
-    folder = tmp_path / "MC"
+    config = dict(config, tasks=["cancer_vs_lr_hr"], outer_folds=2)
+    folder = tmp_path / "cancer_vs_lr_hr"
     folder.mkdir()
     (folder / "splits.json").write_text(json.dumps([{}, {}]))
     selection = dict(
@@ -174,7 +177,7 @@ def test_review_exports_retain_parameters_and_honest_scope(tmp_path, config):
     assert table.iloc[0].folds_available == table.iloc[0].folds_expected == 2
     assert len(pd.read_csv(tmp_path / "unavailable_results.csv")) == 1
     protocol = json.loads((tmp_path / "final_selection_protocol.json").read_text())
-    assert protocol["task_fold_counts"] == {"MC": 2}
+    assert protocol["task_fold_counts"] == {"cancer_vs_lr_hr": 2}
     assert "no independent confirmation" in protocol["interpretation"]
 
 
@@ -187,7 +190,7 @@ def test_final_synthetic_pipeline_exports_and_verifies_all_models(tmp_path):
         main(
             [
                 "--config",
-                "configs/revision-final.json",
+                "configs/revision.json",
                 "--synthetic",
                 "--tasks",
                 "healthy_vs_cancer",
@@ -219,3 +222,156 @@ def test_final_synthetic_pipeline_exports_and_verifies_all_models(tmp_path):
         "rf",
         "lr",
     }
+
+
+def test_final_mode_rejects_convergence_warning(tmp_path, monkeypatch, config):
+    import warnings
+    from sklearn.exceptions import ConvergenceWarning
+    import revision.pipeline as pipeline
+    from revision.data import load_dataset
+    from run_revision import synthetic_fixture
+
+    class Nonconverged:
+        def fit(self, *args, **kwargs):
+            warnings.warn("test iteration limit", ConvergenceWarning)
+            return self
+
+    data, patterns = synthetic_fixture(tmp_path / "fixture")
+    dataset = load_dataset(data, patterns_path=patterns)
+    indices, y, _ = dataset.task("healthy_vs_cancer")
+    groups = dataset.table.iloc[indices].patient_id.to_numpy()
+    train, test = pipeline.group_splits(y, groups, 3, 1729)[0]
+
+    def make_nonconverged(*args, **kwargs):
+        assert kwargs["lr_max_iter"] == config["final_selection"]["lr_max_iter"]
+        return Nonconverged()
+
+    monkeypatch.setattr(pipeline, "make_model", make_nonconverged)
+    with pytest.raises(ValueError, match="test iteration limit"):
+        pipeline.fit_predict(
+            dataset,
+            indices,
+            y,
+            Candidate(model="lr"),
+            train,
+            test,
+            1729,
+            config,
+        )
+
+
+def test_lesion_pipeline_exports_the_confirmed_class_order(tmp_path):
+    from run_revision import main
+    from revision.verification import verify_results
+
+    output = tmp_path / "synthetic-lesion"
+    assert (
+        main(
+            [
+                "--synthetic",
+                "--tasks",
+                "cancer_vs_lr_hr",
+                "--models",
+                "lr",
+                "--objectives",
+                "auc",
+                "sensitivity",
+                "--fold-workers",
+                "1",
+                "--rf-jobs",
+                "1",
+                "--blas-threads",
+                "1",
+                "--bootstrap-samples",
+                "2",
+                "--no-plots",
+                "--output",
+                str(output),
+            ]
+        )
+        == 0
+    )
+    assert verify_results(output)["checked_outer_folds"] == 3
+    labels = json.loads((output / "cancer_vs_lr_hr/classes.json").read_text())
+    assert labels["classes"] == [
+        "Cancer",
+        "Low-grade dysplasia",
+        "High-grade dysplasia",
+    ]
+    assert labels["positive_class"] is None
+    inclusion = pd.read_csv(output / "cancer_vs_lr_hr/task_inclusion.csv")
+    assert "Healthy" not in set(inclusion.pathology)
+    results = pd.read_csv(output / "cancer_vs_lr_hr/per_class_metrics.csv")
+    assert set(results.class_name) == set(labels["classes"])
+
+
+@pytest.mark.parametrize("fail_baseline", [False, True])
+def test_failed_lr_candidates_is_recorded_and_other_models_finish(
+    tmp_path, monkeypatch, config, fail_baseline
+):
+    import revision.pipeline as pipeline
+    from revision.data import load_dataset
+    from run_revision import synthetic_fixture
+
+    data, patterns = synthetic_fixture(tmp_path / "fixture")
+    dataset = load_dataset(data, patterns_path=patterns)
+    cfg = dict(
+        config,
+        models=["lr", "svm"],
+        outer_folds=3,
+        inner_folds=2,
+        clinical_covariates=[],
+    )
+    cfg["_fold_key"] = (0, 0, "nested_cv")
+    monkeypatch.setattr(
+        pipeline,
+        "screen_candidates",
+        lambda *args: [Candidate(stage="frequency", model="svm")],
+    )
+
+    def evaluate(_data, _indices, _y, candidate, *args):
+        if candidate.model == "lr" and (candidate.stage == "tuning" or fail_baseline):
+            raise ValueError("test LR iteration limit")
+        return dict(
+            candidate=candidate,
+            metrics={},
+            objectives={goal: 0.5 for goal in cfg["objectives"]},
+            coverage=1,
+            metadata=[],
+        )
+
+    monkeypatch.setattr(pipeline, "inner_evaluate", evaluate)
+
+    class Identity:
+        def transform(self, values):
+            return values
+
+    import numpy as np
+
+    monkeypatch.setattr(
+        pipeline,
+        "fit_training_rules",
+        lambda *args, **kwargs: (Identity(), 0.5, {}, {}),
+    )
+    monkeypatch.setattr(
+        pipeline,
+        "fit_predict",
+        lambda d, i, y, c, tr, te, *args: (
+            np.full((len(te), 2), 0.5),
+            {"input_features": 1, "frequencies_hz": [1]},
+            (None, None, None),
+        ),
+    )
+    output = tmp_path / "output"
+    predictions, selections = pipeline.run_task(
+        dataset, "healthy_vs_cancer", cfg, output
+    )
+    streams = set(predictions.stream)
+    assert "auc_svm" in streams and "auc_selected" in streams
+    assert "auc_lr" not in streams
+    assert ("baseline_lr" in streams) == (not fail_baseline)
+    errors = json.loads(
+        (output / "healthy_vs_cancer/candidate_failures.json").read_text()
+    )
+    assert any(row["reason"] == "test LR iteration limit" for row in errors)
+    assert not (output / "healthy_vs_cancer/complete.json").exists()

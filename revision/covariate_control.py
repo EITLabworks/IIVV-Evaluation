@@ -97,7 +97,7 @@ def add_matched_control(
                 dataset, indices, y, candidate, tr, te, seed, config
             )
         except ModelFitConvergenceError as exc:
-            if not (config.get("fine_tuning") or config.get("final_selection")):
+            if not (config.get("final_selection")):
                 raise
             path = folder / "candidate_failures.json"
             failures = json.loads(path.read_text()) if path.exists() else []

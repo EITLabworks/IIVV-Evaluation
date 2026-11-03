@@ -1,152 +1,73 @@
-# IIVV Evaluation — reviewer revision
+# IIVV evaluation: three-task revision
 
-For a fresh reduced search over **all 20 task/folds**, use
-[`./run_final.sh`](run_final.sh). [FINAL_SELECTION.md](FINAL_SELECTION.md) explains
-every omitted option, the unchanged 5×4 patient protocol, 32-CPU execution,
-progress logs and review exports. This is an adaptive follow-up, not independent confirmation.
+The workflow describes the data first, then runs patient-grouped nested selection
+for Healthy vs Cancer, binary High risk vs Low risk, and three-class lesion
+categorization. Task 3 retains the previous lesion-only population; clinically
+healthy sites are excluded. Its lower-grade class includes normal/benign tissue
+and mild dysplasia. Exact definitions and search limits are in [PROTOCOL.md](PROTOCOL.md).
 
-For the optional reduced search based on the 19 available source folds, see
-[FINE_TUNING.md](FINE_TUNING.md). Its MC results remain explicitly partial.
+Start with the step-by-step [todo.md](todo.md). On the server:
 
-Patient-grouped nested evaluation of in vivo oral-lesion EIS. The author-selected
-protocol uses **5 outer × 4 inner folds, one outer partition**, seed 1729, four diagnostic
-tasks, three classifiers and four selection objectives. All learned preprocessing,
-selection, calibration and thresholds stay inside outer-training patients.
-
-Classification outputs report **AUC, F1, precision, SN, SP, PPV and NPV**, with
-whole-patient bootstrap confidence intervals. Binary summaries use the positive
-class; multiclass summaries use macro one-versus-rest metrics and separate class
-tables. Precision equals PPV. Corrected paired outer-CV tests and detailed
-patient/pathology/demographic split reports accompany the outputs.
-
-Follow [SERVER_RUN.md](SERVER_RUN.md) for prerequisites, resources, ordered server
-execution and result handoff. The computational implementation and reviewer mapping
-are documented in [code-revisions.md](code-revisions.md).
-
-## Server run
-
-With Conda installed, create/reuse and activate the Python 3.11 environment
-in your current Bash or Zsh shell:
-
-```sh
+```bash
+conda env create -f environment.yml
 source ./setup_environment.sh
+./run_all.sh --data-quality-only --output results/revision-quality-v3
 ```
 
-The helper uses [environment.yml](environment.yml), which includes scientific,
-test and notebook dependencies. Equivalent manual commands for a new environment:
+Review the saved quality evidence, then run every task/model/objective:
 
-```sh
-conda env create --file environment.yml
-conda activate iivv-revision
+```bash
+./run_all.sh --quality-results results/revision-quality-v3 --output results/revision-three-tasks-v3
 ```
 
-For an existing environment, the helper activates it without changing packages.
-After editing the YAML, update explicitly with
-`conda env update --name iivv-revision --file environment.yml --prune`.
-
-Transfer the private `data/`, `source/` and `manuscript/` trees separately from Git.
-Then run sequentially:
-
-```sh
-make revision-tests
-make revision-preflight
-make revision-evaluation
-make revision-check
-```
-
-Results go to `results/revision-expanded`. An interrupted/failed run with identical
-inputs and settings can use `make revision-resume`. Earlier results and source
-snapshots remain separate. The runner never imports results into manuscripts.
-
-`run_all.sh` defaults to logical CPUs **224–255**. With four RF threads per fold,
-up to **8 independent outer folds** run concurrently, then task reports are assembled.
-Override with `CPUSET=0-255 make revision-evaluation` when the full server is allocated.
-CPU affinity, scheduler allocations and
-cgroup CPU quotas limit concurrency automatically. Each fold has an 8 GiB feature
-cache and an isolated, hash-verified checkpoint under `fold-checkpoints/`.
-Use a fresh output after updating from the earlier task-only execution:
-
-```sh
-make revision-evaluation REVISION_OUTPUT=results/revision-parallel > logs/revision-parallel.log 2>&1
-make revision-check REVISION_OUTPUT=results/revision-parallel
-```
-
-Run the check after evaluation succeeds. Set `IIVV_RESULTS=results/revision-parallel`
-for reporting notebooks. Include `fold-checkpoints/` when copying results.
+The default affinity is logical CPUs 224–255. Override with `CPUSET=0-23` for
+24 logical CPUs. Worker limits respect affinity and scheduler quotas. The launcher
+runs regression checks on the server before tuning, keeps progress logs and
+checkpoints, creates all reports and verifies the completed output. Use a fresh
+output after scientific changes. Resume an interrupted/failed run by repeating its
+command with `--resume`, identical inputs/configuration and the original output.
 
 ## Notebooks
 
-JupyterLab and ipykernel are included in `iivv-revision`. After activation,
-launch `jupyter lab` and select its Python kernel.
-All committed notebooks have empty outputs and unexecuted cells.
+All notebooks are English, unexecuted and read saved artifacts without training.
 
-| Notebook | Purpose |
-|---|---|
-| [Revision-Evaluation.ipynb](Revision-Evaluation.ipynb) | Canonical test/preflight/evaluation/check commands, with execution switches disabled by default |
-| [Revision-Snapshot.ipynb](Revision-Snapshot.ipynb) | Ongoing-run snapshots: saved cohort/quality/repeatability evidence and hash-verified completed-fold partition audits; no fitting or aggregate classifier inference |
-| [mat-to-npz.ipynb](mat-to-npz.ipynb) | Saved source/export alignment, centralized labels, metadata availability, quality, anatomy and test-mean repeatability audits |
-| [Figures-and-Tables.ipynb](Figures-and-Tables.ipynb) | Completed outer results for all reviewer analyses, clinical metrics, dysplasia errors, ablations, uncertainty, matched controls, identities, timing and figures |
+| Notebook | Purpose | Environment variable |
+|---|---|---|
+| [Data-Quality.ipynb](Data-Quality.ipynb) | Cohort, source quality, PCA/MI, missingness, retention, repeatability and planned CV demographics | `IIVV_QUALITY` |
+| [Revision-Evaluation.ipynb](Revision-Evaluation.ipynb) | Exact quality/tuning/check commands and protocol | none |
+| [Revision-Snapshot.ipynb](Revision-Snapshot.ipynb) | Hash-verified completed folds and saved progress from an ongoing run | `IIVV_RESULTS` |
+| [Figures-and-Tables.ipynb](Figures-and-Tables.ipynb) | Final metrics, intervals, corrected tests, controls, selected parameters and figures | `IIVV_RESULTS` |
+| `manuscript/Reviewer-Evidence.ipynb` | Reviewer/concern evidence and response drafts | both |
 
-The reporting notebooks read existing artifacts without fitting models or
-changing primary result files. Run preflight before the source notebook; run evaluation and
-completion checks before the figure notebook. The historical conversion code and
-notebook outputs remain available in Git history. Patient identifiers may appear
-when notebooks are executed; keep those copies under the study's access conditions.
-
-For copied outputs from an ongoing server run:
-
-```sh
-source ./setup_environment.sh
-IIVV_SNAPSHOT=results/revision-server-snapshot jupyter lab Revision-Snapshot.ipynb
+```bash
+IIVV_QUALITY=results/revision-quality-v3 jupyter lab Data-Quality.ipynb
+IIVV_RESULTS=results/revision-three-tasks-v3 jupyter lab Figures-and-Tables.ipynb
 ```
 
-Run its cells in order. It verifies completion-marker hashes and writes derived CSV,
-PNG and PDF files under `results/revision-snapshot-analysis/<snapshot-hash>/`.
-Cohort audits cover their recorded source population; completed-fold tables remain
-preliminary. No final AUC/F1/SN/SP/PPV/NPV, CV tests, bootstrap recomputation or
-manuscript import is performed. Existing completed-run notebook guards remain intact.
+`review_selected_parameters.csv` contains each outer fold's training-selected
+configuration. Task `inner_search.csv` files contain evaluated candidates;
+`selections.json` includes full frequency/IIVV identities and postprocessing
+provenance. There is no test-selected universal winning configuration. The
+self-contained `parameter-explorer.html` supports interactive parameter filtering.
 
-## Result inspection
+Reports retain AUC, accuracy, F1, precision, SN, SP, PPV, NPV, abstention/coverage,
+per-class and patient endpoints, whole-patient bootstrap intervals, corrected
+resampled CV tests, Holm correction, matched available-covariate controls and
+measured timings. Global PCA/MI views are descriptive and never feed tuning.
 
-```sh
-python -m revision.report_cli check --verify-inputs
-python -m revision.report_cli evaluation
-python -m revision.report_cli tuning --only freq --top 10
-```
+## Repository and documents
 
-These commands default to `results/revision-expanded`; override `--results-dir`
-when inspecting a different directory. Inner tuning scores are descriptive.
+- `run_all.sh`, `run_revision.py`: one quality/tuning entry point and orchestration.
+- `configs/revision.json`: the only active scientific configuration.
+- `revision/`: fitting, features, patient splits, quality, inference and verification.
+- `scripts/`: MATLAB/source audits and the offline parameter explorer.
+- `tests/`: prepared scientific and artifact-integrity regression checks.
+- `environment.yml`, `setup_environment.sh`: Conda environment and activation.
+- [CLEANUP-REMOVED.txt](CLEANUP-REMOVED.txt): retired entry points/configurations.
 
-## Manuscripts
-
-```sh
-make revision revision-clean response
-```
-
-The clean PDF is `manuscript/Paper/Revision-1-clean.pdf`. Its tracked entry-point
-template is in the local `templates/` directory; both original and marked manuscript sources are
-preserved. Defer numerical manuscript/rebuttal imports until review of the completed
-server outputs. See SERVER_RUN.md for those later commands.
-
-Paper/response sources, templates, `manuscript.mk` and document-generation scripts
-are local-only and ignored by Git. The shared Makefile loads `manuscript.mk` when
-present; copy these local files separately if building documents on another host.
-
-## Repository layout
-
-- `run_all.sh`, `run_revision.sh`, `run_revision.py`: canonical execution.
-- `configs/revision.json`: final expanded protocol.
-- `environment.yml`, `setup_environment.sh`: Conda dependencies and activation.
-- `revision/`: active data, geometry, fitting, metrics, reporting and verification.
-- `scripts/`: source audits, run diagnostics, result checks and the parameter explorer.
-- `tests/`: scientific regression and integration checks.
-
-Obsolete numbered entry points, compatibility adapters, unused toolbox modules,
-GPU dependency stack and interim profiles were removed. The live geometry module was
-moved unchanged to `revision/geometry.py`. The later cleanup removed superseded
-manuscript importers, screenshot tooling, stale generated reports and unreferenced
-root figure copies. Current paper assets, clinical runs, provenance and private
-inputs are preserved. The complete deletion list is in [CLEANUP-REMOVED.txt](CLEANUP-REMOVED.txt).
-No evaluation, tests, notebooks or builds were executed during cleanup.
-
-For citation metadata, see [CITATION.cff](CITATION.cff).
+Raw inputs, old result directories and original reviewer comments are preserved.
+Old four-task results are not compatible with this protocol. Clinical data and
+local paper/response/build files remain ignored by Git. `main.tex` is the untouched
+original. Revised sources use `\edit{}`/`\edits{}`; `make manuscript` builds the
+original, marked/clean revision and response when local document files are present.
+No paper numbers are imported automatically. See [CITATION.cff](CITATION.cff).

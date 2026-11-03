@@ -13,11 +13,7 @@ from .data import digest
 def annotate(output, config):
     output = Path(output)
     repository = Path(__file__).resolve().parents[1]
-    rationale_files = {
-        "FINAL_SELECTION.md": repository / "FINAL_SELECTION.md",
-        "revision-final-evidence.json": repository
-        / "configs/revision-final-evidence.json",
-    }
+    rationale_files = {"PROTOCOL.md": repository / "PROTOCOL.md"}
     for name, source in rationale_files.items():
         shutil.copyfile(source, output / name)
     selected, unavailable, budget = [], [], []
@@ -110,8 +106,8 @@ def annotate(output, config):
             config=config,
             task_fold_counts=counts,
             selection_scope="Per-fold scoring and winners use current inner-training/validation data only. Runtime reads no prior classifier results; the search-space design is informed by earlier cohort analyses.",
-            interpretation="Adaptive reduced follow-up on the original cohort/partition; no independent confirmation or noninferiority claim",
-            omitted_parameter_rationale="FINAL_SELECTION.md",
+            interpretation="Adaptive reduced analysis on the original cohort with task-specific patient partitions; no independent confirmation or noninferiority claim",
+            omitted_parameter_rationale="PROTOCOL.md",
             rationale_artifact_hashes={
                 name: digest(output / name) for name in rationale_files
             },
@@ -137,6 +133,6 @@ def annotate(output, config):
         "- review_selected_parameters.csv: selected model, hyperparameters, frequency identities and input counts.",
         "- final_search_budget.csv and fold-checkpoints/*/*/inner_search.csv: evaluated candidates and measured search times.",
         "- Task folders retain demographics, pathology splits, confusion matrices, ROC, calibration, controls and timings.",
-        "- FINAL_SELECTION.md explains every excluded search option; narrowing the search does not prove equal performance.",
+        "- PROTOCOL.md explains every excluded search option; narrowing the search does not prove equal performance.",
     ]
     (output / "REVIEW_RESULTS.md").write_text("\n".join(lines) + "\n")

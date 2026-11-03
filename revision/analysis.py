@@ -19,6 +19,7 @@ from .metrics import (
     classification_rows,
 )
 from .pipeline import write_json
+from .data import TASK3_CAPTION, TASK_PROTOCOL
 
 
 def aggregate_repeats(frame, nclasses):
@@ -114,6 +115,14 @@ def plot_outputs(folder, frame, classes, title):
     plt = _pyplot()
     folder = Path(folder)
     folder.mkdir(parents=True, exist_ok=True)
+
+    def finish_figure(fig):
+        if len(classes) == 3:
+            fig.text(0.5, 0.01, TASK3_CAPTION, ha="center", va="bottom", fontsize=7)
+            fig.tight_layout(rect=(0, 0.09, 1, 1))
+        else:
+            fig.tight_layout()
+
     covered = frame[frame.covered]
     if not len(covered):
         return
@@ -153,7 +162,7 @@ def plot_outputs(folder, frame, classes, title):
                 va="center",
             )
         fig.colorbar(image, ax=ax)
-        fig.tight_layout()
+        finish_figure(fig)
         suffix = "_norm" if normalized else ""
         fig.savefig(folder / f"CM{suffix}.png", dpi=160)
         fig.savefig(folder / f"CM{suffix}.pdf")
@@ -175,7 +184,7 @@ def plot_outputs(folder, frame, classes, title):
     ax.plot([0, 1], [0, 1], "k--", lw=0.7)
     ax.set(xlabel="False-positive rate", ylabel="Sensitivity", title=title)
     ax.legend(fontsize="small")
-    fig.tight_layout()
+    finish_figure(fig)
     fig.savefig(folder / "ROC.png", dpi=160)
     fig.savefig(folder / "ROC.pdf")
     plt.close(fig)
@@ -198,7 +207,7 @@ def plot_outputs(folder, frame, classes, title):
         title=title + " calibration",
     )
     ax.legend(fontsize="small")
-    fig.tight_layout()
+    finish_figure(fig)
     fig.savefig(folder / "calibration.png", dpi=160)
     plt.close(fig)
     fig, ax = plt.subplots(figsize=(6, 5))
@@ -222,7 +231,7 @@ def plot_outputs(folder, frame, classes, title):
         title=title + " decision curves",
     )
     ax.legend(fontsize="small")
-    fig.tight_layout()
+    finish_figure(fig)
     fig.savefig(folder / "decision_curve.png", dpi=160)
     plt.close(fig)
 
@@ -247,7 +256,7 @@ def report_task(dataset, task, predictions, selections, config, outdir):
         weighting="class_weight",
     )
     expected_ablations = {"ablation_missingness"}
-    if config.get("fine_tuning") or config.get("final_selection"):
+    if config.get("final_selection"):
         expected_ablations.update(
             {"covariate_only", "covariate_combined", "covariate_eis_only"}
         )
@@ -287,7 +296,7 @@ def report_task(dataset, task, predictions, selections, config, outdir):
         observed = set(zip(part["repeat"], part.sample_id))
         if observed != expected:
             if not stream.startswith("ablation_") and not (
-                config.get("fine_tuning") or config.get("final_selection")
+                config.get("final_selection")
             ):
                 raise ValueError(f"{task}/{stream}: incomplete outer population")
             unavailable.append(
@@ -467,11 +476,7 @@ def report_task(dataset, task, predictions, selections, config, outdir):
             / stream
         )
         if config.get("plots", True):
-            partial = (
-                config.get("fine_tuning")
-                and len(config["fine_tuning"]["folds"][task]) < config["outer_folds"]
-            )
-            prefix = "PARTIAL EXPLORATORY: " if partial else ""
+            prefix = ""
             plot_outputs(
                 plotdir, frame, classes, f"{prefix}{task}: {stream} ({evaluation})"
             )
@@ -740,7 +745,8 @@ def export_search(folder, selections, dataset, task):
     write_json(
         folder / "frequency_and_pattern_identities.json",
         {
-            "schema_version": 2,
+            "schema_version": 3,
+            "task_protocol": TASK_PROTOCOL,
             "scope": "outer-training refits; reporting only; never reused in evaluation",
             "selections": actual,
         },

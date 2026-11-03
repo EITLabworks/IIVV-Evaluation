@@ -19,7 +19,7 @@ from .features import (
     patient_weights,
 )
 from .metrics import scores, threshold_for_sensitivity, select_threshold
-from .data import RISK_DEFINITION
+from .data import TASK_DEFINITIONS, TASK_PROTOCOL
 from .progress import update_progress
 
 
@@ -151,11 +151,7 @@ def fit_predict(dataset, indices, y, candidate, train, test, seed, config):
     builder.candidate = candidate
     n = candidate.n_freq or len(full_builder.ranking_)
     builder.selected_ = full_builder.ranking_[:n]
-    count = (
-        full_train.shape[1]
-        if candidate.representation == "circuit"
-        else full_train.shape[1] // len(full_builder.ranking_) * len(builder.selected_)
-    )
+    count = full_train.shape[1] // len(full_builder.ranking_) * len(builder.selected_)
     xtrain = full_train[:, :count]
     clinical = None
     clinical_columns = [
@@ -211,9 +207,7 @@ def fit_predict(dataset, indices, y, candidate, train, test, seed, config):
         candidate,
         seed,
         rf_jobs=config.get("rf_jobs", 4),
-        lr_max_iter=(
-            config.get("fine_tuning") or config.get("final_selection") or {}
-        ).get("lr_max_iter", 5000),
+        lr_max_iter=(config.get("final_selection") or {}).get("lr_max_iter", 5000),
     )
     weights = (
         patient_weights(groups[tr]) if candidate.patient_weighted else np.ones(len(tr))
@@ -242,11 +236,11 @@ def fit_predict(dataset, indices, y, candidate, train, test, seed, config):
             fit_options["training_gram"] = gram
         model.fit(xtrain, y[tr], sample_weight=weights, **fit_options)
         model_fit_seconds = time.perf_counter() - model_start
-        if (config.get("fine_tuning") or config.get("final_selection")) and any(
+        if (config.get("final_selection")) and any(
             issubclass(w.category, ConvergenceWarning) for w in caught
         ):
             raise ModelFitConvergenceError(
-                ("Fine-tuning" if config.get("fine_tuning") else "Final-search")
+                "Search"
                 + " fit did not converge; candidate rejected: "
                 + "; ".join(
                     str(w.message)
@@ -400,20 +394,14 @@ def screen_candidates(config, nfreq, complex_available):
             )
         )
     for rep in config["representations"]:
-        if rep in {"real_imag", "magnitude_phase", "circuit"} and not complex_available:
-            continue
-        if rep == "circuit" and nfreq < 6:
+        if rep == "magnitude_phase" and not complex_available:
             continue
         candidates.append(
             replace(
                 base,
                 stage="representation",
                 representation=rep,
-                n_freq=(
-                    0
-                    if rep == "circuit"
-                    else min(config["comparison_frequencies"], nfreq)
-                ),
+                n_freq=min(config["comparison_frequencies"], nfreq),
             )
         )
     candidates += [replace(base, stage="quality", cutoff=t) for t in config["cutoffs"]]
@@ -479,7 +467,7 @@ def tune_candidates(screened, config, objective, nfreq):
             candidates.append(
                 Candidate(
                     model=model,
-                    n_freq=0 if settings["representation"] == "circuit" else n,
+                    n_freq=n,
                     mask=mask,
                     params_json=json.dumps(params, sort_keys=True),
                     **settings,
@@ -586,10 +574,32 @@ def task_outer_splits(dataset, task, config):
             outer.append((repeat, fold, dev[tr], dev[te], "nested_cv"))
     if external.any():
         outer.append((0, 0, dev, np.flatnonzero(external), "external"))
-    if config.get("fine_tuning"):
-        allowed = config["fine_tuning"]["folds"][task]
-        outer = [row for row in outer if row[1] in allowed]
     return outer
+
+
+def make_split_record(dataset, task, indices, tr, te, inner, repeat, fold, evaluation):
+    """Use one partition inventory for prospective audits and actual training."""
+    table = dataset.table.iloc[indices]
+    groups = table.patient_id.to_numpy()
+    return dict(
+        task=task,
+        repeat=repeat,
+        outer_fold=fold,
+        evaluation=evaluation,
+        train_sample_ids=table.iloc[tr].sample_id.tolist(),
+        test_sample_ids=table.iloc[te].sample_id.tolist(),
+        train_patients=sorted(set(groups[tr])),
+        test_patients=sorted(set(groups[te])),
+        inner=[
+            dict(
+                train_patients=sorted(set(groups[tr][a])),
+                validation_patients=sorted(set(groups[tr][b])),
+                train_sample_ids=table.iloc[tr[a]].sample_id.tolist(),
+                validation_sample_ids=table.iloc[tr[b]].sample_id.tolist(),
+            )
+            for a, b in inner
+        ],
+    )
 
 
 def run_task(dataset, task, config, outdir, *, taskdir=None):
@@ -703,28 +713,8 @@ def run_task(dataset, task, config, outdir, *, taskdir=None):
         train_indices, train_y = indices[tr], y[tr]
         seed = config["seed"] + repeat * 1000 + fold * 100
         inner = group_splits(train_y, groups[tr], config["inner_folds"], seed + 1)
-        split_record = dict(
-            task=task,
-            repeat=repeat,
-            outer_fold=fold,
-            evaluation=evaluation,
-            train_sample_ids=dataset.table.iloc[indices[tr]].sample_id.tolist(),
-            test_sample_ids=dataset.table.iloc[indices[te]].sample_id.tolist(),
-            train_patients=sorted(set(groups[tr])),
-            test_patients=sorted(set(groups[te])),
-            inner=[
-                dict(
-                    train_patients=sorted(set(groups[tr][a])),
-                    validation_patients=sorted(set(groups[tr][b])),
-                    train_sample_ids=dataset.table.iloc[
-                        train_indices[a]
-                    ].sample_id.tolist(),
-                    validation_sample_ids=dataset.table.iloc[
-                        train_indices[b]
-                    ].sample_id.tolist(),
-                )
-                for a, b in inner
-            ],
+        split_record = make_split_record(
+            dataset, task, indices, tr, te, inner, repeat, fold, evaluation
         )
         split_record["source_version"] = config.get("_source_version")
         splits_log.append(split_record)
@@ -778,7 +768,7 @@ def run_task(dataset, task, config, outdir, *, taskdir=None):
                         )
                     )
                     cache[candidate] = None
-                    if config.get("fine_tuning") or config.get("final_selection"):
+                    if config.get("final_selection"):
                         write_json(taskdir / "candidate_failures.json", failures)
                 update_progress(
                     config, "candidate-complete", candidates_completed=len(cache)
@@ -795,31 +785,16 @@ def run_task(dataset, task, config, outdir, *, taskdir=None):
                     )
             return cache[candidate]
 
-        shortlist = None
-        if config.get("fine_tuning"):
-            from .finetuning import fold_id, validate_split
-
-            entry = config["_shortlist"][fold_id(task, repeat, fold, evaluation)]
-            validate_split(entry, split_record)
-            shortlist = entry["candidates"]
-        screen_options = (
-            screen_candidates(
-                config, len(dataset.frequencies), dataset.complex_available
-            )
-            if shortlist is None
-            else []
+        screen_options = screen_candidates(
+            config, len(dataset.frequencies), dataset.complex_available
         )
         update_progress(
             config,
             "screening-and-baselines",
             candidates_planned=len(screen_options) + len(config["models"]),
         )
-        screened = (
-            [r for c in screen_options if (r := evaluate(c)) is not None]
-            if shortlist is None
-            else []
-        )
-        if shortlist is None and not screened:
+        screened = [r for c in screen_options if (r := evaluate(c)) is not None]
+        if not screened:
             raise RuntimeError(
                 f"{task}/{fold_name}: every screening candidate failed; inspect input labels and quality"
             )
@@ -834,21 +809,15 @@ def run_task(dataset, task, config, outdir, *, taskdir=None):
                 selector="all",
                 params_json=(
                     json.dumps(
-                        {
-                            "max_iter": (
-                                config.get("fine_tuning")
-                                or config.get("final_selection")
-                            )["svm_max_iter"]
-                        }
+                        {"max_iter": (config.get("final_selection"))["svm_max_iter"]}
                     )
-                    if (config.get("fine_tuning") or config.get("final_selection"))
-                    and model == "svm"
+                    if (config.get("final_selection")) and model == "svm"
                     else "{}"
                 ),
             )
             result = evaluate(baseline)
             if result is None:
-                if config.get("fine_tuning") or config.get("final_selection"):
+                if config.get("final_selection"):
                     continue
                 raise RuntimeError(
                     f"Baseline {model} failed: cannot perform a paired evaluation"
@@ -873,8 +842,6 @@ def run_task(dataset, task, config, outdir, *, taskdir=None):
         tuning_plans = {
             objective: (
                 tune_candidates(screened, config, objective, len(dataset.frequencies))
-                if shortlist is None
-                else [Candidate(**c) for c in shortlist[objective]]
             )
             for objective in config["objectives"]
         }
@@ -892,13 +859,13 @@ def run_task(dataset, task, config, outdir, *, taskdir=None):
                 r for c in tuning_plans[objective] if (r := evaluate(c)) is not None
             ]
             if not tuned:
-                if config.get("fine_tuning") or config.get("final_selection"):
+                if config.get("final_selection"):
                     continue
                 raise RuntimeError("Every tuning candidate failed")
             for model in config["models"]:
                 options = [r for r in tuned if r["candidate"].model == model]
                 if not options:
-                    if config.get("fine_tuning") or config.get("final_selection"):
+                    if config.get("final_selection"):
                         continue
                     reasons = list(
                         dict.fromkeys(
@@ -963,7 +930,7 @@ def run_task(dataset, task, config, outdir, *, taskdir=None):
                         dataset, indices, y, candidate, tr, te, seed, config
                     )
                 except ModelFitConvergenceError as exc:
-                    if not (config.get("fine_tuning") or config.get("final_selection")):
+                    if not (config.get("final_selection")):
                         raise
                     failures.append(
                         dict(
@@ -1072,11 +1039,8 @@ def run_task(dataset, task, config, outdir, *, taskdir=None):
             classes=list(classes),
             positive_class=classes[1] if len(classes) == 2 else None,
             probability_columns={f"p_{k}": v for k, v in enumerate(classes)},
-            task_definition=(
-                RISK_DEFINITION
-                if task == "highrisk_vs_lowrisk"
-                else "See task_label_audit.csv"
-            ),
+            task_protocol=TASK_PROTOCOL,
+            task_definition=TASK_DEFINITIONS[task],
         ),
     )
     return pd.DataFrame(predictions), selections

@@ -407,7 +407,7 @@ class Masking:
         """
         vv_distance : takes the predefined dict vv_dictance dict (or list)
 
-            available for 'skip == None'
+            available for 'skip is None'
             - "adjacent_close"
             - "adjacent_medium"
             - "adjacent_far"
@@ -423,7 +423,7 @@ class Masking:
             - "vv_medium_across_extended"
             - "vv_distance_close_skip_1"
 
-            available for 'skip != None'
+            available for 'skip is not None'
             - "close"
             - "medium"
             - "far"
@@ -458,7 +458,7 @@ class Masking:
 
         mask_IIVV_selection = list()
 
-        if skip == None:
+        if skip is None:
             # ----- NEW ---
             if vv_distance == "all":
                 self.mask = np.ones(len(self.IIVV), dtype=bool)
@@ -589,7 +589,7 @@ class Masking:
                     tmp_mask = create_mask(dd)
                     mask_IIVV_selection.append(tmp_mask)
 
-        if skip != None:
+        if skip is not None:
             self.ii_skip_pattern(skip)
             if vv_distance == "close":
 

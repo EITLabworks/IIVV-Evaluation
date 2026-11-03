@@ -9,9 +9,15 @@ import pandas as pd
 
 CLASS_NAMES = {
     "healthy_vs_cancer": ("Healthy", "Cancer"),
-    "cancer_vs_lr_hr": ("Cancer", "High-grade dysplasia", "Non-malignant"),
-    "MC": ("Healthy", "Cancer", "High-grade dysplasia", "Non-malignant"),
     "highrisk_vs_lowrisk": ("Low risk", "High risk"),
+    "cancer_vs_lr_hr": ("Cancer", "Low-grade dysplasia", "High-grade dysplasia"),
+}
+PATHOLOGY_CLASSES = ("Healthy", "Cancer", "High-grade dysplasia", "Non-malignant")
+TASK_PROTOCOL = "three-tasks-v1-lesion-only-task3"
+TASK_TITLES = {
+    "healthy_vs_cancer": "Task 1: Healthy vs Cancer",
+    "highrisk_vs_lowrisk": "Task 2: High risk vs Low risk",
+    "cancer_vs_lr_hr": "Task 3: Lesion categorization",
 }
 # These are the explicit original conversion-notebook mappings, now centralized.
 PATHOLOGY = {
@@ -44,6 +50,43 @@ RISK_DEFINITION = {
     },
     "other_pathologies": "excluded; no substring-based assignment",
 }
+TASK3_CLASS = {
+    "Cancer": "Cancer",
+    "Non-malignant": "Low-grade dysplasia",
+    "High-grade dysplasia": "High-grade dysplasia",
+}
+TASK3_CAPTION = (
+    "Task 3: Low-grade dysplasia includes normal/benign tissue and mild dysplasia;\n"
+    "High-grade dysplasia includes moderate/severe dysplasia and CIS. Clinically healthy sites are excluded."
+)
+TASK_DEFINITIONS = {
+    "healthy_vs_cancer": {
+        "title": TASK_TITLES["healthy_vs_cancer"],
+        "pathology_to_class": {"Healthy": "Healthy", "Cancer": "Cancer"},
+        "excluded": "Dysplastic, non-malignant and unmapped sites",
+    },
+    "highrisk_vs_lowrisk": {
+        "title": TASK_TITLES["highrisk_vs_lowrisk"],
+        "pathology_to_class": RISK_CLASS,
+        "definition": RISK_DEFINITION,
+        "excluded": "Unmapped pathologies",
+    },
+    "cancer_vs_lr_hr": {
+        "title": TASK_TITLES["cancer_vs_lr_hr"],
+        "pathology_to_class": TASK3_CLASS,
+        "High-grade dysplasia": "Moderate/severe or high-grade dysplasia and CIS; invasive carcinoma excluded",
+        "Low-grade dysplasia": "Normal/benign tissue and mild dysplasia; clinically healthy sites excluded",
+        "caption": TASK3_CAPTION,
+        "excluded": "Clinically healthy sites and unmapped pathologies; same population as the previous cancer_vs_lr_hr task",
+    },
+}
+
+
+def task_labels(table, name):
+    """Disjoint task-specific classes, distinct from canonical source pathology."""
+    if name not in CLASS_NAMES:
+        raise ValueError(f"Unknown task {name}")
+    return table.pathology.map(TASK_DEFINITIONS[name]["pathology_to_class"])
 
 
 def scalar(value):
@@ -79,9 +122,7 @@ class Dataset:
     def task(self, name):
         if name not in CLASS_NAMES:
             raise ValueError(f"Unknown task {name}")
-        labels = self.table["pathology"].copy()
-        if name == "highrisk_vs_lowrisk":
-            labels = labels.map(RISK_CLASS)
+        labels = task_labels(self.table, name)
         keep = labels.isin(CLASS_NAMES[name]).to_numpy()
         indices = np.flatnonzero(keep)
         y = np.array([CLASS_NAMES[name].index(v) for v in labels[keep]], dtype=int)
@@ -165,7 +206,7 @@ def load_dataset(
                 else ""
             )
             # Reject a disagreement, rather than silently regrouping moderate dysplasia.
-            if pathology and legacy in CLASS_NAMES["MC"] and legacy != pathology:
+            if pathology and legacy in PATHOLOGY_CLASSES and legacy != pathology:
                 raise ValueError(
                     f"{file}: raw pathology {raw!r} maps to {pathology!r}, conflicting with labels_MC={legacy!r}"
                 )
@@ -192,6 +233,7 @@ def load_dataset(
                 "smoking": "smoking",
                 "alcohol": "alcohol",
                 "prior_radiation": "prior_radiation",
+                "prior_surgery": "prior_surgery",
                 "inflammation": "inflammation",
                 "treatment_history": "treatment_history",
                 "contact_pressure": "contact_pressure",

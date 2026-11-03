@@ -7,7 +7,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from .data import CLASS_NAMES, digest
+from .data import CLASS_NAMES, TASK_DEFINITIONS, TASK_PROTOCOL, digest, task_labels
 from .metrics import CLASSIFICATION_METRICS, corrected_resampled_test, holm
 
 
@@ -21,6 +21,10 @@ def verify_results(root, *, verify_inputs=False):
     manifest = json.loads((root / "run_manifest.json").read_text())
     require(manifest.get("status") == "completed", "Run is not completed")
     cfg = manifest["config"]
+    require(
+        cfg.get("schema_version") == 3 and cfg.get("task_protocol") == TASK_PROTOCOL,
+        "Results belong to an obsolete task protocol; do not relabel them",
+    )
     if cfg.get("final_selection"):
         protocol = root / "final_selection_protocol.json"
         require(
@@ -38,6 +42,22 @@ def verify_results(root, *, verify_inputs=False):
     revised_reports = manifest.get("reporting_protocol_version", 0) >= 1
     checked_folds = 0
     require(manifest.get("input_hashes"), "Missing input inventory")
+    if not manifest.get("synthetic"):
+        from .data_quality import verify_quality
+
+        require(
+            (root / "quality_manifest.json").is_file()
+            and digest(root / "quality_manifest.json")
+            == manifest.get("quality_manifest_sha256"),
+            "Missing or changed quality prerequisite",
+        )
+        quality = verify_quality(
+            root, cfg, manifest["input_hashes"], manifest.get("source_input_hashes")
+        )
+        require(
+            not quality.get("synthetic"),
+            "Synthetic quality evidence is not clinical evidence",
+        )
     if verify_inputs:
         repository = Path(__file__).resolve().parents[1]
         inventory = {
@@ -98,6 +118,11 @@ def verify_results(root, *, verify_inputs=False):
             require((folder / name).is_file(), f"{task}: missing {name}")
         classes = json.loads((folder / "classes.json").read_text())
         require(
+            classes.get("task_protocol") == TASK_PROTOCOL
+            and classes.get("task_definition") == TASK_DEFINITIONS[task],
+            f"{task}: missing or changed task definition",
+        )
+        require(
             classes["classes"] == list(CLASS_NAMES[task]),
             f"{task}: incorrect class order",
         )
@@ -123,18 +148,27 @@ def verify_results(root, *, verify_inputs=False):
                 ).all(),
                 f"{task}: classification intervals are not patient bootstrap intervals",
             )
-            if task == "highrisk_vs_lowrisk":
-                from .data import RISK_CLASS
-
-                actual = inclusion.pathology.map(RISK_CLASS).map(
-                    {name: j for j, name in enumerate(CLASS_NAMES[task])}
-                )
-                require(
-                    np.array_equal(actual.to_numpy(), inclusion.class_index.to_numpy()),
-                    "High-/low-risk labels disagree with the confirmed pathology groups",
-                )
+            actual = task_labels(inclusion, task).map(
+                {name: j for j, name in enumerate(CLASS_NAMES[task])}
+            )
+            require(
+                np.array_equal(actual.to_numpy(), inclusion.class_index.to_numpy()),
+                f"{task}: labels disagree with the confirmed pathology groups",
+            )
         lookup = inclusion.set_index("sample_id")
         splits = json.loads((folder / "splits.json").read_text())
+        if not manifest.get("synthetic"):
+            planned = json.loads(
+                (root / "planned-splits" / task / "splits.json").read_text()
+            )
+            actual = [
+                {key: value for key, value in row.items() if key != "source_version"}
+                for row in splits
+            ]
+            require(
+                actual == planned,
+                f"{task}: actual partitions differ from quality-analysis partitions",
+            )
         selections = json.loads((folder / "selections.json").read_text())
         unavailable = json.loads((folder / "unavailable_streams.json").read_text())
         failures = json.loads((folder / "candidate_failures.json").read_text())

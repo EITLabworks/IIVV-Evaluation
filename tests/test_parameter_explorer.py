@@ -29,15 +29,17 @@ def test_outer_metrics_join_exact_fold_stream_and_unit(tmp_path):
             dict(
                 status="completed_partial",
                 config={
-                    "tasks": ["MC"],
+                    "tasks": ["cancer_vs_lr_hr"],
                     "outer_folds": 5,
-                    "fine_tuning": {"folds": {"MC": [0, 1, 3, 4]}},
+                    "schema_version": 3,
+                    "task_protocol": "three-tasks-v1-lesion-only-task3",
+                    "final_selection": {"design": "fresh"},
                 },
             )
         )
     )
     write_csv(
-        tmp_path / "MC/inner_search.csv",
+        tmp_path / "cancer_vs_lr_hr/inner_search.csv",
         [
             dict(
                 model="lr",
@@ -51,10 +53,10 @@ def test_outer_metrics_join_exact_fold_stream_and_unit(tmp_path):
         ],
     )
     write_csv(
-        tmp_path / "MC/outer_fold_metrics.csv",
+        tmp_path / "cancer_vs_lr_hr/outer_fold_metrics.csv",
         [
             dict(
-                task="MC",
+                task="cancer_vs_lr_hr",
                 repeat="0",
                 outer_fold="0",
                 stream="auc_lr",
@@ -65,7 +67,7 @@ def test_outer_metrics_join_exact_fold_stream_and_unit(tmp_path):
         ],
     )
     candidate = json.dumps(dict(model="lr", n_freq=3, params_json='{"C":1}'))
-    (tmp_path / "MC/candidate_failures.json").write_text(
+    (tmp_path / "cancer_vs_lr_hr/candidate_failures.json").write_text(
         json.dumps(
             [
                 dict(
@@ -81,12 +83,27 @@ def test_outer_metrics_join_exact_fold_stream_and_unit(tmp_path):
     write_csv(
         tmp_path / "review_selected_parameters.csv",
         [
-            dict(task="MC", repeat="0", fold="0", stream="auc_lr", candidate=candidate),
-            dict(task="MC", repeat="0", fold="1", stream="auc_lr", candidate=candidate),
+            dict(
+                task="cancer_vs_lr_hr",
+                repeat="0",
+                fold="0",
+                stream="auc_lr",
+                candidate=candidate,
+            ),
+            dict(
+                task="cancer_vs_lr_hr",
+                repeat="0",
+                fold="1",
+                stream="auc_lr",
+                candidate=candidate,
+            ),
         ],
     )
+    (tmp_path / "cancer_vs_lr_hr/splits.json").write_text(
+        json.dumps([{"evaluation": "nested_cv"}] * 4)
+    )
     rows, tasks = explorer.load_points(tmp_path)
-    assert tasks == ["MC"]
+    assert tasks == ["cancer_vs_lr_hr"]
     inner = [row for row in rows if row["mode"] == "inner"]
     outer = [row for row in rows if row["mode"] == "outer"]
     assert len(inner) == len(outer) == 1
@@ -107,7 +124,7 @@ def test_missing_metrics_and_html_payload_are_safe():
     row = explorer.point(
         dict(model="svm", params_json='{"kernel":"</script>"}'),
         dict(repeat="0", auc="NaN"),
-        "MC",
+        "cancer_vs_lr_hr",
         "inner",
     )
     assert row["auc"] is None and row["f1"] is None
@@ -120,13 +137,17 @@ def test_active_run_is_rejected(tmp_path):
         explorer.load_points(tmp_path)
 
 
-def test_final_selection_uses_actual_mc_partition_without_partial_label(tmp_path):
+def test_final_selection_uses_actual_three_class_partition_without_partial_label(
+    tmp_path,
+):
     (tmp_path / "run_manifest.json").write_text(
         json.dumps(
             dict(
                 status="completed",
                 config=dict(
-                    tasks=["MC"],
+                    tasks=["cancer_vs_lr_hr"],
+                    schema_version=3,
+                    task_protocol="three-tasks-v1-lesion-only-task3",
                     outer_folds=5,
                     outer_repeats=1,
                     final_selection={"scope": "adaptive"},
@@ -134,12 +155,12 @@ def test_final_selection_uses_actual_mc_partition_without_partial_label(tmp_path
             )
         )
     )
-    (tmp_path / "MC").mkdir()
-    (tmp_path / "MC/splits.json").write_text(
+    (tmp_path / "cancer_vs_lr_hr").mkdir()
+    (tmp_path / "cancer_vs_lr_hr/splits.json").write_text(
         json.dumps([dict(evaluation="nested_cv", outer_fold=i) for i in range(5)])
     )
     write_csv(
-        tmp_path / "MC/inner_search.csv",
+        tmp_path / "cancer_vs_lr_hr/inner_search.csv",
         [
             dict(
                 model="svm",
@@ -153,8 +174,8 @@ def test_final_selection_uses_actual_mc_partition_without_partial_label(tmp_path
         ],
     )
     rows, tasks = explorer.load_points(tmp_path)
-    assert tasks == ["MC"] and len(rows) == 1
+    assert tasks == ["cancer_vs_lr_hr"] and len(rows) == 1
     assert rows[0]["fold"] == "2"
     assert (
-        rows[0]["status"] == "complete original partition; adaptive follow-up analysis"
+        rows[0]["status"] == "complete current partition; adaptive follow-up analysis"
     )

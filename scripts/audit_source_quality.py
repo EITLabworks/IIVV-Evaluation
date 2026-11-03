@@ -9,7 +9,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import h5py
 import numpy as np
 import pandas as pd
-from scripts.prepare_revision_source import unpack, complex_array
+from scripts.prepare_revision_source import unpack
 from revision.data import digest
 from revision.pipeline import write_json
 from revision.features import finite_mean
@@ -77,7 +77,7 @@ def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--mat", default="source/Python-Labeled-CaseData-17-Sep-2025.mat")
     p.add_argument("--data", default="data")
-    p.add_argument("--source-output", default="results/revision-source")
+    p.add_argument("--source-output", default="results/revision-source-v3")
     p.add_argument("--output", required=True)
     a = p.parse_args()
     print(audit(a.mat, a.data, a.source_output, a.output))

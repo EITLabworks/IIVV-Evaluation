@@ -11,7 +11,7 @@ def main(argv=None):
         description="Inspect patient-grouped nested revision outputs"
     )
     p.add_argument("kind", choices=["check", "evaluation", "tuning"])
-    p.add_argument("--results-dir", default="results/revision-expanded")
+    p.add_argument("--results-dir", required=True)
     p.add_argument("--top", type=int, default=10)
     p.add_argument("--only", choices=["freq", "mask", "metrics"])
     p.add_argument(
@@ -25,7 +25,7 @@ def main(argv=None):
     manifest = root / "run_manifest.json"
     if not manifest.exists():
         print(
-            f"No run manifest at {manifest}; execute ./run_revision.sh --preflight first."
+            f"No run manifest at {manifest}; see todo.md for the quality-first workflow."
         )
         return 2
     info = json.loads(manifest.read_text())

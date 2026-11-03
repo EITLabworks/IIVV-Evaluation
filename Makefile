@@ -3,28 +3,27 @@
 .PHONY: help
 
 PYTHON ?= python
-REVISION_CONFIG ?= configs/revision.json
-REVISION_OUTPUT ?= results/revision-expanded
-PREFLIGHT_OUTPUT ?= results/revision-expanded-preflight
+REVISION_OUTPUT ?= results/revision-three-tasks
+QUALITY_OUTPUT ?= results/revision-quality
 
 help:
-	@printf '%s\n' 'Run sequentially: revision-tests, revision-preflight, revision-evaluation, revision-check.' 'Use revision-resume for an interrupted run. See SERVER_RUN.md.'
+	@printf '%s\n' 'Run revision-quality, inspect Data-Quality.ipynb, then revision-evaluation and revision-check.' 'See todo.md. The launcher runs regression checks before tuning.'
 
-.PHONY: revision-preflight revision-evaluation revision-resume revision-check revision-tests
-revision-preflight:
-	./run_all.sh --config "$(REVISION_CONFIG)" --preflight --output "$(PREFLIGHT_OUTPUT)"
+.PHONY: revision-quality revision-evaluation revision-resume revision-check revision-tests
+revision-quality:
+	./run_all.sh --data-quality-only --output "$(QUALITY_OUTPUT)"
 
 revision-evaluation:
-	./run_all.sh --config "$(REVISION_CONFIG)" --output "$(REVISION_OUTPUT)"
+	./run_all.sh --quality-results "$(QUALITY_OUTPUT)" --output "$(REVISION_OUTPUT)"
 
 revision-resume:
-	./run_all.sh --config "$(REVISION_CONFIG)" --resume --output "$(REVISION_OUTPUT)"
+	./run_all.sh --quality-results "$(QUALITY_OUTPUT)" --resume --output "$(REVISION_OUTPUT)"
 
 revision-check:
 	$(PYTHON) -m revision.report_cli check --results-dir "$(REVISION_OUTPUT)" --verify-inputs
 
 revision-tests:
-	$(PYTHON) -m pytest -q tests/test_revision.py
+	$(PYTHON) -m pytest -q tests
 
 # Optional local document targets; evaluation runs do not require this file.
 -include manuscript.mk

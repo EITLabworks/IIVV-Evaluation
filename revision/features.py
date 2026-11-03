@@ -6,11 +6,8 @@ import contextlib
 import io
 import warnings
 import numpy as np
-from scipy.optimize import least_squares
 from sklearn.decomposition import PCA
-from sklearn.feature_selection import RFE, f_classif, mutual_info_classif
-from sklearn.inspection import permutation_importance
-from sklearn.linear_model import LogisticRegression
+from sklearn.feature_selection import mutual_info_classif
 from sklearn.ensemble import RandomForestClassifier
 from scipy.special import expit, softmax
 
@@ -142,60 +139,11 @@ class Candidate:
 def components(z, representation):
     if representation == "magnitude":
         return np.abs(z)[..., None]
-    if representation == "real_imag":
-        return np.stack([z.real, z.imag], axis=-1)
     if representation == "magnitude_phase":
         return np.stack([np.abs(z), np.angle(z)], axis=-1)
-    if representation == "ratio":
-        reference = np.abs(z[:, :1, :])
-        return np.divide(
-            np.abs(z), reference, out=np.full(z.shape, np.nan), where=reference > 1e-12
-        )[..., None]
     if representation == "missingness":
         return (~np.isfinite(z))[..., None].astype(float)
     raise ValueError(f"Unsupported representation {representation}")
-
-
-def circuit_features(z, frequencies):
-    """Effective Cole-Cole fit to mean complex spectrum at each site, not each IIVV.
-
-    Returns R_inf, Delta_R, tau, alpha, relative RMSE; failed fits remain missing.
-    This is a phenomenological spectrum fit, not a validated tissue compartment model.
-    """
-    spectra = finite_mean(z, axis=2)
-    values = np.full((len(z), 1, 5, 1), np.nan)
-    for i, spectrum in enumerate(spectra):
-        ok = np.isfinite(spectrum)
-        if ok.sum() < 6:
-            continue
-        target, f = spectrum[ok], frequencies[ok]
-        scale = max(float(np.abs(target).mean()), 1e-12)
-        target = target / scale
-
-        def prediction(p):
-            rinf, dr, logtau, alpha = p
-            return rinf + dr / (1 + (2j * np.pi * f * np.exp(logtau)) ** alpha)
-
-        def residual(p):
-            delta = prediction(p) - target
-            return np.r_[delta.real, delta.imag]
-
-        fit = least_squares(
-            residual,
-            [0.1, 1.0, -8.0, 0.8],
-            bounds=([0, 0, -20, 0.05], [100, 100, 0, 1]),
-            max_nfev=300,
-        )
-        if fit.success and np.isfinite(fit.x).all():
-            r, dr, logtau, alpha = fit.x
-            values[i, 0, :, 0] = [
-                r * scale,
-                dr * scale,
-                np.exp(logtau),
-                alpha,
-                np.sqrt(np.mean(residual(fit.x) ** 2)),
-            ]
-    return values
 
 
 def rank_frequencies(x, y, method, seed, max_pca_rows=100000):
@@ -217,43 +165,11 @@ def rank_frequencies(x, y, method, seed, max_pca_rows=100000):
             ]
         pca = PCA(n_components=min(10, *matrix.shape), svd_solver="full").fit(matrix)
         scores = (pca.components_**2).sum(axis=0)
-    else:
+    elif method == "mutual_info":
         summary = x[..., 0].mean(axis=2)
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", RuntimeWarning)
-            if method == "anova":
-                scores = f_classif(summary, y)[0]
-            elif method == "mutual_info":
-                scores = mutual_info_classif(summary, y, random_state=seed)
-            elif method == "sparse":
-                model = LogisticRegression(
-                    penalty="l1",
-                    solver="liblinear",
-                    C=0.1,
-                    max_iter=3000,
-                    random_state=seed,
-                ).fit(summary, y)
-                scores = np.abs(model.coef_).sum(axis=0)
-            elif method == "rfe":
-                model = RFE(
-                    LogisticRegression(max_iter=3000, random_state=seed),
-                    n_features_to_select=1,
-                ).fit(summary, y)
-                scores = -model.ranking_.astype(float)
-            elif method == "permutation":
-                model = RandomForestClassifier(
-                    n_estimators=50, max_depth=5, random_state=seed, n_jobs=1
-                ).fit(summary, y)
-                scores = permutation_importance(
-                    model,
-                    summary,
-                    y,
-                    n_repeats=3,
-                    random_state=seed,
-                    scoring="balanced_accuracy",
-                ).importances_mean
-            else:
-                raise ValueError(f"Unknown frequency selector {method}")
+        scores = mutual_info_classif(summary, y, random_state=seed)
+    else:
+        raise ValueError(f"Unknown frequency selector {method}")
     scores = np.nan_to_num(
         scores, nan=-np.inf, posinf=np.finfo(float).max, neginf=-np.inf
     )
@@ -301,34 +217,23 @@ class FeatureBuilder:
         x = self._raw(z)
         self.scaler_ = TrainScaler(c.normalization, c.imputation).fit(x)
         scaled = self.scaler_.transform(x)
-        if c.representation == "circuit":
-            self.ranking_, self.scores_ = np.array([0]), np.array([1.0])
-        else:
-            self.ranking_, self.scores_ = rank_frequencies(
-                scaled, y, c.selector, self.seed, self.max_pca_rows
-            )
+        self.ranking_, self.scores_ = rank_frequencies(
+            scaled, y, c.selector, self.seed, self.max_pca_rows
+        )
         n = c.n_freq or scaled.shape[1]
         self.selected_ = self.ranking_[:n]
         return self
 
     def _raw(self, z):
         z = z[:, :, self.pattern_mask_]
-        return (
-            circuit_features(z, self.frequencies)
-            if self.candidate.representation == "circuit"
-            else components(z, self.candidate.representation)
-        )
+        return components(z, self.candidate.representation)
 
     def transform(self, z):
         x = self.scaler_.transform(self._raw(z))[:, self.selected_]
         return np.ascontiguousarray(x.reshape(len(x), -1))
 
     def metadata(self):
-        used = (
-            np.arange(len(self.frequencies))
-            if self.candidate.representation == "circuit"
-            else self.selected_
-        )
+        used = self.selected_
         return dict(
             frequency_indices_0based=used.tolist(),
             frequencies_hz=self.frequencies[used].tolist(),

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run nested EIS revision analyses, or validate prerequisites without fitting."""
+"""Describe EIS data, then run training-only nested selection for three tasks."""
 
 import argparse
 from datetime import datetime, timezone
@@ -21,7 +21,13 @@ os.environ.setdefault(
 os.environ.setdefault("MPLBACKEND", "Agg")
 import numpy as np
 import pandas as pd
-from revision.data import load_dataset, digest, CLASS_NAMES
+from revision.data import (
+    load_dataset,
+    digest,
+    CLASS_NAMES,
+    TASK_PROTOCOL,
+    TASK_DEFINITIONS,
+)
 from revision.pipeline import write_json, run_task
 from revision.analysis import quality_audit, repeatability_audit, report_task
 from revision.metrics import holm
@@ -37,7 +43,7 @@ def parse_args(argv=None):
     p.add_argument(
         "--source-mat", default="source/Python-Labeled-CaseData-17-Sep-2025.mat"
     )
-    p.add_argument("--source-output", default="results/revision-source")
+    p.add_argument("--source-output", default="results/revision-source-v3")
     p.add_argument(
         "--data",
         default="data",
@@ -95,8 +101,14 @@ def parse_args(argv=None):
     )
     p.add_argument(
         "--preflight",
+        "--data-quality-only",
+        dest="preflight",
         action="store_true",
-        help="Validate data/config and write missing-input status without fitting",
+        help="Run descriptive data-quality, PCA/MI and planned-fold analyses without diagnostic classifiers",
+    )
+    p.add_argument(
+        "--quality-results",
+        help="Completed matching quality-analysis directory, required for clinical tuning",
     )
     p.add_argument(
         "--no-plots",
@@ -190,11 +202,8 @@ def runtime_manifest(args, config):
         *sorted((root / "revision").glob("*.py")),
         *sorted((root / "scripts").glob("*.py")),
         root / "run_all.sh",
-        root / "run_revision.sh",
-        root / "run_finetuning.sh",
-        root / "run_final.sh",
-        root / "FINAL_SELECTION.md",
-        root / "configs/revision-final-evidence.json",
+        root / "scripts/parameter_explorer.html",
+        root / "PROTOCOL.md",
         root / "environment.yml",
         root / "setup_environment.sh",
     ]
@@ -210,6 +219,7 @@ def runtime_manifest(args, config):
         started_utc=datetime.now(timezone.utc).isoformat(),
         arguments=vars(args),
         config=config,
+        task_definitions={task: TASK_DEFINITIONS[task] for task in config["tasks"]},
         synthetic=args.synthetic,
         python=sys.version,
         platform=platform.platform(),
@@ -243,13 +253,33 @@ def runtime_manifest(args, config):
 
 
 def validate_config(config):
-    if config.get("schema_version") != 2:
-        raise ValueError("Expected revision config schema_version 2")
+    if (
+        config.get("schema_version") != 3
+        or config.get("task_protocol") != TASK_PROTOCOL
+    ):
+        raise ValueError(
+            "Expected schema_version 3 and the confirmed three-task protocol; use a fresh output directory"
+        )
+    if config.get("fine_tuning"):
+        raise ValueError(
+            "Use the fresh search; prior-winner fine-tuning has been retired"
+        )
+    if not config.get("final_selection"):
+        raise ValueError(
+            "The current protocol requires the fresh staged selection settings"
+        )
+    quality = config.get("data_quality", {})
+    if (
+        not isinstance(quality.get("mi_patient_draws"), int)
+        or quality["mi_patient_draws"] < 1
+        or not isinstance(quality.get("mi_top_frequencies"), int)
+        or quality["mi_top_frequencies"] < 2
+        or not isinstance(quality.get("mi_guided_pca"), bool)
+        or not quality.get("audit_cutoffs")
+        or any(not 0 <= value <= 100.000001 for value in quality["audit_cutoffs"])
+    ):
+        raise ValueError("Invalid data_quality settings")
     if config.get("final_selection"):
-        if config.get("fine_tuning"):
-            raise ValueError(
-                "Final selection is a fresh search, not a fine-tuning shortlist"
-            )
         for key in ("svm_max_iter", "lr_max_iter"):
             value = config["final_selection"].get(key)
             if not isinstance(value, int) or isinstance(value, bool) or value < 1:
@@ -305,13 +335,10 @@ def validate_config(config):
         models={"svm", "rf", "lr"},
         objectives={"auc", "acc", "f1", "sensitivity"},
         masks=set(MASKS),
-        selectors={"pca", "anova", "mutual_info", "sparse", "rfe", "permutation"},
+        selectors={"pca", "mutual_info"},
         representations={
             "magnitude",
-            "real_imag",
             "magnitude_phase",
-            "ratio",
-            "circuit",
         },
         normalizations={"freq", "global", "none"},
         imputations={"mean", "median", "zero"},
@@ -368,6 +395,10 @@ def main(argv=None):
         raise ValueError(
             "--resume and --preflight cannot be combined; preflight uses a separate output directory"
         )
+    if not args.synthetic and not args.preflight and not args.quality_results:
+        raise ValueError(
+            "Clinical tuning requires --quality-results from the completed data-quality stage"
+        )
     config = json.loads(Path(args.config).read_text())
     for key in [
         "tasks",
@@ -403,7 +434,7 @@ def main(argv=None):
             if old.get("synthetic") != args.synthetic:
                 raise ValueError("Resume requires identical synthetic flag")
             previous_manifest = old
-        elif old.get("status") not in ["preflight_failed", "preflight_passed"]:
+        else:
             raise ValueError(
                 f"{output} already contains a run. Choose a new --output directory, or --resume an interrupted run."
             )
@@ -431,8 +462,8 @@ def main(argv=None):
             objectives=args.objectives or ["auc", "sensitivity"],
             masks=["All"],
             z_quantiles=[0.5],
-            selectors=["pca", "anova"],
-            representations=["magnitude", "real_imag", "ratio"],
+            selectors=["pca", "mutual_info"],
+            representations=["magnitude", "magnitude_phase"],
             cutoffs=[60, 100.000001],
             normalizations=["freq"],
             imputations=["mean"],
@@ -467,6 +498,10 @@ def main(argv=None):
         )
     if previous_manifest is not None and previous_manifest.get("config") != config:
         raise ValueError("Resume requires the identical resolved configuration")
+    if previous_manifest is not None and previous_manifest.get("task_definitions") != {
+        task: TASK_DEFINITIONS[task] for task in config["tasks"]
+    }:
+        raise ValueError("Task definitions changed; use a fresh run")
     if (
         previous_manifest is not None
         and previous_manifest.get("reporting_protocol_version") != 1
@@ -523,7 +558,7 @@ def main(argv=None):
         ):
             raise FileNotFoundError(
                 f"--prepare-source requires the MATLAB source: {args.source_mat}. "
-                "Supply --source-mat or use run_revision.sh without --prepare-source for an explicitly reduced-input analysis."
+                "Supply --source-mat or use run_revision.py without --prepare-source for an explicitly reduced-input analysis."
             )
         if (
             args.prepare_source
@@ -542,6 +577,10 @@ def main(argv=None):
                 sidecars = previous.get("sidecar_hashes", {})
                 verified = (
                     previous.get("mat_sha256") == digest(args.source_mat)
+                    and previous.get("script_sha256")
+                    == digest(
+                        Path(__file__).parent / "scripts/prepare_revision_source.py"
+                    )
                     and previous.get("npz_hashes") == hashes
                     and set(sidecars)
                     == {
@@ -623,11 +662,6 @@ def main(argv=None):
         manifest["input_hashes"] = dataset.input_hashes
         if source_hashes is not None:
             manifest["source_input_hashes"] = source_hashes
-        shortlist = None
-        if config.get("fine_tuning"):
-            from revision.finetuning import prepare
-
-            shortlist = prepare(config, dataset.input_hashes, output)
         inventory = sorted(
             (d.metadata.get("Name", "unknown"), d.version)
             for d in importlib.metadata.distributions()
@@ -686,13 +720,46 @@ def main(argv=None):
                 group_splits(y, taskgroups, config["inner_folds"], config["seed"] + 1)
         if config.get("progress_interval_seconds"):
             print(
-                "PIPELINE 2/6: quality, clinical metadata and repeatability audits",
+                "PIPELINE 2/6: calculate or verify frozen data-quality evidence",
                 flush=True,
             )
-        quality_audit(dataset, config, output)
-        repeatability_audit(
-            dataset, output, config["bootstrap_samples"], config["seed"]
-        )
+        from revision.data_quality import explore, freeze_quality, verify_quality
+
+        if args.preflight or args.synthetic:
+            quality_audit(dataset, config, output)
+            repeatability_audit(
+                dataset, output, config["bootstrap_samples"], config["seed"]
+            )
+            if args.preflight:
+                explore(dataset, config, output)
+                freeze_quality(output, dataset, config, source_hashes)
+        else:
+            if not args.quality_results:
+                raise ValueError(
+                    "Clinical tuning requires --quality-results from ./run_quality.sh"
+                )
+            quality_root = Path(args.quality_results)
+            quality = verify_quality(
+                quality_root, config, dataset.input_hashes, source_hashes
+            )
+            if quality.get("synthetic"):
+                raise ValueError(
+                    "Synthetic quality evidence cannot be used for clinical tuning"
+                )
+            quality_hash = digest(quality_root / "quality_manifest.json")
+            if (
+                previous_manifest is not None
+                and previous_manifest.get("quality_manifest_sha256") != quality_hash
+            ):
+                raise ValueError("Resume requires the original frozen quality report")
+            for name in ("quality", "repeatability", "exploration", "planned-splits"):
+                shutil.copytree(quality_root / name, output / name, dirs_exist_ok=True)
+            shutil.copyfile(
+                quality_root / "quality_manifest.json", output / "quality_manifest.json"
+            )
+            manifest["quality_manifest_sha256"] = digest(
+                output / "quality_manifest.json"
+            )
         statuses = {
             "complex_feature_comparisons": (
                 "available"
@@ -715,9 +782,9 @@ def main(argv=None):
         }
         write_json(output / "analysis_status.json", statuses)
         if args.preflight:
-            manifest["status"] = "preflight_passed"
+            manifest["status"] = "quality_completed"
             write_json(output / "run_manifest.json", manifest)
-            print(f"Preflight passed: {output}/run_manifest.json")
+            print(f"DATA QUALITY READY: {output}/quality_manifest.json")
             return 0
         all_summaries = []
         all_comparisons = []
@@ -729,7 +796,6 @@ def main(argv=None):
             )
         execution_config = {
             **config,
-            "_shortlist": shortlist,
             "_resume": args.resume,
             "_source_version": dict(
                 started_utc=manifest["started_utc"], hashes=manifest["source_hashes"]
@@ -837,12 +903,7 @@ def main(argv=None):
             len(json.loads((output / task / "unavailable_streams.json").read_text()))
             for task in config["tasks"]
         )
-        partial_tasks = [
-            task
-            for task in config["tasks"]
-            if config.get("fine_tuning")
-            and len(config["fine_tuning"]["folds"][task]) != config["outer_folds"]
-        ]
+        partial_tasks = []
         statuses["completed_task_populations"] = [
             t for t in config["tasks"] if t not in partial_tasks
         ]
@@ -866,14 +927,6 @@ def main(argv=None):
             == "completed"
             for task in config["tasks"]
         )
-        if config.get("fine_tuning"):
-            from revision.finetuning import annotate
-
-            annotate(output, config, shortlist)
-            manifest["fine_tuning_plan_sha256"] = digest(
-                output / "fine_tuning_plan.json"
-            )
-            manifest["partial_tasks"] = partial_tasks
         if config.get("final_selection"):
             from revision.final_selection import annotate
 
@@ -893,15 +946,7 @@ def main(argv=None):
             claim_scope=(
                 "SYNTHETIC SOFTWARE VALIDATION ONLY"
                 if args.synthetic
-                else (
-                    "Adaptive same-partition fine tuning; partial tasks exploratory only"
-                    if config.get("fine_tuning")
-                    else (
-                        "Adaptive reduced search on the original patient partition; not independent confirmation"
-                        if config.get("final_selection")
-                        else "Retrospective nested validation; conditional uncertainty, not prospective clinical validation"
-                    )
-                )
+                else "Adaptive reduced search on the original cohort; not independent confirmation"
             ),
         )
         write_json(output / "run_manifest.json", manifest)

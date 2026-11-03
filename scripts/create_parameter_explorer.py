@@ -25,11 +25,7 @@ def point(candidate, row, task, mode):
         repeat=row["repeat"],
         stream=row.get("stream", candidate.get("stage")),
         unit=row.get("unit", "patient_weighted_site"),
-        status=(
-            "MC: 4/5 folds, exploratory"
-            if task == "MC"
-            else "adaptive follow-up analysis"
-        ),
+        status="adaptive follow-up analysis",
     )
     for key in [
         "auc",
@@ -62,8 +58,14 @@ def load_points(root):
     if manifest["status"] not in {"completed", "completed_partial"}:
         raise ValueError("Expected a finished search run (partial allowed)")
     config = manifest["config"]
-    if not (config.get("fine_tuning") or config.get("final_selection")):
-        raise ValueError("Expected a finished fine-tuning or final-selection run")
+    if (
+        config.get("schema_version") != 3
+        or config.get("task_protocol") != "three-tasks-v1-lesion-only-task3"
+        or not config.get("final_selection")
+    ):
+        raise ValueError(
+            "Expected a finished three-task selection run; old results cannot be relabeled"
+        )
     tasks = manifest["config"]["tasks"]
     points = []
     for task in tasks:
@@ -105,23 +107,19 @@ def load_points(root):
                 frequencies_hz=row.get("frequencies_hz"),
             )
             points.append(value)
-    counts = (
-        {task: len(config["fine_tuning"]["folds"][task]) for task in tasks}
-        if config.get("fine_tuning")
-        else {
-            task: sum(
-                row["evaluation"] == "nested_cv"
-                for row in json.loads((root / task / "splits.json").read_text())
-            )
-            for task in tasks
-        }
-    )
+    counts = {
+        task: sum(
+            row["evaluation"] == "nested_cv"
+            for row in json.loads((root / task / "splits.json").read_text())
+        )
+        for task in tasks
+    }
     expected = config["outer_folds"] * config.get("outer_repeats", 1)
     for value in points:
         value["status"] = (
             f"EXPLORATORY: {counts[value['task']]}/{expected} folds"
             if counts[value["task"]] < expected
-            else "complete original partition; adaptive follow-up analysis"
+            else "complete current partition; adaptive follow-up analysis"
         )
     return points, tasks
 

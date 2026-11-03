@@ -10,7 +10,6 @@ from revision.features import (
     FeatureBuilder,
     TrainScaler,
     patient_weights,
-    circuit_features,
 )
 from revision.pipeline import group_splits, fit_predict
 from revision.metrics import (
@@ -101,14 +100,14 @@ def test_all_missing_training_columns_do_not_use_test_means():
 
 
 def test_group_splits_never_separate_a_patients_sites(dataset):
-    ix, y, _ = dataset.task("MC")
+    ix, y, _ = dataset.task("cancer_vs_lr_hr")
     groups = dataset.table.iloc[ix].patient_id.to_numpy()
     splits = group_splits(y, groups, 5, 77)
     seen = []
     for tr, te in splits:
         assert not set(groups[tr]) & set(groups[te])
         seen.extend(te)
-        assert set(y[tr]) == set(range(4))
+        assert set(y[tr]) == set(range(3))
     assert sorted(seen) == list(range(len(y)))
 
 
@@ -122,7 +121,7 @@ def test_selected_frequencies_are_identities_not_subset_sizes():
     z = rng.normal(0, 0.1, (30, 7, 4))
     y = np.repeat([0, 1], 15)
     z[:, 5, :] += y[:, None] * 10
-    c = Candidate(selector="anova", n_freq=1, normalization="none")
+    c = Candidate(selector="mutual_info", n_freq=1, normalization="none")
     b = FeatureBuilder(c, np.arange(1, 8) * 100, None).fit(z, y, np.arange(30))
     assert b.metadata()["frequency_indices_0based"] == [5]
     assert b.metadata()["frequencies_hz"] == [600]
@@ -458,6 +457,41 @@ def test_macro_auc_is_undefined_when_a_target_class_is_missing():
     assert np.isnan(m["macro_auc"])
 
 
+def test_lesion_sensitivity_selection_targets_high_grade_not_low_grade(
+    dataset, monkeypatch
+):
+    import revision.pipeline as pipeline
+
+    indices, y, classes = dataset.task("cancer_vs_lr_hr")
+    groups = dataset.table.iloc[indices].patient_id.to_numpy()
+    high_grade = classes.index("High-grade dysplasia")
+    assert high_grade == 2
+
+    def predict_high_grade(_dataset, _indices, _y, _candidate, train, test, *_args):
+        probabilities = np.full((len(test), 3), 0.05)
+        probabilities[:, high_grade] = 0.9
+        metadata = dict(
+            train_patients=len(set(groups[train])),
+            test_patients=len(set(groups[test])),
+            frequency_indices_0based=[0],
+            input_features=1,
+        )
+        return probabilities, metadata, None
+
+    monkeypatch.setattr(pipeline, "fit_predict", predict_high_grade)
+    result = pipeline.inner_evaluate(
+        dataset,
+        indices,
+        y,
+        Candidate(),
+        group_splits(y, groups, 3, 1729),
+        1729,
+        {"_class_names": list(classes), "sensitivity_target": 0.95},
+    )
+    assert result["objectives"]["sensitivity"] == pytest.approx(1)
+    assert result["metrics"]["macro_sensitivity"] == pytest.approx(1 / 3)
+
+
 def test_operating_thresholds_are_selected_from_training_predictions():
     y = np.array([0, 0, 0, 1, 1, 1])
     p = np.array([0.1, 0.2, 0.6, 0.3, 0.7, 0.9])
@@ -546,15 +580,9 @@ def test_icc_absolute_penalizes_systematic_repositioning_offset():
     assert icc_absolute(x) < 1
 
 
-def test_circuit_fit_retains_physical_frequencies_and_recovers_known_spectrum():
-    f = np.geomspace(100, 100000, 20)
-    z = 50 + 200 / (1 + (2j * np.pi * f * 1e-4) ** 0.8)
-    vals = circuit_features(z[None, :, None], f)
-    np.testing.assert_allclose(vals[0, 0, :4, 0], [50, 200, 1e-4, 0.8], rtol=0.02)
-
-
 def test_revision_reporting_module_exposes_supported_commands():
-    import subprocess, sys
+    import subprocess
+    import sys
 
     completed = subprocess.run(
         [sys.executable, "-m", "revision.report_cli", "--help"],
@@ -567,9 +595,7 @@ def test_revision_reporting_module_exposes_supported_commands():
     assert "tuning" in completed.stdout
 
 
-@pytest.mark.parametrize(
-    "selector", ["pca", "anova", "mutual_info", "sparse", "rfe", "permutation"]
-)
+@pytest.mark.parametrize("selector", ["pca", "mutual_info"])
 def test_all_ranking_methods_fit_only_training_shapes(selector):
     rng = np.random.default_rng(2)
     z = np.abs(rng.normal(size=(20, 6, 3)))
@@ -844,7 +870,7 @@ def test_resume_reuses_complete_folds_and_reproduces_outer_predictions(tmp_path)
 def test_fold_population_counts_preserve_classes_sites_and_quality(dataset, tmp_path):
     from revision.analysis import export_split_populations
 
-    ix, y, classes = dataset.task("MC")
+    ix, y, classes = dataset.task("cancer_vs_lr_hr")
     groups = dataset.table.iloc[ix].patient_id.to_numpy()
     tr, te = group_splits(y, groups, 3, 0)[0]
     inner = group_splits(y[tr], groups[tr], 2, 1)
@@ -864,7 +890,10 @@ def test_fold_population_counts_preserve_classes_sites_and_quality(dataset, tmp_
     )
     (tmp_path / "splits.json").write_text(json.dumps([split]))
     export_split_populations(
-        tmp_path, dataset, "MC", {"cutoffs": [10, 60], "default_cutoff": 60}
+        tmp_path,
+        dataset,
+        "cancer_vs_lr_hr",
+        {"cutoffs": [10, 60], "default_cutoff": 60},
     )
     frame = pd.read_csv(tmp_path / "split_population_counts.csv")
     test = frame[
@@ -881,7 +910,10 @@ def test_fold_population_counts_preserve_classes_sites_and_quality(dataset, tmp_
     from revision.demographics import export_cv_demographics
 
     export_cv_demographics(
-        tmp_path, dataset, "MC", {"cutoffs": [10, 60], "default_cutoff": 60}
+        tmp_path,
+        dataset,
+        "cancer_vs_lr_hr",
+        {"cutoffs": [10, 60], "default_cutoff": 60},
     )
     detail = pd.read_csv(tmp_path / "cv_population_summary.csv")
     detail = detail[

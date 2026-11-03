@@ -1,0 +1,74 @@
+Retired for the confirmed three-task quality-first protocol.
+Research inputs, result archives, original reviewer comments and main.tex are preserved.
+Convergence/error-path tests were migrated to tests/test_final_selection.py.
+
+run_final.sh
+run_revision.sh
+run_finetuning.sh
+revision/finetuning.py
+scripts/check_finetuning.py
+scripts/diagnose_revision.py
+tests/test_finetuning.py
+tests/test_diagnose_revision.py
+configs/revision-final.json
+configs/revision-final-evidence.json
+configs/revision-finetuning.json
+configs/revision-seed-20261029.json
+FINAL_SELECTION.md
+FINE_TUNING.md
+Fine-Tuning-Results.ipynb
+mat-to-npz.ipynb
+Evaluationsablauf.txt
+README-Evaluation.md
+
+Obsolete derived answer copies (original requests and current response retained):
+manuscript/Response_Letter/JBHI Revision-answered.txt
+manuscript/Response_Letter/JBHI Revisions-answered.md
+
+Document material safely archived, not deleted (automatic review protected provenance):
+Archive: archive/revision-three-task-transition-20261103-195726
+manuscript/Paper/Revision-1-clean.aux -> archive/revision-three-task-transition-20261103-195726/manuscript/Paper/Revision-1-clean.aux
+manuscript/Paper/Revision-1-clean.bbl -> archive/revision-three-task-transition-20261103-195726/manuscript/Paper/Revision-1-clean.bbl
+manuscript/Paper/Revision-1-clean.blg -> archive/revision-three-task-transition-20261103-195726/manuscript/Paper/Revision-1-clean.blg
+manuscript/Paper/Revision-1-clean.fdb_latexmk -> archive/revision-three-task-transition-20261103-195726/manuscript/Paper/Revision-1-clean.fdb_latexmk
+manuscript/Paper/Revision-1-clean.fls -> archive/revision-three-task-transition-20261103-195726/manuscript/Paper/Revision-1-clean.fls
+manuscript/Paper/Revision-1-clean.log -> archive/revision-three-task-transition-20261103-195726/manuscript/Paper/Revision-1-clean.log
+manuscript/Paper/Revision-1-clean.pdf -> archive/revision-three-task-transition-20261103-195726/manuscript/Paper/Revision-1-clean.pdf
+manuscript/Paper/Revision-1.aux -> archive/revision-three-task-transition-20261103-195726/manuscript/Paper/Revision-1.aux
+manuscript/Paper/Revision-1.bbl -> archive/revision-three-task-transition-20261103-195726/manuscript/Paper/Revision-1.bbl
+manuscript/Paper/Revision-1.blg -> archive/revision-three-task-transition-20261103-195726/manuscript/Paper/Revision-1.blg
+manuscript/Paper/Revision-1.fdb_latexmk -> archive/revision-three-task-transition-20261103-195726/manuscript/Paper/Revision-1.fdb_latexmk
+manuscript/Paper/Revision-1.fls -> archive/revision-three-task-transition-20261103-195726/manuscript/Paper/Revision-1.fls
+manuscript/Paper/Revision-1.log -> archive/revision-three-task-transition-20261103-195726/manuscript/Paper/Revision-1.log
+manuscript/Paper/Revision-1.pdf -> archive/revision-three-task-transition-20261103-195726/manuscript/Paper/Revision-1.pdf
+manuscript/Paper/figures_revision_finetuning/task1-CM_norm.pdf -> archive/revision-three-task-transition-20261103-195726/manuscript/Paper/figures_revision_finetuning/task1-CM_norm.pdf
+manuscript/Paper/figures_revision_finetuning/task1-CM_norm.tikz.tex -> archive/revision-three-task-transition-20261103-195726/manuscript/Paper/figures_revision_finetuning/task1-CM_norm.tikz.tex
+manuscript/Paper/figures_revision_finetuning/task1-ROC.pdf -> archive/revision-three-task-transition-20261103-195726/manuscript/Paper/figures_revision_finetuning/task1-ROC.pdf
+manuscript/Paper/figures_revision_finetuning/task1-ROC.tikz.tex -> archive/revision-three-task-transition-20261103-195726/manuscript/Paper/figures_revision_finetuning/task1-ROC.tikz.tex
+manuscript/Paper/figures_revision_finetuning/task2-CM_norm.pdf -> archive/revision-three-task-transition-20261103-195726/manuscript/Paper/figures_revision_finetuning/task2-CM_norm.pdf
+manuscript/Paper/figures_revision_finetuning/task2-CM_norm.tikz.tex -> archive/revision-three-task-transition-20261103-195726/manuscript/Paper/figures_revision_finetuning/task2-CM_norm.tikz.tex
+manuscript/Paper/figures_revision_finetuning/task2-ROC.pdf -> archive/revision-three-task-transition-20261103-195726/manuscript/Paper/figures_revision_finetuning/task2-ROC.pdf
+manuscript/Paper/figures_revision_finetuning/task2-ROC.tikz.tex -> archive/revision-three-task-transition-20261103-195726/manuscript/Paper/figures_revision_finetuning/task2-ROC.tikz.tex
+manuscript/Paper/figures_revision_finetuning/task4-CM_norm.pdf -> archive/revision-three-task-transition-20261103-195726/manuscript/Paper/figures_revision_finetuning/task4-CM_norm.pdf
+manuscript/Paper/figures_revision_finetuning/task4-CM_norm.tikz.tex -> archive/revision-three-task-transition-20261103-195726/manuscript/Paper/figures_revision_finetuning/task4-CM_norm.tikz.tex
+manuscript/Paper/figures_revision_finetuning/task4-ROC.pdf -> archive/revision-three-task-transition-20261103-195726/manuscript/Paper/figures_revision_finetuning/task4-ROC.pdf
+manuscript/Paper/figures_revision_finetuning/task4-ROC.tikz.tex -> archive/revision-three-task-transition-20261103-195726/manuscript/Paper/figures_revision_finetuning/task4-ROC.tikz.tex
+manuscript/Paper/revision-finetuning-evidence.json -> archive/revision-three-task-transition-20261103-195726/manuscript/Paper/revision-finetuning-evidence.json
+manuscript/Paper/revision-historical-removals.json -> archive/revision-three-task-transition-20261103-195726/manuscript/Paper/revision-historical-removals.json
+manuscript/Paper/revision-snapshot-evidence.json -> archive/revision-three-task-transition-20261103-195726/manuscript/Paper/revision-snapshot-evidence.json
+manuscript/Paper/revision-tikz-figures.json -> archive/revision-three-task-transition-20261103-195726/manuscript/Paper/revision-tikz-figures.json
+manuscript/REVISION-FINETUNING-NOTES.md -> archive/revision-three-task-transition-20261103-195726/manuscript/REVISION-FINETUNING-NOTES.md
+manuscript/Response_Letter/figures_rebuttal/quality-retention.pdf -> archive/revision-three-task-transition-20261103-195726/manuscript/Response_Letter/figures_rebuttal/quality-retention.pdf
+manuscript/Response_Letter/figures_rebuttal/quality-retention.tikz.tex -> archive/revision-three-task-transition-20261103-195726/manuscript/Response_Letter/figures_rebuttal/quality-retention.tikz.tex
+manuscript/Response_Letter/figures_rebuttal/saved-test-mean-icc.pdf -> archive/revision-three-task-transition-20261103-195726/manuscript/Response_Letter/figures_rebuttal/saved-test-mean-icc.pdf
+manuscript/Response_Letter/figures_rebuttal/saved-test-mean-icc.tikz.tex -> archive/revision-three-task-transition-20261103-195726/manuscript/Response_Letter/figures_rebuttal/saved-test-mean-icc.tikz.tex
+manuscript/Response_Letter/resposeletter.aux -> archive/revision-three-task-transition-20261103-195726/manuscript/Response_Letter/resposeletter.aux
+manuscript/Response_Letter/resposeletter.bbl -> archive/revision-three-task-transition-20261103-195726/manuscript/Response_Letter/resposeletter.bbl
+manuscript/Response_Letter/resposeletter.fdb_latexmk -> archive/revision-three-task-transition-20261103-195726/manuscript/Response_Letter/resposeletter.fdb_latexmk
+manuscript/Response_Letter/resposeletter.fls -> archive/revision-three-task-transition-20261103-195726/manuscript/Response_Letter/resposeletter.fls
+manuscript/Response_Letter/resposeletter.log -> archive/revision-three-task-transition-20261103-195726/manuscript/Response_Letter/resposeletter.log
+manuscript/Response_Letter/resposeletter.out -> archive/revision-three-task-transition-20261103-195726/manuscript/Response_Letter/resposeletter.out
+manuscript/Response_Letter/resposeletter.pdf -> archive/revision-three-task-transition-20261103-195726/manuscript/Response_Letter/resposeletter.pdf
+manuscript/result-import-manifest.json -> archive/revision-three-task-transition-20261103-195726/manuscript/result-import-manifest.json
+manuscript/reviewer-evidence-map.json -> archive/revision-three-task-transition-20261103-195726/manuscript/reviewer-evidence-map.json
+manuscript/revision-change-records.json -> archive/revision-three-task-transition-20261103-195726/manuscript/revision-change-records.json

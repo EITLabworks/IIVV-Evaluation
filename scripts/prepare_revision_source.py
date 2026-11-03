@@ -49,7 +49,7 @@ def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--mat", default="source/Python-Labeled-CaseData-17-Sep-2025.mat")
     p.add_argument("--data", default="data")
-    p.add_argument("--output", default="results/revision-source")
+    p.add_argument("--output", default="results/revision-source-v3")
     args = p.parse_args()
     out = Path(args.output)
     out.mkdir(parents=True, exist_ok=True)
@@ -120,6 +120,7 @@ def main():
         out / "source_extraction.json",
         dict(
             mat_sha256=digest(args.mat),
+            script_sha256=digest(__file__),
             n_sites=len(paths),
             source_fields=source_fields,
             npz_hashes={str(path): digest(path) for path in paths},
