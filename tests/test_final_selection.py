@@ -175,7 +175,7 @@ def test_review_exports_retain_parameters_and_honest_scope(tmp_path, config):
     assert len(pd.read_csv(tmp_path / "unavailable_results.csv")) == 1
     protocol = json.loads((tmp_path / "final_selection_protocol.json").read_text())
     assert protocol["task_fold_counts"] == {"MC": 2}
-    assert "not independent confirmation" in protocol["interpretation"]
+    assert "no independent confirmation" in protocol["interpretation"]
 
 
 def test_final_synthetic_pipeline_exports_and_verifies_all_models(tmp_path):
