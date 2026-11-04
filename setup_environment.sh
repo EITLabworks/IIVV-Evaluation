@@ -29,7 +29,7 @@ _iivv_setup_environment() {
         conda env create --file "$iivv_root/environment.yml" || return 1
     fi
     conda activate iivv-revision || return 1
-    printf '%s\n' 'Activated iivv-revision. Next: make revision-quality (see todo.md).'
+    printf '%s\n' 'Activated iivv-revision. Next: make revision-quality (see README.md).'
 }
 
 if _iivv_setup_environment "$@"; then

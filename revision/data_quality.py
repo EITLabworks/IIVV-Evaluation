@@ -9,6 +9,10 @@ import numpy as np
 import pandas as pd
 from sklearn.feature_selection import mutual_info_classif
 
+from .plot_style import apply_style, class_color
+
+apply_style()
+
 from .data import digest, TASK3_CAPTION, TASK_DEFINITIONS, task_labels
 from .demographics import export_cv_demographics
 from .features import _geometry, finite_mean, patient_weights
@@ -121,7 +125,9 @@ def save_projection(x, table, frequencies, destination, labels, title):
     fig, ax = plt.subplots(figsize=(6.5, 4.5), layout="constrained")
     for label in pd.unique(frame.class_name):
         part = frame[frame.class_name == label]
-        ax.scatter(part.PC1, part.PC2, label=label, s=20, alpha=0.65)
+        ax.scatter(
+            part.PC1, part.PC2, label=label, color=class_color(label), s=20, alpha=0.65
+        )
     ax.set(
         xlabel=f"PC1 ({variance[0]:.1%})",
         ylabel=f"PC2 ({variance[1]:.1%})",
@@ -196,6 +202,7 @@ def explore(dataset, config, output):
     )
     fig, ax = plt.subplots(figsize=(10, 5), layout="constrained")
     image = ax.imshow(heat, aspect="auto", vmin=0, vmax=100)
+    ax.grid(False)
     ax.set(
         yticks=range(len(heat)),
         yticklabels=heat.index,
@@ -362,6 +369,7 @@ def explore(dataset, config, output):
                 group.retained_sites / group.total_sites,
                 "o-",
                 label=label,
+                color=class_color(label),
             )
         ax.set(
             xlabel="Strict acquisition-rejection cutoff (%)",
@@ -399,8 +407,17 @@ def explore(dataset, config, output):
         icc = pd.read_csv(icc_path)
         fig, ax = plt.subplots(figsize=(8, 4.5), layout="constrained")
         positions = np.arange(len(icc))
-        ax.vlines(positions, icc.icc_ci_low, icc.icc_ci_high)
-        ax.plot(positions, icc.icc_2_1_absolute, "o")
+        ax.vlines(
+            positions,
+            icc.icc_ci_low,
+            icc.icc_ci_high,
+            colors=[class_color(v) for v in icc.class_name],
+        )
+        ax.scatter(
+            positions,
+            icc.icc_2_1_absolute,
+            color=[class_color(v) for v in icc.class_name],
+        )
         ax.set(
             xticks=positions,
             xticklabels=icc.class_name,

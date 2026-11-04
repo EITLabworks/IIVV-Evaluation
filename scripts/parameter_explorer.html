@@ -20,7 +20,7 @@
 'use strict';
 const data=/*DATA*/;
 data.rows.forEach((row,i)=>row.id=i);
-const colours={svm:'#3877bc',rf:'#218c76',lr:'#bf657a'},controls={},box=document.getElementById('filters');
+const colours={svm:'#003F5C',rf:'#58508D',lr:'#DD5182'},controls={},box=document.getElementById('filters');
 let page=0,filtered=[];
 const metrics=[['auc','AUC'],['accuracy','Accuracy'],['f1','F1'],['sensitivity','SN'],['specificity','SP'],['precision','Precision / PPV'],['npv','NPV'],['coverage','Coverage'],['objective_auc','Inner AUC objective'],['objective_acc','Inner accuracy objective'],['objective_f1','Inner F1 objective'],['objective_sensitivity','Inner sensitivity objective']];
 function control(key,label,options){const wrap=document.createElement('label');wrap.textContent=label;const select=document.createElement('select');select.id=key;wrap.append(select);box.append(wrap);controls[key]=select;setOptions(key,options);select.addEventListener('change',()=>{page=0;if(['mode','task'].includes(key))domains();render();});}

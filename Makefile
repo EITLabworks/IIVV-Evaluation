@@ -7,7 +7,7 @@ REVISION_OUTPUT ?= results/revision-three-tasks
 QUALITY_OUTPUT ?= results/revision-quality
 
 help:
-	@printf '%s\n' 'Run revision-quality, inspect Data-Quality.ipynb, then revision-evaluation and revision-check.' 'See todo.md. The launcher runs regression checks before tuning.'
+	@printf '%s\n' 'Run revision-quality, inspect Data-Quality.ipynb, then revision-evaluation and revision-check.' 'See README.md. The launcher runs regression checks before tuning.'
 
 .PHONY: revision-quality revision-evaluation revision-resume revision-check revision-tests
 revision-quality:

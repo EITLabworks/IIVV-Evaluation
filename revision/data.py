@@ -148,7 +148,7 @@ def load_dataset(
     files = sorted(Path(path).glob("*.npz"))
     if not files:
         raise FileNotFoundError(
-            f"No site NPZ files in {path}. See code-revisions.md for the input schema."
+            f"No site NPZ files in {path}. See README.md for the input schema."
         )
     mapping = dict(PATHOLOGY)
     if label_map_path:

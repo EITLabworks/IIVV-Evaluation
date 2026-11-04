@@ -102,12 +102,16 @@ def patient_frame(frame, nclasses):
     return pd.DataFrame(rows), excluded
 
 
+from .plot_style import apply_style, class_color
+
+
 def _pyplot():
     import matplotlib
 
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
 
+    apply_style()
     return plt
 
 
@@ -142,7 +146,8 @@ def plot_outputs(folder, frame, classes, title):
             else cm
         )
         fig, ax = plt.subplots(figsize=(6, 5))
-        image = ax.imshow(shown, cmap="Blues")
+        image = ax.imshow(shown, cmap="iivv")
+        ax.grid(False)
         ax.set(
             xticks=range(len(classes)),
             yticks=range(len(classes)),
@@ -160,6 +165,7 @@ def plot_outputs(folder, frame, classes, title):
                 f"{shown[i,j]:.2f}" if normalized else f"{shown[i,j]:.0f}",
                 ha="center",
                 va="center",
+                color="white" if shown[i, j] > shown.max() * 0.55 else "black",
             )
         fig.colorbar(image, ax=ax)
         finish_figure(fig)
@@ -174,7 +180,9 @@ def plot_outputs(folder, frame, classes, title):
         if len(np.unique(yy)) < 2:
             continue
         fpr, tpr, threshold = roc_curve(yy, p[:, k])
-        ax.plot(fpr, tpr, label=f"{name} (AUC {auc(fpr,tpr):.3f})")
+        ax.plot(
+            fpr, tpr, color=class_color(name), label=f"{name} (AUC {auc(fpr,tpr):.3f})"
+        )
         bundles[name] = {
             "class_index": k,
             "fpr": fpr.tolist(),
@@ -200,7 +208,13 @@ def plot_outputs(folder, frame, classes, title):
     fig, ax = plt.subplots(figsize=(6, 5))
     ax.plot([0, 1], [0, 1], "k--")
     for name, g in calibration.groupby("class_name"):
-        ax.plot(g.mean_probability, g.observed_fraction, "o-", label=name)
+        ax.plot(
+            g.mean_probability,
+            g.observed_fraction,
+            "o-",
+            color=class_color(name),
+            label=name,
+        )
     ax.set(
         xlabel="Predicted probability",
         ylabel="Observed fraction",
@@ -215,7 +229,9 @@ def plot_outputs(folder, frame, classes, title):
         decision[decision.class_name == classes[1]] if len(classes) == 2 else decision
     )
     for name, g in shown_decision.groupby("class_name"):
-        (line,) = ax.plot(g.threshold, g.net_benefit, label=name)
+        (line,) = ax.plot(
+            g.threshold, g.net_benefit, color=class_color(name), label=name
+        )
         ax.plot(
             g.threshold,
             g.treat_all,

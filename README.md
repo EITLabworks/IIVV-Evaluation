@@ -1,74 +1,129 @@
-# IIVV evaluation: three-task revision
+# IIVV evaluation
 
-The workflow describes the data first, then runs patient-grouped nested selection
-for Healthy vs Cancer, binary High risk vs Low risk, and three-class lesion
-categorization. Task 3 retains the previous lesion-only population; clinically
-healthy sites are excluded. Its lower-grade class includes normal/benign tissue
-and mild dysplasia. Exact definitions and search limits are in [PROTOCOL.md](PROTOCOL.md).
+Code, notebooks, figures, and documents for the current oral EIS revision.
+The verified export contains **276 recording sites from 100 patients**.
 
-Start with the step-by-step [todo.md](todo.md). On the server:
-
-```bash
-conda env create -f environment.yml
-source ./setup_environment.sh
-./run_all.sh --data-quality-only --output results/revision-quality-v3
-```
-
-Review the saved quality evidence, then run every task/model/objective:
-
-```bash
-./run_all.sh --quality-results results/revision-quality-v3 --output results/revision-three-tasks-v3
-```
-
-The default affinity is logical CPUs 224–255. Override with `CPUSET=0-23` for
-24 logical CPUs. Worker limits respect affinity and scheduler quotas. The launcher
-runs regression checks on the server before tuning, keeps progress logs and
-checkpoints, creates all reports and verifies the completed output. Use a fresh
-output after scientific changes. Resume an interrupted/failed run by repeating its
-command with `--resume`, identical inputs/configuration and the original output.
-
-## Notebooks
-
-All notebooks use English and read saved artifacts without training. Saved outputs
-and execution counts are allowed; server checks validate cell source syntax only.
-
-| Notebook | Purpose | Environment variable |
+| Task | Classes and purpose | Sites / patients |
 |---|---|---|
-| [Data-Quality.ipynb](Data-Quality.ipynb) | Cohort, source quality, PCA/MI, missingness, retention, repeatability and planned CV demographics | `IIVV_QUALITY` |
-| [Revision-Evaluation.ipynb](Revision-Evaluation.ipynb) | Exact quality/tuning/check commands and protocol | none |
-| [Revision-Snapshot.ipynb](Revision-Snapshot.ipynb) | Hash-verified completed folds and saved progress from an ongoing run | `IIVV_RESULTS` |
-| [Figures-and-Tables.ipynb](Figures-and-Tables.ipynb) | Final metrics, intervals, corrected tests, controls, selected parameters and figures | `IIVV_RESULTS` |
-| `manuscript/Reviewer-Evidence.ipynb` | Reviewer/concern evidence and response drafts | both |
+| 1: Healthy vs Cancer | Clinically healthy tissue versus invasive carcinoma | 196 / 98 |
+| 2: High risk vs Low risk | High risk includes moderate/severe or high-grade dysplasia, CIS, and invasive cancer. Low risk includes healthy/normal tissue, benign tissue, and mild dysplasia | 272 / 100 |
+| 3: Lesion categorization | Cancer contains invasive carcinoma. High-grade dysplasia includes moderate/severe dysplasia and CIS. The Low-grade dysplasia label includes normal/benign tissue and mild dysplasia. Clinically healthy sites are excluded | 172 / 97 |
 
-```bash
-IIVV_QUALITY=results/revision-quality-v3 jupyter lab Data-Quality.ipynb
-IIVV_RESULTS=results/revision-three-tasks-v3 jupyter lab Figures-and-Tables.ipynb
-```
+Task 2 addresses whether a finding may warrant further evaluation or a procedure.
+Task 3 exposes category errors hidden by binary pooling. These study labels do not
+establish treatment rules. Four unmapped sites are excluded from classification.
 
-`review_selected_parameters.csv` contains each outer fold's training-selected
-configuration. Task `inner_search.csv` files contain evaluated candidates;
-`selections.json` includes full frequency/IIVV identities and postprocessing
-provenance. There is no test-selected universal winning configuration. The
-self-contained `parameter-explorer.html` supports interactive parameter filtering.
+## Workflow
 
-Reports retain AUC, accuracy, F1, precision, SN, SP, PPV, NPV, abstention/coverage,
-per-class and patient endpoints, whole-patient bootstrap intervals, corrected
-resampled CV tests, Holm correction, matched available-covariate controls and
-measured timings. Global PCA/MI views are descriptive and never feed tuning.
+1. **Prepare inputs and the environment.** Keep `data/`, `source/`, results, and logs.
+   NPZ sites require `Zdata`, `patient_no`, `patient_sample`, `LesionAssessment`,
+   and `Avg_Cutpats`. `source/IIVV_patterns.txt` defines coordinate order.
+   The MATLAB source supplies available clinical metadata and processed test means.
 
-## Repository and documents
+   ```bash
+   conda env create -f environment.yml
+   # Existing environment: conda env update -f environment.yml --prune
+   source ./setup_environment.sh
+   ```
 
-- `run_all.sh`, `run_revision.py`: one quality/tuning entry point and orchestration.
-- `configs/revision.json`: the only active scientific configuration.
-- `revision/`: fitting, features, patient splits, quality, inference and verification.
-- `scripts/`: MATLAB/source audits and the offline parameter explorer.
-- `tests/`: prepared scientific and artifact-integrity regression checks.
-- `environment.yml`, `setup_environment.sh`: Conda environment and activation.
-- [CLEANUP-REMOVED.txt](CLEANUP-REMOVED.txt): retired entry points/configurations.
+2. **Run quality analysis on the server and inspect it before tuning.**
 
-Raw inputs, old result directories and original reviewer comments are preserved.
-Old four-task results are not compatible with this protocol. Clinical data and
-local paper/response/build files remain ignored by Git. `main.tex` is the untouched
-original. Revised sources use `\edit{}`/`\edits{}`; `make manuscript` builds the
-original, marked/clean revision and response when local document files are present.
-No paper numbers are imported automatically. See [CITATION.cff](CITATION.cff).
+   ```bash
+   tmux new -s iivv-revision
+   CPUSET=224-255 ./run_all.sh --data-quality-only --output results/revision-quality-v3
+   ```
+
+   Wait for `DATA QUALITY READY`. Inspect source agreement, cohort composition,
+   missingness, retention, exploratory PCA/MI, repeatability, and fold populations
+   in `Data-Quality.ipynb`. Global PCA/MI never supplies classifier features.
+
+3. **Run tuning and reporting after the quality review.**
+
+   ```bash
+   CPUSET=224-255 ./run_all.sh --quality-results results/revision-quality-v3 --output results/revision-three-tasks-v3
+   ```
+
+   The launcher runs server regression checks, saves checkpoints, and verifies
+   reports. Monitor `tail -f logs/revision-latest.log` until `REVISION RESULTS READY`.
+   Detach tmux with Ctrl-b, d. Reattach with `tmux attach -t iivv-revision`.
+   Default affinity is 224–255. Use `CPUSET=0-23` for 24 allocated logical CPUs.
+   Use fresh output paths after scientific changes. Add `--resume` only for an
+   interrupted/failed run with unchanged configuration and inputs. Never start
+   two writers in one output directory. Retain diagnostic logs if tests stall.
+
+4. **Copy whole run directories to the PC, then verify.** Replace the server/path.
+
+   ```bash
+   mkdir -p results logs
+   scp -r USER@SERVER:/PATH/results/revision-quality-v3 results/
+   scp -r USER@SERVER:/PATH/results/revision-three-tasks-v3 results/
+   scp 'USER@SERVER:/PATH/logs/revision-three-tasks-v3-*.log' logs/
+   python -m revision.report_cli check --results-dir results/revision-three-tasks-v3
+   ```
+
+5. **Inspect saved results and create figures.** Notebooks do not train models.
+
+   | Notebook | Purpose |
+   |---|---|
+   | `Data-Quality.ipynb` | Cohort, quality, PCA/MI, repeatability, demographics |
+   | `Revision-Evaluation.ipynb` | Commands and protocol |
+   | `Revision-Snapshot.ipynb` | Completed-fold progress during an ongoing run |
+   | `Figures-and-Tables.ipynb` | Final metrics, uncertainty, parameters, figures |
+   | `manuscript/Reviewer-Evidence.ipynb` | Reviewer → concern → response → evidence |
+
+   ```bash
+   IIVV_RESULTS=results/revision-three-tasks-v3 jupyter lab Figures-and-Tables.ipynb
+   python scripts/restyle_results.py
+   python scripts/create_parameter_explorer.py --results-dir results/revision-three-tasks-v3 --output results/revision-palette/revision-three-tasks-v3/parameter-explorer.html
+   PYTHONPATH=. python manuscript/prepare_revision_results.py
+   ```
+
+   `IIVV_RESULTS` and `IIVV_QUALITY` override notebook paths. Selected settings are in
+   `review_selected_parameters.csv` and task `selections.json`. Candidate scores
+   are in task `inner_search.csv`. The HTML explorer provides interactive filters.
+   Restyled figures use `revision/plot_style.py` and live in
+   `results/revision-palette/`, preserving the verified source artifacts.
+
+6. **Review documents together, build, and package for Overleaf.**
+
+   ```bash
+   make manuscript
+   python scripts/package_overleaf.py
+   ```
+
+   `main.tex` remains the original. `Revision-1.tex` marks additions with `\edit{}`
+   and removals with `\edits{}`. The clean paper uses that same source. The response
+   quotes exact associated changes. Upload `overleaf.zip` for the marked/clean paper
+   and `response-letter.zip` as a separate project. Each includes compilation notes.
+
+## Protocol, status, and remaining work
+
+`configs/revision.json` defines five outer and four inner patient-grouped folds,
+with seed 1729 and **15 outer computations**. Training partitions learn preprocessing,
+frequency/IIVV selection, and classifiers. Inner validation selects settings and
+families. Outer-training OOF predictions determine calibration and binary thresholds.
+This is nested grouped CV, not leave-one-patient-out or independent validation.
+`PROTOCOL.md` remains the detailed search specification required by the code.
+
+Reports include AUC, accuracy, F1, precision/PPV, SN, SP, NPV, coverage, per-class
+and patient endpoints, calibration, decision curves, covariate controls, and timings.
+Intervals use 1000 whole-patient bootstrap resamples of frozen predictions. CV
+comparisons use corrected resampled tests and global Holm adjustment (216 hypotheses).
+
+The current quality and three-task runs are verified across all 15 folds. Primary
+patient-equal site AUCs are 0.884, 0.798, and 0.794. No comparison passes global Holm
+correction. Dysplasia sensitivity remains limited. Clinical safety and hardware
+savings are not established. Before submission:
+
+- [ ] Resolve Sophie placeholders for enrollment, pathology correspondence/blinding,
+  mixed histology, healthy-site confirmation, contact controls, acquisition/test-mean
+  reconciliation, and approved data sharing.
+- [ ] Explain unperformed RFE/resistance-reactance comparisons and the limited
+  quality-cutoff sweep. Omitted methods have not been shown inferior.
+- [ ] Review both paper versions, responses, and upload packages. Independent clinical
+  validation and prospective hardware/acquisition timing remain outside this study.
+
+Private inputs, results, manuscript files, and upload ZIPs are ignored by Git and
+need separate transfer. Active code/tests and current results are retained.
+Superseded files are preserved in `archive/superseded-20261104.zip` with a
+`CLEANUP.json` inventory. See `LICENSE` and `CITATION.cff` for reuse and citation.

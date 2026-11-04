@@ -12,9 +12,9 @@ identifiers, citations and the untouched original manuscript are preserved.
 | 2: `highrisk_vs_lowrisk` | Low risk; High risk | Low risk: healthy/normal, benign and mild dysplasia. High risk: moderate/severe or high-grade dysplasia, CIS and invasive carcinoma |
 | 3: `cancer_vs_lr_hr` | Cancer; Low-grade dysplasia; High-grade dysplasia | Lesion categorization, retaining the previous lesion-only population. Low-grade dysplasia is the requested display label for normal/benign tissue and mild dysplasia. High-grade dysplasia includes moderate/severe dysplasia and CIS. Clinically healthy sites are excluded |
 
-Task 3 classes are disjoint: invasive cancer occurs only in Cancer. Every Task 3
-figure caption explains the pooled lower-grade/non-malignant composition and the
-inclusion of moderate dysplasia in the high-grade group. These are study groupings,
+Task 3 classes are disjoint: invasive cancer occurs only in Cancer. Methods defines the pooled lower-grade/non-malignant composition and the
+inclusion of moderate dysplasia in the high-grade group. Captions refer to these
+definitions rather than repeating them. These are study groupings,
 not a reassignment of the recorded histological diagnoses. Raw pathology remains
 in inclusion, exclusion and fold-demographic exports. Unknown diagnoses are excluded
 explicitly. No four-class classification task remains.

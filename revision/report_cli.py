@@ -25,7 +25,7 @@ def main(argv=None):
     manifest = root / "run_manifest.json"
     if not manifest.exists():
         print(
-            f"No run manifest at {manifest}; see todo.md for the quality-first workflow."
+            f"No run manifest at {manifest}; see README.md for the quality-first workflow."
         )
         return 2
     info = json.loads(manifest.read_text())

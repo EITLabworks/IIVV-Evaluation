@@ -1,6 +1,10 @@
+from .plot_style import apply_style
+
 ## Masking class specialized for surface electrode array by Dartmouth
 
 import matplotlib.pyplot as plt
+
+apply_style()
 import numpy as np
 from typing import Union
 
@@ -213,6 +217,7 @@ class Masking:
             )
 
     def plot_mask(self, mode: int = 0):
+        apply_style()
         if mode == 0:
             plt.figure(figsize=(6, 2))
             plt.plot(self.mask, "C0", lw=2, label="Current self.mask")

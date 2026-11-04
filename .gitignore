@@ -42,3 +42,7 @@ log_telegram_watcher.py
 *.egg-info/
 /build/
 /dist/
+
+# Local Overleaf upload packages
+/overleaf.zip
+/response-letter.zip
