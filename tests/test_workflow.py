@@ -42,10 +42,9 @@ def test_launcher_help_and_empty_paths_do_not_start_computation():
         assert result.returncode == 2 and "requires a path" in result.stderr
 
 
-def test_committed_notebooks_have_parseable_unexecuted_code():
+def test_notebook_code_is_parseable():
     for path in Path(".").glob("*.ipynb"):
         notebook = json.loads(path.read_text())
         for index, cell in enumerate(notebook["cells"]):
             if cell["cell_type"] == "code":
-                assert cell["execution_count"] is None and not cell["outputs"]
                 ast.parse("".join(cell["source"]), filename=f"{path}:cell{index}")

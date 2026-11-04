@@ -29,7 +29,8 @@ command with `--resume`, identical inputs/configuration and the original output.
 
 ## Notebooks
 
-All notebooks are English, unexecuted and read saved artifacts without training.
+All notebooks use English and read saved artifacts without training. Saved outputs
+and execution counts are allowed; server checks validate cell source syntax only.
 
 | Notebook | Purpose | Environment variable |
 |---|---|---|
