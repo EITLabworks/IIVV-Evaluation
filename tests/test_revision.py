@@ -304,12 +304,9 @@ def test_outer_fold_worker_count_respects_scheduler_cpu_budget(monkeypatch):
 def test_serial_and_parallel_outer_folds_and_resume_preserve_predictions(
     tmp_path, monkeypatch
 ):
-    import multiprocessing
     from run_revision import main
     import revision.parallel as parallel
 
-    if "fork" not in multiprocessing.get_all_start_methods():
-        pytest.skip("Outer-fold process parity requires fork")
     # Two tiny LR workers exercise actual process isolation even on a quota-limited CI host.
     monkeypatch.setattr(
         parallel,
@@ -328,6 +325,8 @@ def test_serial_and_parallel_outer_folds_and_resume_preserve_predictions(
         "2",
         "--no-plots",
         "--rf-jobs",
+        "1",
+        "--blas-threads",
         "1",
     ]
     serial, concurrent = tmp_path / "serial", tmp_path / "parallel"

@@ -172,3 +172,12 @@ make manuscript
 Paper/response files, document assets, templates and `manuscript.mk` are local-only
 and ignored by Git. Copy them separately if building elsewhere. The clean revision
 is generated from the marked source; do not edit it independently.
+
+## If server regression checks previously stalled at step 0/6
+
+Stop that launcher with Ctrl+C, update the code, and repeat the original command
+without `--resume`: clinical tuning has not started at step 0/6. Test names and
+five-minute diagnostic stack dumps now appear in the log. The former fork-based
+worker startup was replaced by fresh processes with shared read-only input files.
+Do not skip the serial/parallel/resume parity check. If a test still stalls, retain
+its test name and diagnostic stack dump.

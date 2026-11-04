@@ -16,3 +16,10 @@ allocated logical CPUs, for example `0-23`. A completed run ends with
 
 No previous task checkpoints or selected configurations are reused. Use new
 output paths and preserve previous scientific results as provenance.
+
+Worker processes start with `spawn` to avoid inheriting native thread-pool locks
+after serial numerical work. Each pool shares one temporary, read-only memory-mapped
+dataset. This adds startup I/O and requires temporary space for the uncompressed
+input arrays; `TMPDIR` can point to a fast scratch directory. Checkpoints, seeds and
+training/test separation are unchanged. Regression logs show each test name and
+automatically dump Python stacks after a test exceeds five minutes.

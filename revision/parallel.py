@@ -8,6 +8,9 @@ from pathlib import Path
 import shutil
 import signal
 import time
+from tempfile import TemporaryDirectory
+
+from joblib import dump, load
 
 import pandas as pd
 from threadpoolctl import threadpool_limits
@@ -53,9 +56,9 @@ def worker_count(requested, jobs, threads=1):
     return max(1, min(int(requested), int(jobs), max(1, cpus // int(threads))))
 
 
-def _initialize(dataset, blas_threads):
+def _initialize(dataset_path, blas_threads):
     global _DATASET, _THREAD_LIMIT
-    _DATASET = dataset
+    _DATASET = load(dataset_path, mmap_mode="r")
     _DATASET.z.flags.writeable = False
     if _DATASET.repeats is not None:
         _DATASET.repeats.flags.writeable = False
@@ -71,53 +74,58 @@ def _execute(function, jobs, workers, dataset, config):
             global _DATASET
             _DATASET = dataset
             return [function(job, config) for job in jobs]
-    if "fork" not in mp.get_all_start_methods():
-        raise ValueError(
-            "Parallel outer folds require fork; set fold_workers=1 on this platform"
+    # Fresh interpreters avoid inheriting native thread-pool locks after serial work.
+    # One disk-backed dataset is shared read-only rather than copied into every worker.
+    with TemporaryDirectory(prefix="iivv-workers-") as shared:
+        shared_path = Path(shared) / "dataset.joblib"
+        dump(dataset, shared_path, compress=0)
+        previous_children = {child.pid for child in mp.active_children()}
+        pool = ProcessPoolExecutor(
+            max_workers=workers,
+            mp_context=mp.get_context("spawn"),
+            initializer=_initialize,
+            initargs=(str(shared_path), config.get("blas_threads", 1)),
         )
-    previous_children = {child.pid for child in mp.active_children()}
-    pool = ProcessPoolExecutor(
-        max_workers=workers,
-        mp_context=mp.get_context("fork"),
-        initializer=_initialize,
-        initargs=(dataset, config.get("blas_threads", 1)),
-    )
-    futures = []
-    try:
-        since = time.time()
-        futures = [pool.submit(function, job, config) for job in jobs]
-        interval = config.get("progress_interval_seconds", 0)
-        if interval:
-            from .progress import heartbeat
+        futures = []
+        try:
+            since = time.time()
+            futures = [pool.submit(function, job, config) for job in jobs]
+            interval = config.get("progress_interval_seconds", 0)
+            if interval:
+                from .progress import heartbeat
 
-            pending = set(futures)
-            results = []
-            while pending:
-                done, pending = wait(
-                    pending, timeout=interval, return_when=FIRST_COMPLETED
-                )
-                results.extend(future.result() for future in done)
-                heartbeat(
-                    [job for future, job in zip(futures, jobs) if future in pending],
-                    len(results),
-                    len(jobs),
-                    since_epoch=since,
-                    label="folds" if len(jobs[0]) == 3 else "reports",
-                )
+                pending = set(futures)
+                results = []
+                while pending:
+                    done, pending = wait(
+                        pending, timeout=interval, return_when=FIRST_COMPLETED
+                    )
+                    results.extend(future.result() for future in done)
+                    heartbeat(
+                        [
+                            job
+                            for future, job in zip(futures, jobs)
+                            if future in pending
+                        ],
+                        len(results),
+                        len(jobs),
+                        since_epoch=since,
+                        label="folds" if len(jobs[0]) == 3 else "reports",
+                    )
+            else:
+                results = [future.result() for future in as_completed(futures)]
+        except BaseException:
+            for future in futures:
+                future.cancel()
+            # Public multiprocessing API: only this coordinator creates child processes.
+            for child in mp.active_children():
+                if child.pid not in previous_children:
+                    child.terminate()
+            pool.shutdown(wait=True, cancel_futures=True)
+            raise
         else:
-            results = [future.result() for future in as_completed(futures)]
-    except BaseException:
-        for future in futures:
-            future.cancel()
-        # Public multiprocessing API: only this coordinator creates child processes.
-        for child in mp.active_children():
-            if child.pid not in previous_children:
-                child.terminate()
-        pool.shutdown(wait=True, cancel_futures=True)
-        raise
-    else:
-        pool.shutdown(wait=True)
-        return results
+            pool.shutdown(wait=True)
+            return results
 
 
 def fold_directory(root, task, key):
@@ -300,7 +308,7 @@ def run_parallel(dataset, config, root):
     write_json(
         Path(root) / "parallel_execution.json",
         dict(
-            mode="independent outer folds; fork-shared raw inputs; isolated fitted state",
+            mode="independent outer folds; spawn workers; read-only memory-mapped inputs; isolated fitted state",
             fold_workers=workers,
             requested_fold_workers=config.get("fold_workers", 1),
             rf_threads_per_fit=config.get("rf_jobs", 4),

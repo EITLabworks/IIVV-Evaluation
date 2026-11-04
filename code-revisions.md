@@ -51,3 +51,10 @@ burst-level recordings. The server launcher verifies/extracts MATLAB metadata
 and available test means into `results/revision-source-v3`; older sidecars remain
 in place. Extraction cache acceptance requires matching MATLAB, NPZ, sidecar and
 producer-script hashes. Every run archives input hashes and its exact code/config.
+
+Worker processes start with `spawn` to avoid inheriting native thread-pool locks
+after serial numerical work. Each pool shares one temporary, read-only memory-mapped
+dataset. This adds startup I/O and requires temporary space for the uncompressed
+input arrays; `TMPDIR` can point to a fast scratch directory. Checkpoints, seeds and
+training/test separation are unchanged. Regression logs show each test name and
+automatically dump Python stacks after a test exceeds five minutes.

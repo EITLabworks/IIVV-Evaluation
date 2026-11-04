@@ -157,3 +157,10 @@ matched analyses, not causal adjustment for missing clinical variables.
 
 No numerical results from the old four-task runs are imported into this protocol.
 Final claims require the new server artifacts and completion verification.
+
+Worker processes start with `spawn` to avoid inheriting native thread-pool locks
+after serial numerical work. Each pool shares one temporary, read-only memory-mapped
+dataset. This adds startup I/O and requires temporary space for the uncompressed
+input arrays; `TMPDIR` can point to a fast scratch directory. Checkpoints, seeds and
+training/test separation are unchanged. Regression logs show each test name and
+automatically dump Python stacks after a test exceeds five minutes.

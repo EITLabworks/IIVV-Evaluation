@@ -66,7 +66,7 @@ exec > >(tee -a "$log") 2>&1
 printf 'PIPELINE: CPUs=%s; config=configs/revision.json\nOUTPUT=%s\nLOG=%s\n' "$CPUSET" "$output" "$log"
 if ((!quality_only)); then
     echo 'PIPELINE 0/6: regression checks on the server'
-    taskset -c "$CPUSET" "${PYTHON:-python}" -m pytest -q tests
+    taskset -c "$CPUSET" "${PYTHON:-python}" -m pytest -v --durations=10 -o faulthandler_timeout=300 tests
 fi
 taskset -c "$CPUSET" "${PYTHON:-python}" run_revision.py --config configs/revision.json \
     --prepare-source --output "$output" "${forward[@]}"

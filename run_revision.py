@@ -376,17 +376,17 @@ def validate_config(config):
             raise ValueError(f"Missing parameter grid for {model}")
 
 
-_WORKER_DATASET = None
+def _fit_report_task(job, config):
+    from revision.parallel import _DATASET
 
-
-def _fit_report_task(task, config, output):
-    predictions, selections = run_task(_WORKER_DATASET, task, config, output)
+    task, output = job
+    predictions, selections = run_task(_DATASET, task, config, output)
     from revision.covariate_control import add_matched_control
 
     predictions, selections = add_matched_control(
-        _WORKER_DATASET, task, config, output, predictions, selections
+        _DATASET, task, config, output, predictions, selections
     )
-    return report_task(_WORKER_DATASET, task, predictions, selections, config, output)
+    return report_task(_DATASET, task, predictions, selections, config, output)
 
 
 def main(argv=None):
@@ -817,34 +817,21 @@ def main(argv=None):
                 dataset, execution_config, output
             )
         elif workers > 1:
-            import multiprocessing
-            from concurrent.futures import ProcessPoolExecutor
+            from revision.parallel import _execute
 
-            if "fork" not in multiprocessing.get_all_start_methods():
-                raise ValueError(
-                    "task_workers>1 currently requires fork support; use task_workers=1 on this platform"
-                )
-            # Raw immutable arrays are inherited read-only; only small task/config
-            # arguments cross the pool. Each task has distinct folds/output files,
-            # independent caches, identical prespecified seeds and no test reuse.
-            global _WORKER_DATASET
-            _WORKER_DATASET = dataset
-            dataset.z.flags.writeable = False
             print(
                 f"Running {workers} independent diagnostic tasks concurrently",
                 flush=True,
             )
-            with ProcessPoolExecutor(
-                max_workers=workers, mp_context=multiprocessing.get_context("fork")
-            ) as pool:
-                futures = [
-                    pool.submit(_fit_report_task, task, execution_config, output)
-                    for task in config["tasks"]
-                ]
-                for future in futures:
-                    summary, comparison = future.result()
-                    all_summaries.append(summary)
-                    all_comparisons.append(comparison)
+            for summary, comparison in _execute(
+                _fit_report_task,
+                [(task, str(output)) for task in config["tasks"]],
+                workers,
+                dataset,
+                execution_config,
+            ):
+                all_summaries.append(summary)
+                all_comparisons.append(comparison)
         else:
             for task in config["tasks"]:
                 predictions, selections = run_task(
