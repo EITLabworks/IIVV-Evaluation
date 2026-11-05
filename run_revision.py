@@ -203,7 +203,7 @@ def runtime_manifest(args, config):
         *sorted((root / "scripts").glob("*.py")),
         root / "run_all.sh",
         root / "scripts/parameter_explorer.html",
-        root / "PROTOCOL.md",
+        root / "README.md",
         root / "environment.yml",
         root / "setup_environment.sh",
     ]

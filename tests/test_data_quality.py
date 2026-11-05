@@ -82,7 +82,9 @@ def test_quality_manifest_rejects_changed_artifacts_inputs_and_task_protocol(tmp
 
 @pytest.mark.parametrize("seed", [42, 1729])
 @pytest.mark.parametrize("repeats", [1, 5])
-def test_quality_and_training_share_the_exact_partition_inventory(tmp_path, seed, repeats):
+def test_quality_and_training_share_the_exact_partition_inventory(
+    tmp_path, seed, repeats
+):
     from run_revision import synthetic_fixture
     from revision.data import load_dataset
 
@@ -90,7 +92,8 @@ def test_quality_and_training_share_the_exact_partition_inventory(tmp_path, seed
     dataset = load_dataset(data, patterns_path=patterns)
     # Keep enough synthetic patients per class for inner CV across all tested repeats.
     dataset.table["pathology"] = np.resize(
-        ["Healthy", "Cancer", "Non-malignant", "High-grade dysplasia"], len(dataset.table)
+        ["Healthy", "Cancer", "Non-malignant", "High-grade dysplasia"],
+        len(dataset.table),
     )
     cfg = dict(config(), outer_folds=3, inner_folds=2, seed=seed, outer_repeats=repeats)
     for task in cfg["tasks"]:
@@ -99,7 +102,9 @@ def test_quality_and_training_share_the_exact_partition_inventory(tmp_path, seed
         seen = {repeat: [] for repeat in range(cfg["outer_repeats"])}
         for repeat, fold, tr, te, evaluation in task_outer_splits(dataset, task, cfg):
             inner = group_splits(
-                y[tr], groups[tr], cfg["inner_folds"],
+                y[tr],
+                groups[tr],
+                cfg["inner_folds"],
                 cfg["seed"] + repeat * 1000 + fold * 100 + 1,
             )
             row = make_split_record(

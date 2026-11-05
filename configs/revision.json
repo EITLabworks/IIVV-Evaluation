@@ -92,7 +92,7 @@
     "lr_max_iter": 20000,
     "design": "fresh staged training-only search with a fixed candidate budget",
     "scope": "Adaptive follow-up on the original cohort with task-specific patient partitions; not independent confirmation",
-    "rationale": "PROTOCOL.md"
+    "rationale": "README.md"
   },
   "task_protocol": "three-tasks-v1-lesion-only-task3",
   "data_quality": {

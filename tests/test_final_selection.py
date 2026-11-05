@@ -87,10 +87,17 @@ def test_repeated_patient_schedule_is_complete_and_deterministic(
         [
             dict(patient_id=str(patient), pathology=pathology)
             for patient in range(20)
-            for pathology in ("Healthy", "Cancer", "Non-malignant", "High-grade dysplasia")
+            for pathology in (
+                "Healthy",
+                "Cancer",
+                "Non-malignant",
+                "High-grade dysplasia",
+            )
         ]
     )
-    dataset = Dataset(np.zeros((len(table), 1, 1)), table, np.array([100]), None, False, {})
+    dataset = Dataset(
+        np.zeros((len(table), 1, 1)), table, np.array([100]), None, False, {}
+    )
     original = pipeline.group_splits
     seeds = []
 
@@ -111,19 +118,24 @@ def test_repeated_patient_schedule_is_complete_and_deterministic(
             rows = [row for row in schedule if row[0] == repeat]
             assert {row[1] for row in rows} == set(range(config["outer_folds"]))
             np.testing.assert_array_equal(
-                np.sort(np.concatenate([row[3] for row in rows])), np.arange(len(indices))
+                np.sort(np.concatenate([row[3] for row in rows])),
+                np.arange(len(indices)),
             )
             for _, fold, train, test, evaluation in rows:
                 assert evaluation == "nested_cv"
                 assert not set(groups[train]) & set(groups[test])
                 inner = original(
-                    y[train], groups[train], config["inner_folds"],
+                    y[train],
+                    groups[train],
+                    config["inner_folds"],
                     config["seed"] + repeat * 1000 + fold * 100 + 1,
                 )
                 for fit, validation in inner:
                     assert not set(groups[train[fit]]) & set(groups[train[validation]])
                     assert not set(groups[test]) & set(groups[train[fit]])
-        for first, second in zip(schedule, pipeline.task_outer_splits(dataset, task, config)):
+        for first, second in zip(
+            schedule, pipeline.task_outer_splits(dataset, task, config)
+        ):
             assert first[:2] == second[:2] and first[4] == second[4]
             np.testing.assert_array_equal(first[2], second[2])
             np.testing.assert_array_equal(first[3], second[3])
@@ -180,11 +192,15 @@ def test_final_config_rejects_conflicting_modes_and_unsafe_cache(config):
 
 
 @pytest.mark.parametrize("repeat", [0, 4])
-def test_progress_tracks_worker_and_phase_and_skips_stale_snapshots(tmp_path, capsys, repeat):
+def test_progress_tracks_worker_and_phase_and_skips_stale_snapshots(
+    tmp_path, capsys, repeat
+):
     import time
     from revision.progress import update_progress, heartbeat
 
-    folder = tmp_path / f"fold-checkpoints/cancer_vs_lr_hr/nested_cv_repeat{repeat}_fold2"
+    folder = (
+        tmp_path / f"fold-checkpoints/cancer_vs_lr_hr/nested_cv_repeat{repeat}_fold2"
+    )
     config = {
         "progress_interval_seconds": 60,
         "_progress_path": str(folder / "progress.json"),
@@ -214,7 +230,9 @@ def test_progress_tracks_worker_and_phase_and_skips_stale_snapshots(tmp_path, ca
 def test_review_exports_retain_parameters_and_honest_scope(tmp_path, config, repeats):
     from revision.final_selection import annotate
 
-    config = dict(config, tasks=["cancer_vs_lr_hr"], outer_folds=2, outer_repeats=repeats)
+    config = dict(
+        config, tasks=["cancer_vs_lr_hr"], outer_folds=2, outer_repeats=repeats
+    )
     folder = tmp_path / "cancer_vs_lr_hr"
     folder.mkdir()
     expected_folds = 2 * repeats
@@ -257,11 +275,16 @@ def test_review_exports_retain_parameters_and_honest_scope(tmp_path, config, rep
     annotate(tmp_path, config)
     table = pd.read_csv(tmp_path / "review_selected_parameters.csv")
     assert json.loads(table.iloc[0].candidate)["model"] == "svm"
-    assert table.iloc[0].folds_available == table.iloc[0].folds_expected == expected_folds
+    assert (
+        table.iloc[0].folds_available == table.iloc[0].folds_expected == expected_folds
+    )
     assert len(pd.read_csv(tmp_path / "unavailable_results.csv")) == 1
     protocol = json.loads((tmp_path / "final_selection_protocol.json").read_text())
     assert protocol["task_fold_counts"] == {"cancer_vs_lr_hr": expected_folds}
     assert "no independent confirmation" in protocol["interpretation"]
+    assert protocol["omitted_parameter_rationale"] == "README.md"
+    assert set(protocol["rationale_artifact_hashes"]) == {"README.md"}
+    assert (tmp_path / "README.md").read_text() == Path("README.md").read_text()
 
 
 def test_final_synthetic_pipeline_exports_and_verifies_all_models(tmp_path):

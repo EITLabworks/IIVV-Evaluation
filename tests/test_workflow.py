@@ -22,7 +22,8 @@ def test_runtime_inventory_contains_only_existing_current_sources():
     config = json.loads(Path("configs/revision.json").read_text())
     manifest = runtime_manifest(SimpleNamespace(synthetic=False), config)
     assert "run_all.sh" in manifest["source_hashes"]
-    assert "PROTOCOL.md" in manifest["source_hashes"]
+    assert "README.md" in manifest["source_hashes"]
+    assert "PROTOCOL.md" not in manifest["source_hashes"]
     assert "run_final.sh" not in manifest["source_hashes"]
     assert set(manifest["task_definitions"]) == set(config["tasks"])
     assert all(Path(name).is_file() for name in manifest["source_hashes"])
