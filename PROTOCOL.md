@@ -83,7 +83,7 @@ For each outer job:
 2. Within each inner-training partition, fit quality-dependent training inclusion,
    imputation, scaling, frequency ranking, data-dependent IIVV thresholds and the
    classifier. Apply the fitted pipeline to inner-validation patients.
-3. Screen 35 fixed configurations. For each of AUC, accuracy, F1 and sensitivity,
+3. Screen 39 fixed configurations. For each of AUC, accuracy, F1 and sensitivity,
    retain the best screened choices, then jointly tune the selected frequency
    count, geometric/data-dependent mask and classifier parameters.
 4. Tune SVM, RF and LR separately and select the model family using inner scores
@@ -116,8 +116,8 @@ inference; its absence is not replaced by an invented score.
 | Geometry | All 13 existing geometric masks | Selection of probe coordinates is a study objective; no unmeasured geometry is inferred |
 | Magnitude masks | Training quantiles 0.1, 0.25, 0.5, 0.75, 0.9 | Keeps data-dependent alternatives on a short grid |
 | Representations | Magnitude; magnitude plus phase | Retains the original signal and one complex alternative; omits real/imaginary, ratios and circuit fitting to limit branches and nonlinear fitting. No superiority is assumed |
-| Quality | `<80` and `<100.000001` in search; `<60` baseline | Compares moderate exclusion with full retention. Other cutoffs are retention audits only; 60 is a reference, not a globally selected optimum |
-| Normalization | Global and per-frequency z scores | Tests the preprocessing question within training; no extra per-coordinate branch |
+| Quality | `<20`, `<40`, `<60`, `<80` and `<100.000001` in search; `<60` baseline | Compares exclusion levels with full retention within training folds; 60 is a reference, not a globally selected optimum |
+| Normalization | None, global and per-frequency z scores | Includes an unnormalized reference and tests the preprocessing question within training; no extra per-coordinate branch |
 | Imputation | Training mean | Avoids another search dimension; all-missing training coordinates use the explicit existing fallback |
 | Class weights | None; balanced | Retains imbalance sensitivity; patient-equal training weights apply in both |
 | Joint search breadth | One screened choice, plus best magnitude mask | Limits combinatorial expansion; staged search can miss interactions and is not exhaustive optimization |
@@ -125,8 +125,8 @@ inference; its absence is not replaced by an invented score.
 | RF | 100 trees, depth 8, feature fractions 0.3, 0.7, 1 | Bounded tree cost, no large tree/depth sweep |
 | LR | C = 0.001, 0.01, 0.1, 1; at most 20000 iterations | Avoids weakly regularized extremes; training-span implementation reduces feature-space cost |
 
-At most 35 screened + 4 × 34 joint + 3 baseline + 2 covariate + 1 matched-control
-evaluations give **177 candidate evaluations per outer job**, or at most **10620
+At most 39 screened + 4 × 34 joint + 3 baseline + 2 covariate + 1 matched-control
+evaluations give **181 candidate evaluations per outer job**, or at most **10860
 inner fits across 15 jobs**. Exact duplicates are cached, so actual counts can be
 lower. Outer refits, calibration, reporting and bootstraps add work. This is a budget,
 not a runtime guarantee. Saved candidate/fold timings provide the runtime evidence.

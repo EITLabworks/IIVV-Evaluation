@@ -98,6 +98,12 @@ establish treatment rules. Four unmapped sites are excluded from classification.
 
 ## Protocol, status, and remaining work
 
+The current configuration expands the training-selected rejection cutoffs to
+20, 40, 60, 80 and 100.000001 and adds an unnormalized reference. Existing v3
+results use the previous search. The expanded search requires a new quality run
+and a new evaluation output directory, for example `revision-quality-v4` and
+`revision-three-tasks-v4`; do not resume or overwrite the v3 runs.
+
 `configs/revision.json` defines five outer and four inner patient-grouped folds,
 with seed 1729 and **15 outer computations**. Training partitions learn preprocessing,
 frequency/IIVV selection, and classifiers. Inner validation selects settings and

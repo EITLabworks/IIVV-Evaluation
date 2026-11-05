@@ -34,7 +34,19 @@ def test_final_search_budget_and_original_patient_protocol(config):
     assert config["schema_version"] == 3
     assert "fine_tuning" not in config
     screened = screen_candidates(config, 31, True)
-    assert len(screened) == 35
+    assert len(screened) == 39
+    assert {c.cutoff for c in screened if c.stage == "quality"} == {
+        20,
+        40,
+        60,
+        80,
+        100.000001,
+    }
+    assert {c.normalization for c in screened if c.stage == "normalization"} == {
+        "none",
+        "global",
+        "freq",
+    }
     assert {c.n_freq for c in screened if c.stage == "frequency"} == {1, 3, 5, 10, 31}
     assert {c.selector for c in screened if c.stage == "selector"} == {
         "pca",
@@ -51,8 +63,12 @@ def test_final_search_budget_and_original_patient_protocol(config):
         assert {c.model for c in choices} == {"svm", "lr", "rf"}
         assert len({c.mask for c in choices}) == 2
         assert len({c.n_freq for c in choices}) == 1
-        assert all(c.normalization != "none" and c.cutoff >= 80 for c in choices)
-    assert 35 + 4 * 34 + 3 + 3 == 177
+        assert all(
+            c.normalization in config["normalizations"]
+            and c.cutoff in config["cutoffs"]
+            for c in choices
+        )
+    assert len(screened) + 4 * 34 + 3 + 3 == 181
     assert config["fold_workers"] * max(config["rf_jobs"], config["blas_threads"]) == 32
 
 
@@ -95,7 +111,7 @@ def test_final_config_rejects_conflicting_modes_and_unsafe_cache(config):
     with pytest.raises(ValueError, match="Gram caching"):
         validate_config(bad)
     bad = copy.deepcopy(config)
-    bad["screen_defaults"]["normalization"] = "none"
+    bad["screen_defaults"]["normalization"] = "per_coordinate"
     with pytest.raises(ValueError, match="screen_defaults.normalization"):
         validate_config(bad)
 
