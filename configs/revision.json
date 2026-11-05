@@ -3,7 +3,7 @@
   "seed": 1729,
   "outer_folds": 5,
   "inner_folds": 4,
-  "outer_repeats": 1,
+  "outer_repeats": 5,
   "tasks": ["healthy_vs_cancer", "highrisk_vs_lowrisk", "cancer_vs_lr_hr"],
   "models": ["svm", "rf", "lr"],
   "objectives": ["auc", "acc", "f1", "sensitivity"],
