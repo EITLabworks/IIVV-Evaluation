@@ -91,6 +91,10 @@ establish treatment rules. Four unmapped sites are excluded from classification.
    python scripts/package_overleaf.py
    ```
 
+   Use `make watch` to rebuild the marked paper, clean paper and response letter
+   whenever their LaTeX sources or included files are saved. Keep it running in a
+   terminal and press Ctrl-C to stop. PDF previews are not opened automatically.
+
    `main.tex` remains the original. `Revision-1.tex` marks additions with `\edit{}`
    and removals with `\edits{}`. The clean paper uses that same source. The response
    quotes exact associated changes. Upload `overleaf.zip` for the marked/clean paper

@@ -1,13 +1,13 @@
 """Package the built marked/clean paper and standalone response for Overleaf."""
 
 from pathlib import Path
-import json
 import tempfile
 from zipfile import ZipFile, ZIP_DEFLATED
 
 ROOT = Path(__file__).resolve().parents[1]
 MANUSCRIPT = ROOT / "manuscript"
-PAPER = MANUSCRIPT / "Paper"
+PAPER = MANUSCRIPT / "Revision"
+RESPONSE = MANUSCRIPT / "Response_Letter"
 
 
 def paper_files():
@@ -102,12 +102,17 @@ def main():
         )
         archive(paper, ROOT / "overleaf.zip")
         files = {
-            "resposeletter.tex": MANUSCRIPT / "Response_Letter/resposeletter.tex",
-            "revision-markup.tex": MANUSCRIPT / "revision-markup.tex",
-            "bibliography.bib": PAPER / "bibliography.bib",
-            "Paper/Revision-1.aux": PAPER / "Revision-1.aux",
-            "Paper/Revision-1.pdf": PAPER / "Revision-1.pdf",
+            "resposeletter.tex": RESPONSE / "resposeletter.tex",
+            "revision-markup.tex": RESPONSE / "revision-markup.tex",
+            "bibliography.bib": RESPONSE / "bibliography.bib",
+            "README.md": RESPONSE / "README.md",
+            "paper-references/Revision-1.aux": PAPER / "Revision-1.aux",
         }
+        source = (RESPONSE / "resposeletter.tex").read_text()
+        for image in sorted((RESPONSE / "quality-evidence").glob("*.png")):
+            name = image.relative_to(RESPONSE).as_posix()
+            if "{" + name + "}" in source:
+                files[name] = image
         for path in files.values():
             if not path.is_file():
                 raise FileNotFoundError(f"Missing {path}. Run make manuscript first.")
@@ -119,9 +124,6 @@ def main():
             .replace("{../Paper/bibliography}", "{bibliography}")
         )
         path.write_text(text)
-        (response / "README.md").write_text(
-            "Upload this ZIP as a separate Overleaf project. Select pdfLaTeX\nand resposeletter.tex as the main document. Paper/Revision-1.aux\nsupplies the exact marked-paper references. The companion PDF is\nincluded for reference. Repackage after changing the paper numbering.\nThe package was tested locally with TeX Live 2025. Sophie placeholders\nremain open and require author confirmation before submission.\n"
-        )
         archive(response, ROOT / "response-letter.zip")
     print("Created overleaf.zip and response-letter.zip.")
 

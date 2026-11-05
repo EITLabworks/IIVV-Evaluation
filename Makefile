@@ -8,6 +8,7 @@ QUALITY_OUTPUT ?= results/revision-quality
 
 help:
 	@printf '%s\n' 'Run revision-quality, inspect Data-Quality.ipynb, then revision-evaluation and revision-check.' 'See README.md. The launcher runs regression checks before tuning.'
+	@printf '%s\n' 'Documents: make manuscript builds the PDFs; make watch rebuilds them after saves (Ctrl-C stops).'
 
 .PHONY: revision-quality revision-evaluation revision-resume revision-check revision-tests
 revision-quality:
