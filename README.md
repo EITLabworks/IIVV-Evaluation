@@ -249,13 +249,16 @@ versions. This README is copied and hashed with each run as its protocol rationa
 
 ## Status and remaining work
 
-Available v3 results describe the earlier one-repeat, 15-job analysis. They are
-not results for the current 75-job configuration. Do not relabel old metrics,
-selected parameters or timings as outputs of the expanded search.
+The completed v5 results contain all 75 outer computations. The saved-result
+verifier passed, and the marked manuscript, tables, figure data and response
+letter now describe v5. See [the v3–v5 comparison](manuscript/v3-v5-comparison.md)
+for the reported changes and provenance limits. V3 raw metric files are absent
+locally, so its comparison values come from the previous manuscript.
 
-- [ ] Review the new quality outputs before tuning, then verify the complete run.
-- [ ] Update paper results, figures, selected-parameter tables, timings and responses
-  together from the matching run artifacts.
+- [x] Verify v5 saved results and update paper/response evidence together.
+- [ ] Restore the four missing source-extraction files listed in
+  `manuscript/Revision/revision-evidence/v5-local-input-check.json` before a full
+  input-file verification. All 278 available input files match their recorded hashes.
 - [ ] Resolve Sophie placeholders for enrollment/exclusions, pathology registration
   and blinding, mixed histology, healthy-site confirmation, contact controls,
   acquisition/test-mean reconciliation and approved data sharing.
@@ -263,6 +266,10 @@ selected parameters or timings as outputs of the expanded search.
   and independent clinical validation, reduced hardware and prospective
   acquisition/single-site latency remain untested.
 - [ ] Review marked/clean papers, responses and upload packages before submission.
+
+`python scripts/export_v5_manuscript_evidence.py` regenerates the tables, native
+figure data, response quality PNGs and comparison from frozen v5 outputs. It fits
+no models and compiles no PDFs. Manuscript wording remains an editorial step.
 
 Private inputs, results, manuscript files and upload ZIPs are ignored by Git and
 need separate transfer. See `LICENSE` and `CITATION.cff` for reuse and citation.
