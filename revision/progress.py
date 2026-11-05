@@ -50,7 +50,7 @@ def heartbeat(jobs, completed, total, *, since_epoch=0, label="folds"):
         model = candidate.get("model", "-")
         selector = candidate.get("selector", "-")
         active.append(
-            f"{task}/f{fold}: {state['phase']} "
+            f"{task}/r{repeat}/f{fold}: {state['phase']} "
             f"candidate={state.get('candidates_completed', 0)}/{state.get('candidates_planned', '?')} "
             f"inner={state.get('inner_fold', '-')}, {elapsed:.0f}s "
             f"{model}/{selector}/n={candidate.get('n_freq') or 'all'}/{candidate.get('mask', '-')}"

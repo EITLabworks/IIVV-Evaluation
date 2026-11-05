@@ -3,8 +3,8 @@
 .PHONY: help
 
 PYTHON ?= python
-REVISION_OUTPUT ?= results/revision-three-tasks
-QUALITY_OUTPUT ?= results/revision-quality
+REVISION_OUTPUT ?= results/revision-three-tasks-v5
+QUALITY_OUTPUT ?= results/revision-quality-v5
 
 help:
 	@printf '%s\n' 'Run revision-quality, inspect Data-Quality.ipynb, then revision-evaluation and revision-check.' 'See README.md. The launcher runs regression checks before tuning.'

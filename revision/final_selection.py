@@ -93,6 +93,7 @@ def annotate(output, config):
         + budget_frame[
             [
                 "task",
+                "repeat",
                 "outer_fold",
                 "successful_unique_candidates",
                 "outer_job_elapsed_seconds",

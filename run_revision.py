@@ -301,8 +301,12 @@ def validate_config(config):
     ) <= {"linear", "rbf"}:
         raise ValueError("SVM Gram caching requires linear/RBF kernels")
     for key in ["outer_folds", "inner_folds"]:
-        if config[key] < 2:
-            raise ValueError(f"{key} must be >=2")
+        if (
+            isinstance(config[key], bool)
+            or not isinstance(config[key], int)
+            or config[key] < 2
+        ):
+            raise ValueError(f"{key} must be an integer >=2")
     if int(config.get("task_workers", 1)) < 1:
         raise ValueError("task_workers must be positive")
     if int(config.get("fold_workers", 0)) < 0:
@@ -311,8 +315,12 @@ def validate_config(config):
         if int(config.get(key, 1)) < 1:
             raise ValueError(f"{key} must be positive")
     for key in ["outer_repeats", "bootstrap_samples", "permutation_samples", "top_k"]:
-        if config[key] < 1:
-            raise ValueError(f"{key} must be >=1")
+        if (
+            isinstance(config[key], bool)
+            or not isinstance(config[key], int)
+            or config[key] < 1
+        ):
+            raise ValueError(f"{key} must be an integer >=1")
     for key in [
         "tasks",
         "models",

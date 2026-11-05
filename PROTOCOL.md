@@ -71,9 +71,12 @@ retention, missingness and saved-test-mean ICC when repeats are available.
 
 ## Stage B: nested patient-grouped selection
 
-The retained protocol is **five outer folds, four inner folds, one outer partition,
-seed 1729**, with all sites from a patient kept together. This is nested grouped
-cross-validation, not leave-one-patient-out. Three tasks give **15 outer jobs**.
+The retained protocol is **five outer folds repeated five times, four inner folds,
+seed 1729**, with all sites from a patient kept together. This is repeated nested
+grouped cross-validation, not leave-one-patient-out. Each task has 25 outer jobs;
+three tasks give **75 outer jobs**. Repeat-specific outer split seeds are derived
+as `1729 + repeat * 1000`, with zero-based repeat indices. Inner split seeds also
+include `fold * 100 + 1`. Repetitions reuse the cohort, not independent patients.
 Partitions are regenerated under the confirmed class definitions; they are not
 claimed to be identical to all prior runs. No independent external cohort exists
 unless explicitly provided and verified.
@@ -84,7 +87,7 @@ For each outer job:
 2. Within each inner-training partition, fit quality-dependent training inclusion,
    imputation, scaling, frequency ranking, data-dependent IIVV thresholds and the
    classifier. Apply the fitted pipeline to inner-validation patients.
-3. Screen 41 fixed configurations. For each of AUC, accuracy, F1 and sensitivity,
+3. Screen 42 fixed configurations. For each of AUC, accuracy, F1 and sensitivity,
    retain the best screened choices, then jointly tune the selected frequency
    count, geometric/data-dependent mask and classifier parameters.
 4. Tune SVM, RF and LR separately and select the model family using inner scores
@@ -112,7 +115,7 @@ inference; its absence is not replaced by an invented score.
 
 | Setting | Retained | Reason for excluding alternatives |
 |---|---|---|
-| Frequency count | 1, 2, 3, 4, 5, 10, 31 | Covers small, intermediate and complete inputs without a 31-point sweep |
+| Frequency count | 1, 2, 3, 4, 5, 10, 20, 31 | Covers small, intermediate and complete inputs without a 31-point sweep |
 | Ranking | PCA and mutual information | Keeps an unsupervised and a supervised alternative; omits ANOVA, sparse LR, RFE and permutation ranking to avoid redundant searches and repeated model fitting. No equivalence is claimed |
 | Geometry | All 13 existing geometric masks | Selection of probe coordinates is a study objective; no unmeasured geometry is inferred |
 | Magnitude masks | Training quantiles 0.1, 0.25, 0.5, 0.75, 0.9 | Keeps data-dependent alternatives on a short grid |
@@ -126,9 +129,9 @@ inference; its absence is not replaced by an invented score.
 | RF | 100 trees, depth 8, feature fractions 0.3, 0.7, 1 | Bounded tree cost, no large tree/depth sweep |
 | LR | C = 0.001, 0.01, 0.1, 1; at most 20000 iterations | Avoids weakly regularized extremes; training-span implementation reduces feature-space cost |
 
-At most 41 screened + 4 × 34 joint + 3 baseline + 2 covariate + 1 matched-control
-evaluations give **183 candidate evaluations per outer job**, or at most **10980
-inner fits across 15 jobs**. Exact duplicates are cached, so actual counts can be
+At most 42 screened + 4 × 34 joint + 3 baseline + 2 covariate + 1 matched-control
+evaluations give **184 candidate evaluations per outer job**, or at most **55200
+inner fits across 75 jobs**. Exact duplicates are cached, so actual counts can be
 lower. Outer refits, calibration, reporting and bootstraps add work. This is a budget,
 not a runtime guarantee. Saved candidate/fold timings provide the runtime evidence.
 
@@ -137,8 +140,8 @@ not a runtime guarantee. Saved candidate/fold timings provide the runtime eviden
 Default affinity is the last 32 logical CPUs, 224–255. Up to 16 independent jobs
 use two BLAS/RF threads each, capped by available jobs, affinity and scheduler/quota.
 With `CPUSET=0-23`, up to 12 jobs run at two threads each. Affinity names logical
-CPUs; these are not necessarily distinct physical cores. The current 15-job design
-can occupy at most 30 worker threads at once. Training-feature and SVM-Gram caches
+CPUs; these are not necessarily distinct physical cores. The current 75-job design
+uses at most 16 concurrent workers and 32 worker threads. Training-feature and SVM-Gram caches
 stay within each outer job and exact partition; they never share fitted transforms
 across held-out patient populations. Each feature cache has an 8 GiB ceiling;
 total process memory also includes other arrays and model state.
@@ -147,7 +150,13 @@ Reports retain AUC, accuracy, F1, precision, sensitivity (SN), specificity (SP),
 PPV, NPV, coverage/abstention, per-class errors, ROC, calibration, decision curves,
 prevalence scenarios, patient-equal site metrics and explicitly defined patient
 endpoints. Multiclass patient endpoints exclude mixed-label patients. They are
-not interchangeable with site endpoints. Confidence intervals use 1000
+not interchangeable with site endpoints. Each site's class probabilities are
+averaged across repetitions, requiring quality coverage in every repetition.
+Sensitivity-oriented binary decisions and fixed-specificity decisions use majority
+votes. Repeated predictions do not count as additional patients. Corrected fold
+tests use the separate repeat/fold predictions (25 scheduled pairs per task),
+while pooled bootstrap intervals use the repeat-aggregated site predictions.
+Confidence intervals use 1000
 whole-patient bootstrap resamples of frozen predictions; selection is not rerun.
 CV comparisons use approximate corrected resampled paired outer-fold tests,
 correcting by patient training/test ratios. Holm correction covers the scheduled

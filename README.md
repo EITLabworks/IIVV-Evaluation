@@ -30,7 +30,7 @@ establish treatment rules. Four unmapped sites are excluded from classification.
 
    ```bash
    tmux new -s iivv-revision
-   CPUSET=224-255 ./run_all.sh --data-quality-only --output results/revision-quality-v4
+   CPUSET=224-255 ./run_all.sh --data-quality-only --output results/revision-quality-v5
    ```
 
    Wait for `DATA QUALITY READY`. Inspect source agreement, cohort composition,
@@ -40,7 +40,7 @@ establish treatment rules. Four unmapped sites are excluded from classification.
 3. **Run tuning and reporting after the quality review.**
 
    ```bash
-   CPUSET=224-255 ./run_all.sh --quality-results results/revision-quality-v4 --output results/revision-three-tasks-v4
+   CPUSET=224-255 ./run_all.sh --quality-results results/revision-quality-v5 --output results/revision-three-tasks-v5
    ```
 
    The launcher runs server regression checks, saves checkpoints, and verifies
@@ -55,10 +55,10 @@ establish treatment rules. Four unmapped sites are excluded from classification.
 
    ```bash
    mkdir -p results logs
-   scp -r USER@SERVER:/PATH/results/revision-quality-v4 results/
-   scp -r USER@SERVER:/PATH/results/revision-three-tasks-v4 results/
-   scp 'USER@SERVER:/PATH/logs/revision-three-tasks-v4-*.log' logs/
-   python -m revision.report_cli check --results-dir results/revision-three-tasks-v4
+   scp -r USER@SERVER:/PATH/results/revision-quality-v5 results/
+   scp -r USER@SERVER:/PATH/results/revision-three-tasks-v5 results/
+   scp 'USER@SERVER:/PATH/logs/revision-three-tasks-v5-*.log' logs/
+   python -m revision.report_cli check --results-dir results/revision-three-tasks-v5
    ```
 
 5. **Inspect saved results and create figures.** Notebooks do not train models.
@@ -103,24 +103,35 @@ establish treatment rules. Four unmapped sites are excluded from classification.
 ## Protocol, status, and remaining work
 
 The current configuration expands the training-selected rejection cutoffs to
-20, 40, 60, 80 and 100.000001 and adds an unnormalized reference. Existing v3
-results use the previous search. The expanded search requires a new quality run
-and a new evaluation output directory, for example `revision-quality-v4` and
-`revision-three-tasks-v4`; do not resume or overwrite the v3 runs.
+20, 40, 60, 80 and 100.000001, adds an unnormalized reference, and uses five
+outer repetitions with frequency counts 1, 2, 3, 4, 5, 10, 20 and 31. Existing v3
+results use the previous one-repeat search. The expanded search requires a new quality run
+and a new evaluation output directory, for example `revision-quality-v5` and
+`revision-three-tasks-v5`; do not resume or overwrite runs from an earlier
+configuration. A quality run prepared for one outer repetition does not match
+the current five-repeat protocol.
 
-`configs/revision.json` defines five outer and four inner patient-grouped folds,
-with seed 1729 and **15 outer computations**. Training partitions learn preprocessing,
+`configs/revision.json` defines five outer folds repeated five times and four
+inner patient-grouped folds, with seed 1729: **25 outer computations per task,
+75 overall**. Training partitions learn preprocessing,
 frequency/IIVV selection, and classifiers. Inner validation selects settings and
 families. Outer-training OOF predictions determine calibration and binary thresholds.
 This is nested grouped CV, not leave-one-patient-out or independent validation.
 `PROTOCOL.md` remains the detailed search specification required by the code.
+
+Final site metrics average held-out probabilities across repetitions and require
+quality coverage in every repetition. Threshold-based sensitivity/specificity
+decisions use majority votes. Fold comparisons retain all repeat/fold identities.
+Repeated observations do not increase the patient count. Progress labels use
+zero-based repeat/fold indices, for example `task/r3/f2`.
 
 Reports include AUC, accuracy, F1, precision/PPV, SN, SP, NPV, coverage, per-class
 and patient endpoints, calibration, decision curves, covariate controls, and timings.
 Intervals use 1000 whole-patient bootstrap resamples of frozen predictions. CV
 comparisons use corrected resampled tests and global Holm adjustment (216 hypotheses).
 
-The current quality and three-task runs are verified across all 15 folds. Primary
+The completed v3 quality and three-task runs were verified across all 15
+one-repeat folds. They do not provide results for the new 75-fold protocol. Primary
 patient-equal site AUCs are 0.884, 0.798, and 0.794. No comparison passes global Holm
 correction. Dysplasia sensitivity remains limited. Clinical safety and hardware
 savings are not established. Before submission:

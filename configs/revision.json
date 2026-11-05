@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "seed": 1729,
+  "seed": 42,
   "outer_folds": 5,
   "inner_folds": 4,
   "outer_repeats": 5,
@@ -77,7 +77,7 @@
   "blas_threads": 2,
   "verbose_candidates": false,
   "feature_cache_bytes": 8589934592,
-  "frequency_counts": [1, 2, 3, 4, 5, 10, 31],
+  "frequency_counts": [1, 2, 3, 4, 5, 10, 20, 31],
   "fold_schedule": "round_robin",
   "progress_interval_seconds": 60,
   "cache_svm_training_gram": true,

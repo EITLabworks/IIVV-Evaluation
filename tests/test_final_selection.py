@@ -30,8 +30,7 @@ def test_final_search_budget_and_original_patient_protocol(config):
         config["seed"],
         config["outer_folds"],
         config["inner_folds"],
-        config["outer_repeats"],
-    ) == (1729, 5, 4, 1)
+    ) == (1729, 5, 4)
     assert config["schema_version"] == 3
     assert "fine_tuning" not in config
     screened = screen_candidates(config, 31, True)
@@ -79,6 +78,67 @@ def test_final_search_budget_and_original_patient_protocol(config):
     assert config["fold_workers"] * max(config["rf_jobs"], config["blas_threads"]) == 32
 
 
+@pytest.mark.parametrize("repeats", [1, 5])
+def test_repeated_patient_schedule_is_complete_and_deterministic(
+    config, repeats, monkeypatch
+):
+    import revision.pipeline as pipeline
+    from revision.data import Dataset
+    from revision.data_quality import quality_protocol
+
+    config = dict(config, outer_repeats=repeats)
+    table = pd.DataFrame(
+        [
+            dict(patient_id=str(patient), pathology=pathology)
+            for patient in range(20)
+            for pathology in ("Healthy", "Cancer", "Non-malignant", "High-grade dysplasia")
+        ]
+    )
+    dataset = Dataset(np.zeros((len(table), 1, 1)), table, np.array([100]), None, False, {})
+    original = pipeline.group_splits
+    seeds = []
+
+    def record_seeds(y, groups, folds, seed):
+        seeds.append(seed)
+        return original(y, groups, folds, seed)
+
+    monkeypatch.setattr(pipeline, "group_splits", record_seeds)
+    assert quality_protocol(config)["outer_repeats"] == repeats
+    for task in config["tasks"]:
+        seeds.clear()
+        indices, y, _ = dataset.task(task)
+        groups = table.iloc[indices].patient_id.to_numpy()
+        schedule = pipeline.task_outer_splits(dataset, task, config)
+        assert seeds == [config["seed"] + repeat * 1000 for repeat in range(repeats)]
+        assert len(schedule) == config["outer_folds"] * repeats
+        for repeat in range(repeats):
+            rows = [row for row in schedule if row[0] == repeat]
+            assert {row[1] for row in rows} == set(range(config["outer_folds"]))
+            np.testing.assert_array_equal(
+                np.sort(np.concatenate([row[3] for row in rows])), np.arange(len(indices))
+            )
+            for _, fold, train, test, evaluation in rows:
+                assert evaluation == "nested_cv"
+                assert not set(groups[train]) & set(groups[test])
+                inner = original(
+                    y[train], groups[train], config["inner_folds"],
+                    config["seed"] + repeat * 1000 + fold * 100 + 1,
+                )
+                for fit, validation in inner:
+                    assert not set(groups[train[fit]]) & set(groups[train[validation]])
+                    assert not set(groups[test]) & set(groups[train[fit]])
+        for first, second in zip(schedule, pipeline.task_outer_splits(dataset, task, config)):
+            assert first[:2] == second[:2] and first[4] == second[4]
+            np.testing.assert_array_equal(first[2], second[2])
+            np.testing.assert_array_equal(first[3], second[3])
+
+
+@pytest.mark.parametrize("repeats", [0, -1, 1.5, True, "5"])
+def test_config_rejects_invalid_outer_repeats(config, repeats):
+    with pytest.raises(ValueError, match="outer_repeats"):
+        validate_config(dict(config, outer_repeats=repeats))
+
+
 @pytest.mark.parametrize("kernel", ["linear", "rbf"])
 def test_cached_training_gram_preserves_decisions(kernel):
     from revision.kernel_svm import VectorizedSVC
@@ -123,11 +183,12 @@ def test_final_config_rejects_conflicting_modes_and_unsafe_cache(config):
         validate_config(bad)
 
 
-def test_progress_tracks_worker_and_phase_and_skips_stale_snapshots(tmp_path, capsys):
+@pytest.mark.parametrize("repeat", [0, 4])
+def test_progress_tracks_worker_and_phase_and_skips_stale_snapshots(tmp_path, capsys, repeat):
     import time
     from revision.progress import update_progress, heartbeat
 
-    folder = tmp_path / "fold-checkpoints/cancer_vs_lr_hr/nested_cv_repeat0_fold2"
+    folder = tmp_path / f"fold-checkpoints/cancer_vs_lr_hr/nested_cv_repeat{repeat}_fold2"
     config = {
         "progress_interval_seconds": 60,
         "_progress_path": str(folder / "progress.json"),
@@ -137,29 +198,31 @@ def test_progress_tracks_worker_and_phase_and_skips_stale_snapshots(tmp_path, ca
     )
     state = json.loads((folder / "progress.json").read_text())
     assert state["pid"] > 0 and state["phase"] == "model-fit"
-    heartbeat([("cancer_vs_lr_hr", (0, 2, "nested_cv"), tmp_path)], 1, 20)
+    heartbeat([("cancer_vs_lr_hr", (repeat, 2, "nested_cv"), tmp_path)], 1, 20)
     assert (
-        "cancer_vs_lr_hr/f2: model-fit candidate=3/20 inner=2"
+        f"cancer_vs_lr_hr/r{repeat}/f2: model-fit candidate=3/20 inner=2"
         in capsys.readouterr().out
     )
     heartbeat(
-        [("cancer_vs_lr_hr", (0, 2, "nested_cv"), tmp_path)],
+        [("cancer_vs_lr_hr", (repeat, 2, "nested_cv"), tmp_path)],
         1,
         20,
         since_epoch=time.time() + 1,
     )
-    assert "cancer_vs_lr_hr/f2" not in capsys.readouterr().out
+    assert f"cancer_vs_lr_hr/r{repeat}/f2" not in capsys.readouterr().out
     heartbeat([("cancer_vs_lr_hr", str(tmp_path))], 0, 4, label="reports")
     assert "reports=0/4" in capsys.readouterr().out
 
 
-def test_review_exports_retain_parameters_and_honest_scope(tmp_path, config):
+@pytest.mark.parametrize("repeats", [1, 5])
+def test_review_exports_retain_parameters_and_honest_scope(tmp_path, config, repeats):
     from revision.final_selection import annotate
 
-    config = dict(config, tasks=["cancer_vs_lr_hr"], outer_folds=2)
+    config = dict(config, tasks=["cancer_vs_lr_hr"], outer_folds=2, outer_repeats=repeats)
     folder = tmp_path / "cancer_vs_lr_hr"
     folder.mkdir()
-    (folder / "splits.json").write_text(json.dumps([{}, {}]))
+    expected_folds = 2 * repeats
+    (folder / "splits.json").write_text(json.dumps([{}] * expected_folds))
     selection = dict(
         objective="auc",
         repeat=0,
@@ -186,21 +249,22 @@ def test_review_exports_retain_parameters_and_honest_scope(tmp_path, config):
     pd.DataFrame(
         [
             dict(
-                repeat=0,
+                repeat=repeat,
                 outer_fold=fold,
                 evaluation="nested_cv",
                 inner_evaluation_seconds=1.5,
             )
+            for repeat in range(repeats)
             for fold in (0, 1)
         ]
     ).to_csv(folder / "inner_search.csv", index=False)
     annotate(tmp_path, config)
     table = pd.read_csv(tmp_path / "review_selected_parameters.csv")
     assert json.loads(table.iloc[0].candidate)["model"] == "svm"
-    assert table.iloc[0].folds_available == table.iloc[0].folds_expected == 2
+    assert table.iloc[0].folds_available == table.iloc[0].folds_expected == expected_folds
     assert len(pd.read_csv(tmp_path / "unavailable_results.csv")) == 1
     protocol = json.loads((tmp_path / "final_selection_protocol.json").read_text())
-    assert protocol["task_fold_counts"] == {"cancer_vs_lr_hr": 2}
+    assert protocol["task_fold_counts"] == {"cancer_vs_lr_hr": expected_folds}
     assert "no independent confirmation" in protocol["interpretation"]
 
 
