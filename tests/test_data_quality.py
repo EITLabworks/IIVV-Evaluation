@@ -80,19 +80,28 @@ def test_quality_manifest_rejects_changed_artifacts_inputs_and_task_protocol(tmp
         verify_quality(tmp_path, cfg)
 
 
-def test_quality_and_training_share_the_exact_partition_inventory(tmp_path):
+@pytest.mark.parametrize("seed", [42, 1729])
+@pytest.mark.parametrize("repeats", [1, 5])
+def test_quality_and_training_share_the_exact_partition_inventory(tmp_path, seed, repeats):
     from run_revision import synthetic_fixture
     from revision.data import load_dataset
 
     data, patterns = synthetic_fixture(tmp_path / "fixture")
     dataset = load_dataset(data, patterns_path=patterns)
-    cfg = dict(config(), outer_folds=3, inner_folds=2)
+    # Keep enough synthetic patients per class for inner CV across all tested repeats.
+    dataset.table["pathology"] = np.resize(
+        ["Healthy", "Cancer", "Non-malignant", "High-grade dysplasia"], len(dataset.table)
+    )
+    cfg = dict(config(), outer_folds=3, inner_folds=2, seed=seed, outer_repeats=repeats)
     for task in cfg["tasks"]:
         indices, y, _ = dataset.task(task)
         groups = dataset.table.iloc[indices].patient_id.to_numpy()
-        seen = []
+        seen = {repeat: [] for repeat in range(cfg["outer_repeats"])}
         for repeat, fold, tr, te, evaluation in task_outer_splits(dataset, task, cfg):
-            inner = group_splits(y[tr], groups[tr], 2, cfg["seed"] + fold * 100 + 1)
+            inner = group_splits(
+                y[tr], groups[tr], cfg["inner_folds"],
+                cfg["seed"] + repeat * 1000 + fold * 100 + 1,
+            )
             row = make_split_record(
                 dataset, task, indices, tr, te, inner, repeat, fold, evaluation
             )
@@ -101,8 +110,9 @@ def test_quality_and_training_share_the_exact_partition_inventory(tmp_path):
                 not set(s["train_patients"]) & set(s["validation_patients"])
                 for s in row["inner"]
             )
-            seen.extend(row["test_sample_ids"])
-        assert sorted(seen) == sorted(dataset.table.iloc[indices].sample_id)
+            seen[repeat].extend(row["test_sample_ids"])
+        for sites in seen.values():
+            assert sorted(sites) == sorted(dataset.table.iloc[indices].sample_id)
 
 
 def test_quality_only_exports_every_task_without_diagnostic_model_fitting(

@@ -72,10 +72,10 @@ retention, missingness and saved-test-mean ICC when repeats are available.
 ## Stage B: nested patient-grouped selection
 
 The retained protocol is **five outer folds repeated five times, four inner folds,
-seed 1729**, with all sites from a patient kept together. This is repeated nested
+seed 42**, with all sites from a patient kept together. This is repeated nested
 grouped cross-validation, not leave-one-patient-out. Each task has 25 outer jobs;
 three tasks give **75 outer jobs**. Repeat-specific outer split seeds are derived
-as `1729 + repeat * 1000`, with zero-based repeat indices. Inner split seeds also
+as `config.seed + repeat * 1000`, with zero-based repeat indices. Inner split seeds also
 include `fold * 100 + 1`. Repetitions reuse the cohort, not independent patients.
 Partitions are regenerated under the confirmed class definitions; they are not
 claimed to be identical to all prior runs. No independent external cohort exists

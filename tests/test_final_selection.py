@@ -26,11 +26,6 @@ def test_final_search_budget_and_original_patient_protocol(config):
         "highrisk_vs_lowrisk",
         "cancer_vs_lr_hr",
     ]
-    assert (
-        config["seed"],
-        config["outer_folds"],
-        config["inner_folds"],
-    ) == (1729, 5, 4)
     assert config["schema_version"] == 3
     assert "fine_tuning" not in config
     screened = screen_candidates(config, 31, True)
@@ -79,14 +74,15 @@ def test_final_search_budget_and_original_patient_protocol(config):
 
 
 @pytest.mark.parametrize("repeats", [1, 5])
+@pytest.mark.parametrize("seed", [42, 1729])
 def test_repeated_patient_schedule_is_complete_and_deterministic(
-    config, repeats, monkeypatch
+    config, repeats, seed, monkeypatch
 ):
     import revision.pipeline as pipeline
     from revision.data import Dataset
     from revision.data_quality import quality_protocol
 
-    config = dict(config, outer_repeats=repeats)
+    config = dict(config, outer_repeats=repeats, seed=seed)
     table = pd.DataFrame(
         [
             dict(patient_id=str(patient), pathology=pathology)

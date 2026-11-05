@@ -112,7 +112,7 @@ configuration. A quality run prepared for one outer repetition does not match
 the current five-repeat protocol.
 
 `configs/revision.json` defines five outer folds repeated five times and four
-inner patient-grouped folds, with seed 1729: **25 outer computations per task,
+inner patient-grouped folds, with seed 42: **25 outer computations per task,
 75 overall**. Training partitions learn preprocessing,
 frequency/IIVV selection, and classifiers. Inner validation selects settings and
 families. Outer-training OOF predictions determine calibration and binary thresholds.
