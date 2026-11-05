@@ -36,7 +36,8 @@ that no procedure is needed, and management also depends on clinical information
 - Acquisition rejection percentages separately from non-finite coordinates in
   averaged spectra; source/export equality checks; frequency, IIVV-coordinate and
   geometry-mask missingness; spectral magnitude medians and interquartile ranges.
-- Class-specific retention at strict cutoffs 0, 20, 40, 60, 80 and 100.000001.
+- Class-specific retention at strict cutoffs 0, 10, 20, 30, 40, 50, 60, 70, 80,
+  90 and 100.000001.
   Zero retains no sites. The last value includes measurements recorded at 100;
   comparisons in existing code use `< cutoff`. These audit thresholds do not
   expand or choose the classifier search.
@@ -83,7 +84,7 @@ For each outer job:
 2. Within each inner-training partition, fit quality-dependent training inclusion,
    imputation, scaling, frequency ranking, data-dependent IIVV thresholds and the
    classifier. Apply the fitted pipeline to inner-validation patients.
-3. Screen 39 fixed configurations. For each of AUC, accuracy, F1 and sensitivity,
+3. Screen 41 fixed configurations. For each of AUC, accuracy, F1 and sensitivity,
    retain the best screened choices, then jointly tune the selected frequency
    count, geometric/data-dependent mask and classifier parameters.
 4. Tune SVM, RF and LR separately and select the model family using inner scores
@@ -111,12 +112,12 @@ inference; its absence is not replaced by an invented score.
 
 | Setting | Retained | Reason for excluding alternatives |
 |---|---|---|
-| Frequency count | 1, 3, 5, 10, 31 | Covers small, intermediate and complete inputs without a 31-point sweep |
+| Frequency count | 1, 2, 3, 4, 5, 10, 31 | Covers small, intermediate and complete inputs without a 31-point sweep |
 | Ranking | PCA and mutual information | Keeps an unsupervised and a supervised alternative; omits ANOVA, sparse LR, RFE and permutation ranking to avoid redundant searches and repeated model fitting. No equivalence is claimed |
 | Geometry | All 13 existing geometric masks | Selection of probe coordinates is a study objective; no unmeasured geometry is inferred |
 | Magnitude masks | Training quantiles 0.1, 0.25, 0.5, 0.75, 0.9 | Keeps data-dependent alternatives on a short grid |
 | Representations | Magnitude; magnitude plus phase | Retains the original signal and one complex alternative; omits real/imaginary, ratios and circuit fitting to limit branches and nonlinear fitting. No superiority is assumed |
-| Quality | `<20`, `<40`, `<60`, `<80` and `<100.000001` in search; `<60` baseline | Compares exclusion levels with full retention within training folds; 60 is a reference, not a globally selected optimum |
+| Quality | `<20`, `<40`, `<60`, `<80` and `<100.000001` in search; `<80` baseline | Compares exclusion levels with full retention within training folds; 80 is a fixed reference, not a globally selected optimum |
 | Normalization | None, global and per-frequency z scores | Includes an unnormalized reference and tests the preprocessing question within training; no extra per-coordinate branch |
 | Imputation | Training mean | Avoids another search dimension; all-missing training coordinates use the explicit existing fallback |
 | Class weights | None; balanced | Retains imbalance sensitivity; patient-equal training weights apply in both |
@@ -125,8 +126,8 @@ inference; its absence is not replaced by an invented score.
 | RF | 100 trees, depth 8, feature fractions 0.3, 0.7, 1 | Bounded tree cost, no large tree/depth sweep |
 | LR | C = 0.001, 0.01, 0.1, 1; at most 20000 iterations | Avoids weakly regularized extremes; training-span implementation reduces feature-space cost |
 
-At most 39 screened + 4 × 34 joint + 3 baseline + 2 covariate + 1 matched-control
-evaluations give **181 candidate evaluations per outer job**, or at most **10860
+At most 41 screened + 4 × 34 joint + 3 baseline + 2 covariate + 1 matched-control
+evaluations give **183 candidate evaluations per outer job**, or at most **10980
 inner fits across 15 jobs**. Exact duplicates are cached, so actual counts can be
 lower. Outer refits, calibration, reporting and bootstraps add work. This is a budget,
 not a runtime guarantee. Saved candidate/fold timings provide the runtime evidence.

@@ -11,6 +11,7 @@ import pytest
 from revision.features import Candidate
 from revision.pipeline import screen_candidates, tune_candidates
 from run_revision import validate_config
+from sklearn.model_selection import ParameterGrid
 
 
 @pytest.fixture
@@ -34,20 +35,22 @@ def test_final_search_budget_and_original_patient_protocol(config):
     assert config["schema_version"] == 3
     assert "fine_tuning" not in config
     screened = screen_candidates(config, 31, True)
-    assert len(screened) == 39
-    assert {c.cutoff for c in screened if c.stage == "quality"} == {
-        20,
-        40,
-        60,
-        80,
-        100.000001,
+    dimensions = {
+        "frequency": ("n_freq", config["frequency_counts"]),
+        "mask": ("mask", config["masks"]),
+        "z_threshold": ("mask", [f"Zq:{q}" for q in config["z_quantiles"]]),
+        "selector": ("selector", config["selectors"]),
+        "representation": ("representation", config["representations"]),
+        "quality": ("cutoff", config["cutoffs"]),
+        "normalization": ("normalization", config["normalizations"]),
+        "imputation": ("imputation", config["imputations"]),
+        "weighting": ("class_weight", config["class_weights"]),
+        "missingness": ("representation", ["missingness"]),
     }
-    assert {c.normalization for c in screened if c.stage == "normalization"} == {
-        "none",
-        "global",
-        "freq",
-    }
-    assert {c.n_freq for c in screened if c.stage == "frequency"} == {1, 3, 5, 10, 31}
+    assert {c.stage for c in screened} == set(dimensions)
+    for stage, (field, values) in dimensions.items():
+        assert {getattr(c, field) for c in screened if c.stage == stage} == set(values)
+    assert len(screened) == sum(len(set(values)) for _, values in dimensions.values())
     assert {c.selector for c in screened if c.stage == "selector"} == {
         "pca",
         "mutual_info",
@@ -57,18 +60,22 @@ def test_final_search_budget_and_original_patient_protocol(config):
         dict(candidate=c, objectives={goal: 0.5 for goal in config["objectives"]})
         for c in screened
     ]
+    expected_frequencies = min(config["top_k"], len(config["frequency_counts"]))
+    expected_masks = min(config["top_k"], len(config["masks"])) + 1
+    parameter_count = sum(
+        len(ParameterGrid(config["model_grids"][model])) for model in config["models"]
+    )
     for objective in config["objectives"]:
         choices = tune_candidates(records, config, objective, 31)
-        assert len(choices) == 34
+        assert len(choices) == expected_frequencies * expected_masks * parameter_count
         assert {c.model for c in choices} == {"svm", "lr", "rf"}
-        assert len({c.mask for c in choices}) == 2
-        assert len({c.n_freq for c in choices}) == 1
+        assert len({c.mask for c in choices}) == expected_masks
+        assert len({c.n_freq for c in choices}) == expected_frequencies
         assert all(
             c.normalization in config["normalizations"]
             and c.cutoff in config["cutoffs"]
             for c in choices
         )
-    assert len(screened) + 4 * 34 + 3 + 3 == 181
     assert config["fold_workers"] * max(config["rf_jobs"], config["blas_threads"]) == 32
 
 

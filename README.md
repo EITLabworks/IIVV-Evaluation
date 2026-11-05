@@ -30,7 +30,7 @@ establish treatment rules. Four unmapped sites are excluded from classification.
 
    ```bash
    tmux new -s iivv-revision
-   CPUSET=224-255 ./run_all.sh --data-quality-only --output results/revision-quality-v3
+   CPUSET=224-255 ./run_all.sh --data-quality-only --output results/revision-quality-v4
    ```
 
    Wait for `DATA QUALITY READY`. Inspect source agreement, cohort composition,
@@ -40,7 +40,7 @@ establish treatment rules. Four unmapped sites are excluded from classification.
 3. **Run tuning and reporting after the quality review.**
 
    ```bash
-   CPUSET=224-255 ./run_all.sh --quality-results results/revision-quality-v3 --output results/revision-three-tasks-v3
+   CPUSET=224-255 ./run_all.sh --quality-results results/revision-quality-v4 --output results/revision-three-tasks-v4
    ```
 
    The launcher runs server regression checks, saves checkpoints, and verifies
@@ -55,10 +55,10 @@ establish treatment rules. Four unmapped sites are excluded from classification.
 
    ```bash
    mkdir -p results logs
-   scp -r USER@SERVER:/PATH/results/revision-quality-v3 results/
-   scp -r USER@SERVER:/PATH/results/revision-three-tasks-v3 results/
-   scp 'USER@SERVER:/PATH/logs/revision-three-tasks-v3-*.log' logs/
-   python -m revision.report_cli check --results-dir results/revision-three-tasks-v3
+   scp -r USER@SERVER:/PATH/results/revision-quality-v4 results/
+   scp -r USER@SERVER:/PATH/results/revision-three-tasks-v4 results/
+   scp 'USER@SERVER:/PATH/logs/revision-three-tasks-v4-*.log' logs/
+   python -m revision.report_cli check --results-dir results/revision-three-tasks-v4
    ```
 
 5. **Inspect saved results and create figures.** Notebooks do not train models.
